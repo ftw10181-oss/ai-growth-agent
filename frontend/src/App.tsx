@@ -175,17 +175,43 @@ function CaseStudy() {
       <div className="evaluation-section">
         <div className="section-heading">
           <span className="card-index">07 · Evaluation</span>
-          <h3>Built to be inspected, tested, and improved.</h3>
+          <h3>A real baseline—including the failures.</h3>
         </div>
         <div className="evidence-grid">
-          <div><strong>9</strong><span>automated tests passed</span></div>
-          <div><strong>2</strong><span>structured LLM nodes</span></div>
-          <div><strong>4</strong><span>end-to-end workflow steps</span></div>
-          <div><strong>15.6s</strong><span>sample live API run</span></div>
+          <div><strong>12/12</strong><span>live Dify runs succeeded</span></div>
+          <div><strong>100%</strong><span>contract and goal consistency</span></div>
+          <div><strong>3.75</strong><span>single-reviewer score · out of 5</span></div>
+          <div><strong>2/12</strong><span>met the full publish threshold</span></div>
+        </div>
+        <div className="evaluation-findings">
+          <article>
+            <span className="finding-label">What held</span>
+            <h4>Reliable execution, strong brief relevance.</h4>
+            <p>
+              All cases passed the schema, preserved the submitted business goal, and covered
+              functional, emotional, and social jobs. Relevance scored 4.58/5.
+            </p>
+          </article>
+          <article className="finding-risk">
+            <span className="finding-label">What broke</span>
+            <h4>Some hypotheses sounded too much like facts.</h4>
+            <p>
+              Unsupported-claim safety scored 2.67/5. Eight of 12 outputs contained frequency or
+              magnitude language that required human review.
+            </p>
+          </article>
+          <article className="finding-decision">
+            <span className="finding-label">V0.2 decision</span>
+            <h4>Make evidence quality part of every insight.</h4>
+            <p>
+              Add explicit hypothesis labels, evidence basis, confidence per item, and ranking by
+              decision relevance—then rerun the same fixed cases.
+            </p>
+          </article>
         </div>
         <p className="evaluation-note">
-          Evaluation focuses on specificity, relevance, internal consistency, testability, and
-          unsupported-claim risk—not on how polished the prose sounds.
+          Internal baseline · 12 synthetic briefs · one reviewer · no claim of user or business
+          impact. <a href="https://github.com/ftw10181-oss/ai-growth-agent/blob/main/evals/results/baseline-v0.1/report.md" target="_blank" rel="noreferrer">Read the full methodology and raw findings <span aria-hidden="true">↗</span></a>
         </p>
       </div>
 

@@ -127,7 +127,18 @@ small { color: var(--muted); line-height: 1.4; display: block; }
 .evidence-grid > div:first-child { border-left: 0; }
 .evidence-grid strong { display: block; margin-bottom: 8px; color: var(--forest); font: 600 36px "Manrope"; letter-spacing: -.04em; }
 .evidence-grid span { color: var(--muted); font-size: 12px; }
-.evaluation-note { max-width: 760px; margin: 24px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.evaluation-findings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 24px; }
+.evaluation-findings article { min-height: 230px; padding: 24px; display: flex; flex-direction: column; justify-content: flex-end; background: #f0f2e9; }
+.evaluation-findings h4 { margin: 12px 0 10px; font: 600 18px/1.3 "Manrope"; letter-spacing: -.025em; }
+.evaluation-findings p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.evaluation-findings .finding-risk { background: #f4eadb; }
+.evaluation-findings .finding-decision { background: var(--forest); color: white; }
+.evaluation-findings .finding-decision p { color: #c9d7ce; }
+.finding-label { color: #567260; font-size: 10px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
+.finding-risk .finding-label { color: #8b6134; }
+.finding-decision .finding-label { color: var(--accent); }
+.evaluation-note { max-width: 900px; margin: 24px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.evaluation-note a { color: var(--forest); font-weight: 700; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 .builder-card { display: grid; grid-template-columns: 1fr auto; gap: 50px; align-items: center; margin-top: 14px; padding: 42px; border-radius: 18px; background: #dfe8de; }
 .builder-card h3 { max-width: 740px; margin: 12px 0; }
 .builder-card a { display: inline-flex; align-items: center; gap: 28px; border-radius: 10px; padding: 15px 18px; background: var(--forest); color: white; text-decoration: none; font-size: 13px; font-weight: 700; white-space: nowrap; }
@@ -143,6 +154,8 @@ footer { max-width: 1440px; margin: 0 auto; padding: 0 max(5vw, 24px) 30px; disp
   .workflow-steps { grid-template-columns: 1fr; }
   .workflow-arrow { transform: rotate(90deg); justify-self: center; }
   .case-split { grid-template-columns: 1fr; }
+  .evaluation-findings { grid-template-columns: 1fr; }
+  .evaluation-findings article { min-height: auto; }
 }
 @media (max-width: 560px) {
   .hero { padding-bottom: 50px; }
