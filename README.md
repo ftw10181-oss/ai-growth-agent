@@ -4,6 +4,8 @@ Turn a fuzzy overseas growth brief into a structured, actionable user insight.
 
 AI Growth Agent is a portfolio-grade MVP for growth operators working on AI, SaaS, and consumer technology products. V0.1 covers the first slice of the product journey:
 
+**[Open the live portfolio demo](https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site)**
+
 ```text
 Start → Context Interpreter → User Insight → Structured Output
 ```
@@ -17,7 +19,7 @@ The system does not claim to perform live market research. It transforms user-pr
 - Structured user insight: JTBD, pains, motivations, barriers, and scenarios
 - Dify workflow build guide, prompts, and JSON schemas
 - FastAPI adapter with a no-key demo mode and a Dify-connected mode
-- React/Vite interface ready for local demo and later deployment
+- Public React/Vite demo with a server-side Dify integration
 - Sample request and output for recruiters and reviewers
 
 ## Product demo flow
