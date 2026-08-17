@@ -1,0 +1,13 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+node_modules/
+dist/
+coverage/
+.coverage
+*.log
+*.tsbuildinfo
+work/

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UserInsight",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["target_user", "jobs_to_be_done", "pain_points", "purchase_motivations", "adoption_barriers", "typical_scenarios", "research_questions", "assumptions_to_validate", "confidence"],
+  "$defs": {
+    "insightItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["insight", "why_it_matters"],
+      "properties": {
+        "insight": {"type": "string", "minLength": 8},
+        "why_it_matters": {"type": "string", "minLength": 8}
+      }
+    }
+  },
+  "properties": {
+    "target_user": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary_segment", "rationale"],
+      "properties": {
+        "primary_segment": {"type": "string", "minLength": 8},
+        "rationale": {"type": "string", "minLength": 12}
+      }
+    },
+    "jobs_to_be_done": {
+      "type": "array", "minItems": 3, "maxItems": 5,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["job", "dimension", "why_it_matters"],
+        "properties": {
+          "job": {"type": "string", "minLength": 20},
+          "dimension": {"type": "string", "enum": ["functional", "emotional", "social"]},
+          "why_it_matters": {"type": "string", "minLength": 8}
+        }
+      }
+    },
+    "pain_points": {"type": "array", "minItems": 3, "maxItems": 5, "items": {"$ref": "#/$defs/insightItem"}},
+    "purchase_motivations": {"type": "array", "minItems": 3, "maxItems": 5, "items": {"$ref": "#/$defs/insightItem"}},
+    "adoption_barriers": {"type": "array", "minItems": 3, "maxItems": 5, "items": {"$ref": "#/$defs/insightItem"}},
+    "typical_scenarios": {"type": "array", "minItems": 3, "maxItems": 5, "items": {"$ref": "#/$defs/insightItem"}},
+    "research_questions": {"type": "array", "minItems": 3, "maxItems": 5, "items": {"type": "string", "minLength": 10}},
+    "assumptions_to_validate": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"type": "string", "minLength": 8}},
+    "confidence": {"type": "string", "enum": ["low", "medium", "high"]}
+  }
+}

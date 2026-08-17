@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NormalizedContext",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["brief_summary", "product_category", "target_market", "target_audience", "growth_stage", "primary_goal", "known_constraints", "channel_signals", "assumptions", "ambiguities"],
+  "properties": {
+    "brief_summary": {"type": "string", "minLength": 20},
+    "product_category": {"type": "string", "minLength": 2},
+    "target_market": {"type": "string", "minLength": 2},
+    "target_audience": {"type": "string", "minLength": 2},
+    "growth_stage": {"type": "string", "enum": ["new_market_entry", "launch", "early_growth", "scaling", "retention", "unknown"]},
+    "primary_goal": {"type": "string", "enum": ["Brand Awareness", "User Acquisition", "Conversion", "Community Growth", "Product Launch", "Retention"]},
+    "known_constraints": {"type": "array", "items": {"type": "string"}, "maxItems": 8},
+    "channel_signals": {"type": "array", "items": {"type": "string"}, "maxItems": 8},
+    "assumptions": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 8},
+    "ambiguities": {"type": "array", "items": {"type": "string"}, "maxItems": 8}
+  }
+}

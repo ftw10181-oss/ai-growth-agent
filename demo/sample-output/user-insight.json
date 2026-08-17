@@ -1,0 +1,75 @@
+{
+  "request_id": "sample-v0.1",
+  "mode": "mock",
+  "context": {
+    "brief_summary": "AI Translation Earbuds is being positioned for frequent international business travelers in the United States. The immediate goal is user acquisition, so the first analysis should test high-friction situations and the value of faster communication.",
+    "product_category": "AI-enabled translation hardware",
+    "target_market": "United States",
+    "target_audience": "Frequent international business travelers",
+    "growth_stage": "new_market_entry",
+    "primary_goal": "User Acquisition",
+    "known_constraints": ["Competitors have an established Amazon presence"],
+    "channel_signals": ["Reddit", "TikTok"],
+    "assumptions": [
+      "The product supports sufficiently fast two-way translation for live conversation.",
+      "The initial audience experiences language friction often enough to seek a dedicated device."
+    ],
+    "ambiguities": [
+      "Supported languages, price point, accuracy, privacy model, and offline capability are not specified."
+    ]
+  },
+  "user_insight": {
+    "target_user": {
+      "primary_segment": "US-based international business travelers who regularly join unscripted multilingual conversations",
+      "rationale": "Their communication stakes and repeated travel create observable moments where translation friction may justify a dedicated device."
+    },
+    "jobs_to_be_done": [
+      {
+        "job": "When a business conversation shifts languages, I want to understand and respond without interrupting the flow, so I can keep the meeting productive.",
+        "dimension": "functional",
+        "why_it_matters": "Live conversational continuity is the clearest product-value hypothesis."
+      },
+      {
+        "job": "When I speak with a new international contact, I want confidence that I understood the nuance, so I can avoid an embarrassing mistake.",
+        "dimension": "emotional",
+        "why_it_matters": "Reduced anxiety may be more motivating than translation speed alone."
+      },
+      {
+        "job": "When colleagues see me operating across languages, I want to appear prepared and respectful, so I can build trust quickly.",
+        "dimension": "social",
+        "why_it_matters": "Professional credibility can shape willingness to adopt visible hardware."
+      }
+    ],
+    "pain_points": [
+      {"insight": "Pausing to type into a phone breaks eye contact and conversational rhythm.", "why_it_matters": "Hands-free interaction can be tested against familiar phone-based workarounds."},
+      {"insight": "Fast group conversations may move on before a translated response is ready.", "why_it_matters": "Perceived latency is likely a critical activation criterion."},
+      {"insight": "Travelers may be unsure whether translations preserve business-specific nuance.", "why_it_matters": "Trust and error recovery should appear in onboarding and proof points."}
+    ],
+    "purchase_motivations": [
+      {"insight": "A near-term trip with several multilingual meetings creates urgency.", "why_it_matters": "Trip planning offers a concrete acquisition moment."},
+      {"insight": "Reducing dependence on interpreters or phone handoffs feels operationally efficient.", "why_it_matters": "Convenience may support a productivity-oriented value proposition."},
+      {"insight": "A low-risk trial can demonstrate performance in the buyer's own accent and vocabulary.", "why_it_matters": "Experiential proof may overcome abstract feature comparisons."}
+    ],
+    "adoption_barriers": [
+      {"insight": "Concern that a visible device feels awkward or impolite in a meeting.", "why_it_matters": "The product needs a socially acceptable usage ritual."},
+      {"insight": "Privacy concerns about recording confidential conversations.", "why_it_matters": "Data handling may block enterprise or executive use."},
+      {"insight": "Uncertainty about accuracy across accents, jargon, and noisy rooms.", "why_it_matters": "Generic accuracy claims will not answer situational risk."}
+    ],
+    "typical_scenarios": [
+      {"insight": "An informal conversation begins after a conference session without an interpreter present.", "why_it_matters": "Spontaneous networking highlights speed and portability."},
+      {"insight": "A traveler visits a supplier site where several participants prefer the local language.", "why_it_matters": "Multi-party and noisy-environment behavior becomes testable."},
+      {"insight": "Two attendees clarify a sensitive contract detail during a meal or taxi ride.", "why_it_matters": "Privacy, nuance, and discreet use converge in a high-stakes moment."}
+    ],
+    "research_questions": [
+      "Tell me about the last time language friction changed the outcome of a business conversation.",
+      "What translation workaround did you use, and where did it fail?",
+      "What would you need to observe before trusting a wearable translator in a meeting?",
+      "In which situations would wearing or sharing earbuds feel unacceptable?"
+    ],
+    "assumptions_to_validate": [
+      "The product supports sufficiently fast two-way translation for live conversation.",
+      "The initial audience experiences language friction often enough to seek a dedicated device."
+    ],
+    "confidence": "medium"
+  }
+}
