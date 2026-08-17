@@ -35,6 +35,7 @@ The system does not claim to perform live market research. It transforms user-pr
 .
 ├── backend/                 FastAPI service and Dify adapter
 ├── demo/sample-output/      Portfolio-ready example
+├── evals/                   Fixed cases, rubric, user-test guide, scorecard
 ├── dify/
 │   ├── prompts/             Versioned node prompts
 │   ├── schemas/             Structured-output contracts
@@ -105,6 +106,18 @@ See [demo/sample-output/user-insight.json](demo/sample-output/user-insight.json)
 ## Success criteria
 
 V0.1 is successful when a new user can submit a brief, receive valid structured output, understand which statements are assumptions, and identify at least three interview or experiment directions in under three minutes.
+
+## Evaluation system
+
+The repository includes a repeatable evaluation system rather than relying on a single polished example:
+
+- 12 fixed briefs covering six business goals and multiple product categories
+- Boundary cases for sparse context, goal conflict, and unfamiliar domains
+- Hard contract gates plus a five-dimension human scoring rubric
+- A counterbalanced five-participant moderated user-test plan
+- An offline checker for schema, goal consistency, JTBD dimensions, and claim-risk flags
+
+See [evals/README.md](evals/README.md). The scorecard is intentionally blank until real runs and human reviews are complete; the project does not invent validation results.
 
 ## Roadmap
 

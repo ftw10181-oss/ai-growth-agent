@@ -1,0 +1,174 @@
+{
+  "version": "0.1",
+  "description": "Fixed evaluation briefs for AI Growth Agent V0.1.",
+  "cases": [
+    {
+      "id": "translation-earbuds-us-acquisition",
+      "category": "AI hardware",
+      "difficulty": "standard",
+      "focus": ["live conversation", "privacy", "social acceptability"],
+      "input": {
+        "product": "AI Translation Earbuds",
+        "product_description": "Real-time AI translation earbuds designed for cross-language communication.",
+        "target_market": "United States",
+        "target_audience": "Frequent international business travelers",
+        "business_goal": "User Acquisition",
+        "additional_context": "The product is entering the US market. Competitors have a strong Amazon presence. We want to test Reddit and TikTok."
+      }
+    },
+    {
+      "id": "pulsepilot-us-acquisition",
+      "category": "B2B SaaS",
+      "difficulty": "standard",
+      "focus": ["meeting follow-through", "team trust", "switching behavior"],
+      "input": {
+        "product": "PulsePilot AI",
+        "product_description": "An AI meeting assistant that transcribes calls and turns decisions into assigned action items.",
+        "target_market": "United States",
+        "target_audience": "Remote product teams at early-stage SaaS companies",
+        "business_goal": "User Acquisition",
+        "additional_context": "The team wants to test Product Hunt and LinkedIn. Buyers may already use meeting transcription tools."
+      }
+    },
+    {
+      "id": "draftflow-uk-conversion",
+      "category": "B2B SaaS",
+      "difficulty": "standard",
+      "focus": ["trial conversion", "workflow fit", "quality threshold"],
+      "input": {
+        "product": "DraftFlow",
+        "product_description": "A collaborative AI writing workspace that helps small marketing teams turn briefs into review-ready drafts.",
+        "target_market": "United Kingdom",
+        "target_audience": "Marketing teams of three to ten people at B2B software companies",
+        "business_goal": "Conversion",
+        "additional_context": "Free-trial signups are growing, but few teams invite a second collaborator or upgrade within the first month."
+      }
+    },
+    {
+      "id": "lingualoop-japan-retention",
+      "category": "Consumer app",
+      "difficulty": "standard",
+      "focus": ["habit formation", "progress visibility", "return trigger"],
+      "input": {
+        "product": "LinguaLoop",
+        "product_description": "A mobile language-learning app that creates short daily speaking exercises from topics the learner selects.",
+        "target_market": "Japan",
+        "target_audience": "Working adults learning English for international meetings",
+        "business_goal": "Retention",
+        "additional_context": "Learners complete several sessions in the first week, then usage declines. The team has not yet interviewed churned users."
+      }
+    },
+    {
+      "id": "clipcraft-canada-launch",
+      "category": "Creator tool",
+      "difficulty": "standard",
+      "focus": ["launch moment", "creator workflow", "proof of quality"],
+      "input": {
+        "product": "ClipCraft AI",
+        "product_description": "A desktop editor that converts long-form creator videos into short clips with captions and suggested hooks.",
+        "target_market": "Canada",
+        "target_audience": "Independent video creators publishing weekly on YouTube",
+        "business_goal": "Product Launch",
+        "additional_context": "The beta has twenty invited creators. The launch will begin with a waitlist and creator walkthrough videos."
+      }
+    },
+    {
+      "id": "devrelay-global-community",
+      "category": "Developer platform",
+      "difficulty": "standard",
+      "focus": ["peer contribution", "community trust", "participation barrier"],
+      "input": {
+        "product": "DevRelay",
+        "product_description": "A community platform where developers share reusable AI-agent workflows and implementation notes.",
+        "target_market": "Global English-speaking market",
+        "target_audience": "Software engineers building their first production AI agents",
+        "business_goal": "Community Growth",
+        "additional_context": "Most current visitors read public workflows but do not publish, comment, or return the following week."
+      }
+    },
+    {
+      "id": "lumidesk-germany-awareness",
+      "category": "Consumer hardware",
+      "difficulty": "standard",
+      "focus": ["category education", "home-office context", "credibility"],
+      "input": {
+        "product": "LumiDesk",
+        "product_description": "An adaptive desk light that adjusts brightness and color temperature based on work patterns and room conditions.",
+        "target_market": "Germany",
+        "target_audience": "Hybrid knowledge workers improving their home-office setup",
+        "business_goal": "Brand Awareness",
+        "additional_context": "The brand is unknown in Germany and wants to explain the category before emphasizing smart features."
+      }
+    },
+    {
+      "id": "notenest-australia-sparse",
+      "category": "Productivity app",
+      "difficulty": "sparse",
+      "focus": ["assumption exposure", "ambiguity handling", "low confidence"],
+      "input": {
+        "product": "NoteNest",
+        "product_description": "An AI note application that automatically organizes captured ideas into connected topics.",
+        "target_market": "Australia",
+        "target_audience": "Busy professionals who take many notes",
+        "business_goal": "User Acquisition",
+        "additional_context": ""
+      }
+    },
+    {
+      "id": "signalboard-singapore-goal-conflict",
+      "category": "Analytics SaaS",
+      "difficulty": "goal_conflict",
+      "focus": ["primary-goal consistency", "secondary signal handling", "conversion"],
+      "input": {
+        "product": "SignalBoard",
+        "product_description": "A lightweight product analytics dashboard for founders who need weekly activation and retention signals.",
+        "target_market": "Singapore",
+        "target_audience": "Seed-stage B2B SaaS founders without a dedicated data analyst",
+        "business_goal": "Conversion",
+        "additional_context": "The founder keeps describing the campaign as a brand-awareness push, but the selected goal for this brief is converting existing trial users."
+      }
+    },
+    {
+      "id": "inspectra-us-industrial",
+      "category": "Industrial AI",
+      "difficulty": "unfamiliar_domain",
+      "focus": ["operational scenario", "trust threshold", "procurement barrier"],
+      "input": {
+        "product": "Inspectra Vision",
+        "product_description": "An edge-AI camera system that flags visual anomalies on small manufacturing production lines.",
+        "target_market": "United States",
+        "target_audience": "Operations managers at small component manufacturers",
+        "business_goal": "Product Launch",
+        "additional_context": "The product is entering a paid pilot. Installation requires a short line stoppage, and the team has no published case study yet."
+      }
+    },
+    {
+      "id": "localizekit-france-retention",
+      "category": "B2B SaaS",
+      "difficulty": "constraint_heavy",
+      "focus": ["multi-role workflow", "renewal risk", "integration friction"],
+      "input": {
+        "product": "LocalizeKit",
+        "product_description": "A localization workflow platform that coordinates product strings, translator review, and release approvals.",
+        "target_market": "France",
+        "target_audience": "Product operations teams at mid-sized software companies expanding across Europe",
+        "business_goal": "Retention",
+        "additional_context": "Customers involve product managers, engineers, and external translators. Renewal risk appears after teams encounter repeated integration and approval delays."
+      }
+    },
+    {
+      "id": "calmcommute-korea-awareness",
+      "category": "Consumer app",
+      "difficulty": "standard",
+      "focus": ["situational relevance", "habit substitution", "non-medical positioning"],
+      "input": {
+        "product": "CalmCommute",
+        "product_description": "An audio app offering short guided reflection and planning sessions designed for public-transit commutes.",
+        "target_market": "South Korea",
+        "target_audience": "Office workers with long weekday public-transit commutes",
+        "business_goal": "Brand Awareness",
+        "additional_context": "The product is not a medical or therapy service. The initial message focuses on arriving at work or home with a clearer plan."
+      }
+    }
+  ]
+}

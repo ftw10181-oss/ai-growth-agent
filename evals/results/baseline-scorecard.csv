@@ -1,0 +1,13 @@
+case_id,prompt_version,run_id,schema_pass,goal_consistency_pass,jtbd_dimensions_pass,specificity_1_5,relevance_1_5,testability_1_5,consistency_1_5,claim_safety_1_5,testable_items,total_items,strongest_item,weakest_item,recommended_revision,reviewer
+translation-earbuds-us-acquisition,,,,,,,,,,,,,,,,
+pulsepilot-us-acquisition,,,,,,,,,,,,,,,,
+draftflow-uk-conversion,,,,,,,,,,,,,,,,
+lingualoop-japan-retention,,,,,,,,,,,,,,,,
+clipcraft-canada-launch,,,,,,,,,,,,,,,,
+devrelay-global-community,,,,,,,,,,,,,,,,
+lumidesk-germany-awareness,,,,,,,,,,,,,,,,
+notenest-australia-sparse,,,,,,,,,,,,,,,,
+signalboard-singapore-goal-conflict,,,,,,,,,,,,,,,,
+inspectra-us-industrial,,,,,,,,,,,,,,,,
+localizekit-france-retention,,,,,,,,,,,,,,,,
+calmcommute-korea-awareness,,,,,,,,,,,,,,,,
