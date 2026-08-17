@@ -83,6 +83,129 @@ function Results({ result }: { result: InsightResponse }) {
   );
 }
 
+function CaseStudy() {
+  return (
+    <section className="case-study" id="case-study" aria-labelledby="case-study-title">
+      <div className="case-study-intro">
+        <div>
+          <span className="eyebrow">Product case study</span>
+          <h2 id="case-study-title">Why this product exists—and how it was built.</h2>
+        </div>
+        <p>
+          AI Growth Agent is a portfolio-grade vertical slice: a real workflow, a stable product
+          contract, and a public interface designed around one upstream growth problem.
+        </p>
+      </div>
+
+      <div className="case-study-grid">
+        <article className="case-card problem-card">
+          <span className="card-index">01 · Problem</span>
+          <h3>Growth work starts with fragmented context.</h3>
+          <p>
+            Product notes, audience assumptions, and stakeholder requests arrive unevenly. Generic
+            AI tools often skip interpretation and jump straight to polished—but weak—campaign ideas.
+          </p>
+        </article>
+        <article className="case-card">
+          <span className="card-index">02 · Target user</span>
+          <h3>Overseas growth operators for AI and technology products.</h3>
+          <p>
+            Built for growth managers, product operators, international marketers, and early-stage
+            founders who need a better starting point for discovery and experimentation.
+          </p>
+        </article>
+        <article className="case-card decision-card">
+          <span className="card-index">03 · Product decision</span>
+          <h3>Interpret first. Generate second.</h3>
+          <p>
+            The system makes facts, assumptions, constraints, and ambiguities visible before it
+            produces user hypotheses. That creates a reusable context layer and reduces false confidence.
+          </p>
+        </article>
+      </div>
+
+      <div className="case-section workflow-section">
+        <div className="section-heading">
+          <span className="card-index">04 · How it works</span>
+          <h3>A two-stage reasoning workflow.</h3>
+        </div>
+        <div className="workflow-steps" aria-label="AI Growth Agent workflow">
+          <div className="workflow-step">
+            <strong>01</strong>
+            <div><h4>Growth brief</h4><p>Six fields capture the product, market, audience, goal, and constraints.</p></div>
+          </div>
+          <span className="workflow-arrow" aria-hidden="true">→</span>
+          <div className="workflow-step">
+            <strong>02</strong>
+            <div><h4>Context Interpreter</h4><p>Normalizes the brief and exposes assumptions without inventing research.</p></div>
+          </div>
+          <span className="workflow-arrow" aria-hidden="true">→</span>
+          <div className="workflow-step">
+            <strong>03</strong>
+            <div><h4>User Insight</h4><p>Returns testable jobs, pains, motivations, barriers, scenarios, and questions.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="case-split">
+        <article className="responsible-card">
+          <span className="card-index">05 · Responsible AI</span>
+          <h3>Hypotheses, not fabricated authority.</h3>
+          <ul>
+            <li>No invented statistics, quotes, competitor claims, or citations</li>
+            <li>Assumptions and ambiguities remain visible</li>
+            <li>Confidence and research questions encourage human validation</li>
+            <li>The human owns prioritization and commercial decisions</li>
+          </ul>
+        </article>
+
+        <article className="architecture-card">
+          <span className="card-index">06 · Architecture</span>
+          <h3>A stable server-side boundary keeps the workflow secure.</h3>
+          <div className="architecture-flow" aria-label="System architecture">
+            <span>React UI</span><i>→</i><span>Server API</span><i>→</i><span>Dify</span>
+          </div>
+          <p>
+            The browser calls a same-origin API. Dify credentials stay in encrypted server-side
+            environment variables and never enter frontend code or Git history.
+          </p>
+        </article>
+      </div>
+
+      <div className="evaluation-section">
+        <div className="section-heading">
+          <span className="card-index">07 · Evaluation</span>
+          <h3>Built to be inspected, tested, and improved.</h3>
+        </div>
+        <div className="evidence-grid">
+          <div><strong>9</strong><span>automated tests passed</span></div>
+          <div><strong>2</strong><span>structured LLM nodes</span></div>
+          <div><strong>4</strong><span>end-to-end workflow steps</span></div>
+          <div><strong>15.6s</strong><span>sample live API run</span></div>
+        </div>
+        <p className="evaluation-note">
+          Evaluation focuses on specificity, relevance, internal consistency, testability, and
+          unsupported-claim risk—not on how polished the prose sounds.
+        </p>
+      </div>
+
+      <div className="builder-card">
+        <div>
+          <span className="eyebrow">Built by Markus</span>
+          <h3>Product strategy, workflow design, prompts, contracts, testing, and launch.</h3>
+          <p>
+            This independent project demonstrates the full AI product loop: scope a real problem,
+            design the human–AI boundary, ship a working system, and define how quality will be measured.
+          </p>
+        </div>
+        <a href="https://github.com/ftw10181-oss/ai-growth-agent" target="_blank" rel="noreferrer">
+          View GitHub <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   const [brief, setBrief] = useState<GrowthBrief>(initialBrief);
   const [result, setResult] = useState<InsightResponse | null>(null);
@@ -109,15 +232,27 @@ export default function App() {
   return (
     <main>
       <header className="hero">
-        <nav><span className="brand-mark">AG</span><strong>AI Growth Agent</strong><span className="version">V0.1</span></nav>
+        <nav>
+          <span className="brand-mark">AG</span><strong>AI Growth Agent</strong>
+          <div className="nav-links">
+            <a href="#demo">Try demo</a>
+            <a href="#case-study">Case study</a>
+            <a href="https://github.com/ftw10181-oss/ai-growth-agent" target="_blank" rel="noreferrer">GitHub ↗</a>
+          </div>
+          <span className="version">V0.1</span>
+        </nav>
         <div className="hero-copy">
           <span className="eyebrow">From brief to testable hypotheses</span>
           <h1>See the user behind your growth goal.</h1>
           <p>Turn incomplete product context into structured jobs, pains, motivations, barriers, and research questions—before you jump to campaigns.</p>
+          <div className="hero-actions">
+            <a className="primary-action" href="#demo">Try the live workflow <span aria-hidden="true">↓</span></a>
+            <a className="secondary-action" href="#case-study">Read the case study</a>
+          </div>
         </div>
       </header>
 
-      <section className="workspace">
+      <section className="workspace" id="demo">
         <form onSubmit={handleSubmit}>
           <div className="form-heading">
             <div><span className="step">01</span><h2>Growth brief</h2></div>
@@ -148,7 +283,11 @@ export default function App() {
           </aside>
         )}
       </section>
-      <footer><span>Built for overseas growth operators</span><span>Structured · transparent · testable</span></footer>
+      <CaseStudy />
+      <footer>
+        <span>Built by Markus for overseas growth operators</span>
+        <span>Structured · transparent · testable</span>
+      </footer>
     </main>
   );
 }
