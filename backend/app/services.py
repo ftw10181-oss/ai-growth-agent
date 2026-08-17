@@ -122,8 +122,20 @@ class DifyInsightService(InsightService):
         except httpx.RequestError as exc:
             raise InsightServiceError("The AI workflow is currently unavailable.") from exc
 
-        body = response.json()
-        outputs = body.get("data", {}).get("outputs", {})
+        try:
+            body = response.json()
+        except ValueError as exc:
+            raise InsightServiceError("The AI workflow returned an invalid response.") from exc
+
+        data = body.get("data")
+        if not isinstance(data, dict):
+            raise InsightServiceError("The AI workflow returned an unexpected response shape.")
+        if data.get("status") != "succeeded":
+            raise InsightServiceError("The AI workflow could not complete the request.")
+
+        outputs = data.get("outputs")
+        if not isinstance(outputs, dict):
+            raise InsightServiceError("The AI workflow returned an unexpected response shape.")
         try:
             return UserInsightResponse(
                 request_id=body.get("workflow_run_id") or body.get("task_id") or str(uuid4()),
@@ -139,4 +151,3 @@ def build_service(settings: Settings) -> InsightService:
     if settings.app_mode == "dify":
         return DifyInsightService(settings)
     return MockInsightService()
-

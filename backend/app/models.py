@@ -1,6 +1,7 @@
 from enum import Enum
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class BusinessGoal(str, Enum):
@@ -54,7 +55,7 @@ class TargetUser(BaseModel):
 
 class JobToBeDone(BaseModel):
     job: str
-    dimension: str
+    dimension: Literal["functional", "emotional", "social"]
     why_it_matters: str
 
 
@@ -76,10 +77,19 @@ class UserInsight(BaseModel):
     assumptions_to_validate: list[str] = Field(min_length=1, max_length=8)
     confidence: str = Field(pattern="^(low|medium|high)$")
 
+    @model_validator(mode="after")
+    def require_all_job_dimensions(self):
+        dimensions = {item.dimension for item in self.jobs_to_be_done}
+        required = {"functional", "emotional", "social"}
+        if not required.issubset(dimensions):
+            raise ValueError(
+                "jobs_to_be_done must include functional, emotional, and social dimensions"
+            )
+        return self
+
 
 class UserInsightResponse(BaseModel):
     request_id: str
-    mode: str
+    mode: Literal["mock", "dify"]
     context: NormalizedContext
     user_insight: UserInsight
-

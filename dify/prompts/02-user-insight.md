@@ -30,3 +30,13 @@ Produce a structured user-insight hypothesis that helps a growth operator plan d
 - `confidence`: `low`, `medium`, or `high`; use `low` when context is sparse and never use `high` for claims requiring external evidence.
 - `assumptions_to_validate`: carry forward important assumptions and add only those created by your reasoning.
 
+# Mandatory quality validation
+
+Before returning the configured output:
+
+1. `jobs_to_be_done` MUST contain all three dimensions: `functional`, `emotional`, and `social`. For five items, use three functional, one emotional, and one social JTBD.
+2. Treat unsupported user behavior as a hypothesis. Do not use “often,” “many,” “frequently,” “significantly,” or similar frequency and magnitude claims unless evidence is provided.
+3. Keep `purchase_motivations` focused on outcomes experienced by the user, such as reducing administrative work, preventing lost decisions, improving accountability, or lowering evaluation risk.
+4. At least three `research_questions` MUST investigate a specific recent or past experience, the user's current workaround, and a trust threshold or switching trigger.
+5. Reduce repetition across `pain_points`, `adoption_barriers`, and `typical_scenarios`.
+6. Verify every rule above. If any rule is not satisfied, revise the output internally before returning it.

@@ -27,7 +27,8 @@ async def health(config: Settings = Depends(get_settings)) -> dict[str, str]:
     return {"status": "ok", "mode": config.app_mode, "version": "0.1.0"}
 
 
-@app.post("/api/v1/insights", response_model=UserInsightResponse)
+@app.post("/api/analyze", response_model=UserInsightResponse)
+@app.post("/api/v1/insights", response_model=UserInsightResponse, include_in_schema=False)
 async def create_insight(
     brief: GrowthBrief, config: Settings = Depends(get_settings)
 ) -> UserInsightResponse:
@@ -35,4 +36,3 @@ async def create_insight(
         return await build_service(config).generate(brief)
     except InsightServiceError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
-

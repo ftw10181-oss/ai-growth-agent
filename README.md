@@ -83,7 +83,9 @@ Keep the Dify key on the backend only. The browser never calls Dify directly.
 
 ## API contract
 
-`POST /api/v1/insights`
+`POST /api/analyze`
+
+`POST /api/v1/insights` remains available as a compatibility alias.
 
 ```json
 {

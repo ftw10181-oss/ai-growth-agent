@@ -5,7 +5,7 @@
 ```mermaid
 flowchart LR
     U["Growth operator"] --> F["React brief form"]
-    F -->|"POST /api/v1/insights"| B["FastAPI boundary"]
+    F -->|"POST /api/analyze"| B["FastAPI boundary"]
     B --> V["Input/output validation"]
     V -->|"demo"| M["Deterministic mock service"]
     V -->|"configured"| D["Dify Workflow API"]
@@ -34,7 +34,7 @@ Mock mode is a demo adapter, not a second product path. It lets reviewers run th
 ### Backend
 
 - FastAPI with Pydantic validation
-- `POST /api/v1/insights` orchestration endpoint
+- `POST /api/analyze` orchestration endpoint (`/api/v1/insights` remains a compatibility alias)
 - `GET /health` operational endpoint
 - Selects mock or Dify service through `APP_MODE`
 - Converts Dify `data.outputs` into the public response model
@@ -83,4 +83,3 @@ Some Dify configurations serialize structured outputs as JSON strings. The adapt
 ## Evolution path
 
 Each future module should consume the normalized context rather than the raw form. Market research can later add a retrieval/evidence branch, while the public API can add versioned module outputs without rewriting the UI–Dify boundary.
-
