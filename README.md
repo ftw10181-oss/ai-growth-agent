@@ -71,7 +71,7 @@ Open `http://localhost:5173` and submit the pre-filled example.
 
 ### 3. Connect Dify
 
-Build and publish the workflow using [dify/workflow-v0.1.md](dify/workflow-v0.1.md). Then update `backend/.env`:
+Import [dify/workflow-v0.1.yml](dify/workflow-v0.1.yml), select a model available in your workspace, test, and publish. If the imported provider cannot be resolved, use [dify/workflow-v0.1.md](dify/workflow-v0.1.md) to build the same canvas manually. Then update `backend/.env`:
 
 ```dotenv
 APP_MODE=dify
@@ -120,4 +120,3 @@ V0.1 is successful when a new user can submit a brief, receive valid structured 
 ## License
 
 MIT — see [LICENSE](LICENSE).
-

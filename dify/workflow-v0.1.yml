@@ -1,0 +1,500 @@
+app:
+  description: Turn an overseas growth brief into structured, testable user insight hypotheses.
+  icon: 🧭
+  icon_background: '#E8F5EE'
+  icon_type: emoji
+  mode: workflow
+  name: AI Growth Agent — V0.1
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.7.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      enabled: false
+    opening_statement: ''
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+      - data:
+          isInIteration: false
+          isInLoop: false
+          sourceType: start
+          targetType: llm
+        id: start-source-context-interpreter-target
+        source: start
+        sourceHandle: source
+        target: context_interpreter
+        targetHandle: target
+        type: custom
+        zIndex: 0
+      - data:
+          isInIteration: false
+          isInLoop: false
+          sourceType: llm
+          targetType: llm
+        id: context-interpreter-source-user-insight-target
+        source: context_interpreter
+        sourceHandle: source
+        target: user_insight
+        targetHandle: target
+        type: custom
+        zIndex: 0
+      - data:
+          isInIteration: false
+          isInLoop: false
+          sourceType: llm
+          targetType: end
+        id: user-insight-source-end-target
+        source: user_insight
+        sourceHandle: source
+        target: end
+        targetHandle: target
+        type: custom
+        zIndex: 0
+    nodes:
+      - data:
+          desc: Six-field overseas growth brief
+          selected: false
+          title: Start
+          type: start
+          variables:
+            - default: ''
+              hint: Product or working name
+              label: Product
+              max_length: 120
+              options: []
+              placeholder: AI Translation Earbuds
+              required: true
+              type: text-input
+              variable: product
+            - default: ''
+              hint: What the product does and for whom
+              label: Product Description
+              max_length: 2000
+              options: []
+              placeholder: Real-time AI translation earbuds for cross-language communication.
+              required: true
+              type: paragraph
+              variable: product_description
+            - default: ''
+              hint: Country or region
+              label: Target Market
+              max_length: 120
+              options: []
+              placeholder: United States
+              required: true
+              type: text-input
+              variable: target_market
+            - default: ''
+              hint: Initial audience hypothesis
+              label: Target Audience
+              max_length: 500
+              options: []
+              placeholder: Frequent international business travelers
+              required: true
+              type: paragraph
+              variable: target_audience
+            - default: User Acquisition
+              hint: Primary outcome for this analysis
+              label: Business Goal
+              options:
+                - Brand Awareness
+                - User Acquisition
+                - Conversion
+                - Community Growth
+                - Product Launch
+                - Retention
+              placeholder: ''
+              required: true
+              type: select
+              variable: business_goal
+            - default: ''
+              hint: Constraints, channels, competitors, or stage
+              label: Additional Context
+              max_length: 2000
+              options: []
+              placeholder: Optional
+              required: false
+              type: paragraph
+              variable: additional_context
+        height: 270
+        id: start
+        position:
+          x: 40
+          y: 220
+        positionAbsolute:
+          x: 40
+          y: 220
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        type: custom
+        width: 260
+      - data:
+          context:
+            enabled: false
+            variable_selector: []
+          desc: Normalize the brief and expose assumptions before analysis.
+          model:
+            completion_params:
+              temperature: 0.2
+            mode: chat
+            name: gpt-4o-mini
+            provider: langgenius/openai/openai
+          prompt_template:
+            - id: context-system
+              role: system
+              text: |-
+                # Role
+                You are the Context Interpreter for an overseas growth strategy product. Your job is to transform a raw growth brief into a precise, neutral analysis context for downstream agents.
+
+                # Objectives
+                1. Preserve the user's explicit facts.
+                2. Normalize vague or uneven wording without changing intent.
+                3. Separate supplied information from reasonable assumptions.
+                4. Identify ambiguity that could materially affect growth analysis.
+
+                # Rules
+                - Do not perform market research.
+                - Do not invent statistics, user quotes, competitor facts, prices, product capabilities, or citations.
+                - Treat the target audience as an initial hypothesis, not a verified segment.
+                - If information is missing, record a concise assumption rather than silently filling the gap.
+                - Keep the summary specific to the supplied product, market, audience, and goal.
+                - Use English for all values.
+                - Return only the configured structured output. No markdown or commentary.
+
+                # Field guidance
+                - brief_summary: 2–3 sentences connecting product, user, market, and goal.
+                - product_category: a concise category inferred from the description.
+                - growth_stage: one of new_market_entry, launch, early_growth, scaling, retention, unknown.
+                - primary_goal: copy the supported business goal exactly.
+                - known_constraints: only constraints explicitly supplied by the user.
+                - channel_signals: channels mentioned by the user; do not add recommendations.
+                - assumptions: missing or inferred conditions that downstream reasoning relies on.
+                - ambiguities: questions whose answers could change the analysis.
+            - id: context-user
+              role: user
+              text: |-
+                Product: {{#start.product#}}
+                Product description: {{#start.product_description#}}
+                Target market: {{#start.target_market#}}
+                Target audience: {{#start.target_audience#}}
+                Business goal: {{#start.business_goal#}}
+                Additional context: {{#start.additional_context#}}
+          retry_config:
+            max_retries: 2
+            retry_enabled: true
+            retry_interval: 1000
+          selected: false
+          structured_output:
+            schema:
+              additionalProperties: false
+              properties:
+                brief_summary:
+                  minLength: 20
+                  type: string
+                product_category:
+                  minLength: 2
+                  type: string
+                target_market:
+                  minLength: 2
+                  type: string
+                target_audience:
+                  minLength: 2
+                  type: string
+                growth_stage:
+                  enum:
+                    - new_market_entry
+                    - launch
+                    - early_growth
+                    - scaling
+                    - retention
+                    - unknown
+                  type: string
+                primary_goal:
+                  enum:
+                    - Brand Awareness
+                    - User Acquisition
+                    - Conversion
+                    - Community Growth
+                    - Product Launch
+                    - Retention
+                  type: string
+                known_constraints:
+                  items:
+                    type: string
+                  maxItems: 8
+                  type: array
+                channel_signals:
+                  items:
+                    type: string
+                  maxItems: 8
+                  type: array
+                assumptions:
+                  items:
+                    type: string
+                  maxItems: 8
+                  minItems: 1
+                  type: array
+                ambiguities:
+                  items:
+                    type: string
+                  maxItems: 8
+                  type: array
+              required:
+                - brief_summary
+                - product_category
+                - target_market
+                - target_audience
+                - growth_stage
+                - primary_goal
+                - known_constraints
+                - channel_signals
+                - assumptions
+                - ambiguities
+              type: object
+          structured_output_enabled: true
+          title: Context Interpreter
+          type: llm
+          variables: []
+          vision:
+            enabled: false
+        height: 120
+        id: context_interpreter
+        position:
+          x: 380
+          y: 280
+        positionAbsolute:
+          x: 380
+          y: 280
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        type: custom
+        width: 260
+      - data:
+          context:
+            enabled: false
+            variable_selector: []
+          desc: Generate testable JTBD, pains, motivations, barriers, and scenarios.
+          model:
+            completion_params:
+              temperature: 0.2
+            mode: chat
+            name: gpt-4o-mini
+            provider: langgenius/openai/openai
+          prompt_template:
+            - id: insight-system
+              role: system
+              text: |-
+                # Role
+                You are a senior growth researcher turning a normalized brief into testable user hypotheses for an overseas technology product.
+
+                # Objective
+                Produce a structured user-insight hypothesis that helps a growth operator plan discovery interviews, messaging tests, and acquisition experiments.
+
+                # Reasoning policy
+                - Reason only from the normalized context and broadly applicable behavioral logic.
+                - Frame unverified claims as hypotheses using cautious language such as “may,” “likely,” or “hypothesis.”
+                - Prefer situational specificity over demographic stereotypes.
+                - Distinguish the functional, emotional, and social dimensions of the user's job.
+                - Connect every pain, motivation, barrier, and scenario to the product and business goal.
+                - Do not invent statistics, market sizes, adoption rates, user quotes, competitor claims, research findings, or citations.
+                - Do not repeat the same idea across fields.
+                - Use English for all values.
+                - Return only the configured structured output. No markdown or commentary.
+
+                # Output quality bar
+                - target_user: one crisp primary segment and a one-sentence rationale.
+                - jobs_to_be_done: 3–5 items. Write as “When…, I want to…, so I can…”. Include a dimension and why_it_matters.
+                - pain_points: 3–5 specific frictions with a plausible trigger and current workaround.
+                - purchase_motivations: 3–5 outcomes that could cause evaluation or purchase.
+                - adoption_barriers: 3–5 product, trust, habit, or operational obstacles.
+                - typical_scenarios: 3–5 observable situations, not generic activities.
+                - research_questions: 3–5 neutral questions that can validate or falsify the hypotheses.
+                - confidence: low, medium, or high; use low when context is sparse and never use high for claims requiring external evidence.
+                - assumptions_to_validate: carry forward important assumptions and add only those created by your reasoning.
+            - id: insight-user
+              role: user
+              text: |-
+                Normalized growth context:
+                {{#context_interpreter.structured_output#}}
+          retry_config:
+            max_retries: 2
+            retry_enabled: true
+            retry_interval: 1000
+          selected: false
+          structured_output:
+            schema:
+              additionalProperties: false
+              properties:
+                target_user:
+                  additionalProperties: false
+                  properties:
+                    primary_segment:
+                      minLength: 8
+                      type: string
+                    rationale:
+                      minLength: 12
+                      type: string
+                  required:
+                    - primary_segment
+                    - rationale
+                  type: object
+                jobs_to_be_done:
+                  items:
+                    additionalProperties: false
+                    properties:
+                      job:
+                        minLength: 20
+                        type: string
+                      dimension:
+                        enum:
+                          - functional
+                          - emotional
+                          - social
+                        type: string
+                      why_it_matters:
+                        minLength: 8
+                        type: string
+                    required:
+                      - job
+                      - dimension
+                      - why_it_matters
+                    type: object
+                  maxItems: 5
+                  minItems: 3
+                  type: array
+                pain_points:
+                  items: &insight_item
+                    additionalProperties: false
+                    properties:
+                      insight:
+                        minLength: 8
+                        type: string
+                      why_it_matters:
+                        minLength: 8
+                        type: string
+                    required:
+                      - insight
+                      - why_it_matters
+                    type: object
+                  maxItems: 5
+                  minItems: 3
+                  type: array
+                purchase_motivations:
+                  items: *insight_item
+                  maxItems: 5
+                  minItems: 3
+                  type: array
+                adoption_barriers:
+                  items: *insight_item
+                  maxItems: 5
+                  minItems: 3
+                  type: array
+                typical_scenarios:
+                  items: *insight_item
+                  maxItems: 5
+                  minItems: 3
+                  type: array
+                research_questions:
+                  items:
+                    minLength: 10
+                    type: string
+                  maxItems: 5
+                  minItems: 3
+                  type: array
+                assumptions_to_validate:
+                  items:
+                    minLength: 8
+                    type: string
+                  maxItems: 8
+                  minItems: 1
+                  type: array
+                confidence:
+                  enum:
+                    - low
+                    - medium
+                    - high
+                  type: string
+              required:
+                - target_user
+                - jobs_to_be_done
+                - pain_points
+                - purchase_motivations
+                - adoption_barriers
+                - typical_scenarios
+                - research_questions
+                - assumptions_to_validate
+                - confidence
+              type: object
+          structured_output_enabled: true
+          title: User Insight
+          type: llm
+          variables: []
+          vision:
+            enabled: false
+        height: 120
+        id: user_insight
+        position:
+          x: 720
+          y: 280
+        positionAbsolute:
+          x: 720
+          y: 280
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        type: custom
+        width: 260
+      - data:
+          desc: Return the normalized context and user insight objects.
+          outputs:
+            - value_selector:
+                - context_interpreter
+                - structured_output
+              value_type: object
+              variable: context
+            - value_selector:
+                - user_insight
+                - structured_output
+              value_type: object
+              variable: user_insight
+          selected: false
+          title: End
+          type: end
+        height: 120
+        id: end
+        position:
+          x: 1060
+          y: 280
+        positionAbsolute:
+          x: 1060
+          y: 280
+        selected: false
+        sourcePosition: right
+        targetPosition: left
+        type: custom
+        width: 260
+    viewport:
+      x: 20
+      y: 120
+      zoom: 0.8
+  rag_pipeline_variables: []
+

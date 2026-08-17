@@ -1,6 +1,6 @@
 # Dify Workflow Build Guide — V0.1
 
-This is the source-of-truth canvas specification. It is intentionally a manual build guide rather than a brittle exported DSL: provider and model identifiers differ by Dify workspace. After building it once, export the app DSL from your own Dify workspace and commit it as `dify/export.yml`.
+This is the manual fallback canvas specification. Import `workflow-v0.1.yml` first; use this guide when your workspace cannot resolve the DSL's default model provider. After selecting your actual model and publishing, you may export the workspace-resolved app DSL as `dify/export.yml`.
 
 ## Canvas
 
@@ -101,4 +101,3 @@ Use an unfamiliar product and market. Confirm that the response contains no fabr
 ## 7. Publish and connect
 
 Publish the workflow, create its API key, and configure the backend environment. Dify’s published Workflow API uses a blocking request from the backend; keep the key server-side. Re-publish after prompt changes.
-
