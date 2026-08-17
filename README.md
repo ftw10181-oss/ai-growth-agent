@@ -117,7 +117,15 @@ The repository includes a repeatable evaluation system rather than relying on a 
 - A counterbalanced five-participant moderated user-test plan
 - An offline checker for schema, goal consistency, JTBD dimensions, and claim-risk flags
 
-See [evals/README.md](evals/README.md). The scorecard is intentionally blank until real runs and human reviews are complete; the project does not invent validation results.
+See [evals/README.md](evals/README.md).
+
+### V0.1 live baseline
+
+The published Dify workflow completed **12/12 cases successfully** with **100% schema, goal-consistency, JTBD-dimension, and item-count compliance**. Median end-to-end latency was **21.5 seconds** across 35,371 model tokens.
+
+The single-reviewer content score was **3.75/5**. Relevance was strongest at **4.58/5**; unsupported-claim safety was the main weakness at **2.67/5**, because inferred behaviors were sometimes phrased as facts. Only 2/12 cases met the full publish threshold, so V0.2 will focus on explicit hypothesis labels, evidence basis, and confidence per insight.
+
+These are internal synthetic-case results—not user research or evidence of business impact. See the [baseline report](evals/results/baseline-v0.1/report.md) and [completed scorecard](evals/results/baseline-v0.1/scorecard.csv).
 
 ## Roadmap
 

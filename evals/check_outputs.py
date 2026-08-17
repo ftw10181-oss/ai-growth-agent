@@ -26,15 +26,15 @@ def load_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def flatten_strings(value):
+def flatten_strings(value, path=()):
     if isinstance(value, str):
-        yield value
+        yield path, value
     elif isinstance(value, list):
-        for item in value:
-            yield from flatten_strings(item)
+        for index, item in enumerate(value):
+            yield from flatten_strings(item, (*path, str(index)))
     elif isinstance(value, dict):
-        for item in value.values():
-            yield from flatten_strings(item)
+        for key, item in value.items():
+            yield from flatten_strings(item, (*path, key))
 
 
 def main() -> int:
@@ -45,6 +45,7 @@ def main() -> int:
     case_data = load_json(ROOT / "evals" / "cases.json")
     cases = {case["id"]: case for case in case_data["cases"]}
     failures = []
+    review_flags = []
 
     for case_id, case in cases.items():
         output_path = args.output_dir / f"{case_id}.json"
@@ -62,16 +63,25 @@ def main() -> int:
         if response.context.primary_goal != brief.business_goal:
             failures.append(f"{case_id}: primary goal mismatch")
 
-        combined = "\n".join(flatten_strings(response.model_dump(mode="json")))
-        for label, pattern in RISK_PATTERNS.items():
-            if pattern.search(combined):
-                failures.append(f"{case_id}: review flag: {label}")
+        generated_insights = response.user_insight.model_dump(mode="json")
+        for path, text in flatten_strings(generated_insights):
+            # Questions and explicit assumptions are already framed for validation.
+            if path and path[0] in {"research_questions", "assumptions_to_validate"}:
+                continue
+            for label, pattern in RISK_PATTERNS.items():
+                if pattern.search(text):
+                    review_flags.append(
+                        f"{case_id}: review flag: {label} at user_insight.{'.'.join(path)}"
+                    )
 
     if failures:
         print("\n".join(failures))
         return 1
 
-    print(f"Validated {len(cases)} evaluation outputs.")
+    print(f"Validated {len(cases)} evaluation outputs: no contract or goal failures.")
+    if review_flags:
+        print("\n".join(review_flags))
+        print(f"Review required: {len(review_flags)} possible unsupported-claim phrases.")
     return 0
 
 

@@ -7,7 +7,8 @@ This directory turns AI Growth Agent quality from an impression into a repeatabl
 - `cases.json` — 12 fixed briefs across AI hardware, SaaS, consumer apps, creator tools, developer platforms, and industrial AI
 - `rubric.md` — five-dimension human scoring rubric plus hard contract gates
 - `user-testing-guide.md` — five-participant moderated comparison plan
-- `results/baseline-scorecard.csv` — blank scorecard; no outcome is claimed until real reviews are complete
+- `results/baseline-scorecard.csv` — reusable blank scorecard
+- `results/baseline-v0.1/` — reviewed live baseline, raw outputs, run metadata, report, and completed scorecard
 - `check_outputs.py` — offline contract and claim-risk checks for saved run outputs
 
 ## Evaluation loop
@@ -26,7 +27,7 @@ Save one public API response per case as `<case-id>.json`, then run:
 python evals/check_outputs.py evals/results/runs/<run-name>
 ```
 
-The generated run directory is ignored by Git until a reviewed baseline is intentionally selected for publication.
+Ad-hoc generated run directories are ignored by Git until a reviewed baseline is intentionally selected for publication. The reviewed V0.1 baseline is committed as portfolio evidence.
 
 ## Integrity rules
 

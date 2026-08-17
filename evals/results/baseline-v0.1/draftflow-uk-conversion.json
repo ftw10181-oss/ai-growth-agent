@@ -1,0 +1,123 @@
+{
+  "request_id": "c9d80d42-1a4d-4e50-8159-130145a28b6e",
+  "mode": "dify",
+  "context": {
+    "brief_summary": "DraftFlow is a collaborative AI writing workspace designed for small marketing teams in B2B software companies in the United Kingdom. The product aims to enhance team collaboration by turning briefs into review-ready drafts, with a primary goal of increasing conversion rates. Although free-trial signups are on the rise, there is a challenge in getting teams to invite additional collaborators or upgrade within the first month.",
+    "product_category": "AI Writing Workspace",
+    "target_market": "United Kingdom",
+    "target_audience": "Marketing teams of three to ten people at B2B software companies",
+    "growth_stage": "early_growth",
+    "primary_goal": "Conversion",
+    "known_constraints": [
+      "Free-trial signups are growing, but few teams invite a second collaborator or upgrade within the first month."
+    ],
+    "channel_signals": [],
+    "assumptions": [
+      "The target audience is actively seeking tools to enhance collaboration and writing efficiency.",
+      "The product's features align with the needs of small marketing teams in B2B software companies."
+    ],
+    "ambiguities": [
+      "What specific features or incentives could encourage teams to invite more collaborators?",
+      "What barriers are preventing teams from upgrading within the first month?"
+    ]
+  },
+  "user_insight": {
+    "target_user": {
+      "primary_segment": "Small marketing teams in B2B software companies in the UK",
+      "rationale": "This segment is likely to benefit from enhanced collaboration and efficiency in writing tasks."
+    },
+    "jobs_to_be_done": [
+      {
+        "job": "When collaborating on a marketing brief, I want to quickly generate a review-ready draft, so I can save time and focus on strategy.",
+        "dimension": "functional",
+        "why_it_matters": "This reduces the time spent on revisions and increases productivity."
+      },
+      {
+        "job": "When my team is brainstorming ideas, I want to easily share and edit content in real-time, so I can foster creativity and ensure everyone’s input is valued.",
+        "dimension": "functional",
+        "why_it_matters": "This enhances team engagement and improves the quality of the output."
+      },
+      {
+        "job": "When finalizing a document, I want to track changes and comments from my team, so I can ensure accountability and clarity in the review process.",
+        "dimension": "functional",
+        "why_it_matters": "This minimizes miscommunication and streamlines the approval process."
+      },
+      {
+        "job": "When using DraftFlow, I want to feel confident that my team is aligned and productive, so I can reduce stress and enhance collaboration.",
+        "dimension": "emotional",
+        "why_it_matters": "This contributes to a positive team culture and reduces friction in the workflow."
+      },
+      {
+        "job": "When introducing new tools, I want to demonstrate their value to my team, so I can gain their buy-in and support for adoption.",
+        "dimension": "social",
+        "why_it_matters": "This helps in building trust and ensures smoother transitions to new processes."
+      }
+    ],
+    "pain_points": [
+      {
+        "insight": "Teams struggle to invite additional collaborators due to unclear value propositions of the tool.",
+        "why_it_matters": "This limits the collaborative potential and reduces the overall effectiveness of the product."
+      },
+      {
+        "insight": "Users find the onboarding process cumbersome and time-consuming, leading to frustration.",
+        "why_it_matters": "This may result in teams abandoning the tool before realizing its full benefits."
+      },
+      {
+        "insight": "Lack of integration with existing tools creates friction in workflow, causing teams to revert to familiar methods.",
+        "why_it_matters": "This hinders the adoption of DraftFlow and limits its impact on collaboration."
+      }
+    ],
+    "purchase_motivations": [
+      {
+        "insight": "Teams may seek to improve their conversion rates through more effective content creation.",
+        "why_it_matters": "This aligns with the primary goal of the product and drives urgency for evaluation."
+      },
+      {
+        "insight": "The desire for seamless collaboration may motivate teams to upgrade for enhanced features.",
+        "why_it_matters": "This can lead to increased usage and satisfaction with the tool."
+      },
+      {
+        "insight": "Teams may want to reduce the time spent on revisions and approvals, leading to a more efficient workflow.",
+        "why_it_matters": "This outcome is directly tied to the product's promise of enhancing productivity."
+      }
+    ],
+    "adoption_barriers": [
+      {
+        "insight": "Concerns about data security and privacy may prevent teams from fully trusting the platform.",
+        "why_it_matters": "This can lead to hesitation in inviting more collaborators or upgrading."
+      },
+      {
+        "insight": "Existing habits and reliance on traditional tools may create resistance to change.",
+        "why_it_matters": "This can slow down the adoption process and limit the product's effectiveness."
+      },
+      {
+        "insight": "Uncertainty about the product's long-term value may lead to reluctance in committing to a paid plan.",
+        "why_it_matters": "This affects conversion rates and overall growth."
+      }
+    ],
+    "typical_scenarios": [
+      {
+        "insight": "A team member struggles to get feedback on a draft because they haven't invited others to collaborate.",
+        "why_it_matters": "This highlights the need for clearer prompts to encourage collaboration."
+      },
+      {
+        "insight": "A marketing team spends excessive time revising a document due to lack of real-time editing capabilities.",
+        "why_it_matters": "This showcases the potential for DraftFlow to streamline the process."
+      },
+      {
+        "insight": "A team decides to stick with email for document sharing despite having access to DraftFlow.",
+        "why_it_matters": "This indicates a need for better integration and user education."
+      }
+    ],
+    "research_questions": [
+      "What specific features would encourage teams to invite more collaborators to DraftFlow?",
+      "What current workarounds do teams use when they find DraftFlow's onboarding challenging?",
+      "What factors would lead a team to trust DraftFlow enough to upgrade within the first month?"
+    ],
+    "assumptions_to_validate": [
+      "The target audience is actively seeking tools to enhance collaboration and writing efficiency.",
+      "The product's features align with the needs of small marketing teams in B2B software companies."
+    ],
+    "confidence": "medium"
+  }
+}

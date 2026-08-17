@@ -1,0 +1,119 @@
+{
+  "evaluation_version": "0.1",
+  "prompt_version": "v0.1",
+  "run_at": "2026-08-17T10:37:35.947685+00:00",
+  "case_count": 12,
+  "success_count": 12,
+  "failure_count": 0,
+  "concurrency": 2,
+  "cases": [
+    {
+      "case_id": "translation-earbuds-us-acquisition",
+      "status": "succeeded",
+      "elapsed_seconds": 26.665,
+      "workflow_elapsed_seconds": 24.960341,
+      "total_tokens": 3041,
+      "total_steps": 4,
+      "request_id": "cbb8ba98-1643-4a63-a391-4b18d62e0835"
+    },
+    {
+      "case_id": "pulsepilot-us-acquisition",
+      "status": "succeeded",
+      "elapsed_seconds": 17.705,
+      "workflow_elapsed_seconds": 15.573801,
+      "total_tokens": 3021,
+      "total_steps": 4,
+      "request_id": "cf88c042-937a-4d9c-aba9-e35662047ce4"
+    },
+    {
+      "case_id": "draftflow-uk-conversion",
+      "status": "succeeded",
+      "elapsed_seconds": 19.154,
+      "workflow_elapsed_seconds": 18.446116,
+      "total_tokens": 2869,
+      "total_steps": 4,
+      "request_id": "c9d80d42-1a4d-4e50-8159-130145a28b6e"
+    },
+    {
+      "case_id": "lingualoop-japan-retention",
+      "status": "succeeded",
+      "elapsed_seconds": 24.616,
+      "workflow_elapsed_seconds": 23.78117,
+      "total_tokens": 3198,
+      "total_steps": 4,
+      "request_id": "a6eaf6fb-4569-4855-8563-97703747a9d2"
+    },
+    {
+      "case_id": "clipcraft-canada-launch",
+      "status": "succeeded",
+      "elapsed_seconds": 32.231,
+      "workflow_elapsed_seconds": 31.344758,
+      "total_tokens": 2986,
+      "total_steps": 4,
+      "request_id": "e538a08c-04ee-478b-9a0f-969cc1dbea98"
+    },
+    {
+      "case_id": "devrelay-global-community",
+      "status": "succeeded",
+      "elapsed_seconds": 30.122,
+      "workflow_elapsed_seconds": 29.448158,
+      "total_tokens": 3203,
+      "total_steps": 4,
+      "request_id": "cf206ce1-f63d-4614-805b-62d630a7f167"
+    },
+    {
+      "case_id": "lumidesk-germany-awareness",
+      "status": "succeeded",
+      "elapsed_seconds": 65.096,
+      "workflow_elapsed_seconds": 63.988342,
+      "total_tokens": 2749,
+      "total_steps": 4,
+      "request_id": "a10b57ac-fb18-45fa-9be2-8b2a4578129a"
+    },
+    {
+      "case_id": "notenest-australia-sparse",
+      "status": "succeeded",
+      "elapsed_seconds": 21.223,
+      "workflow_elapsed_seconds": 20.360966,
+      "total_tokens": 2871,
+      "total_steps": 4,
+      "request_id": "c1572ca0-b6c9-4b1f-81e2-c3ff790ea840"
+    },
+    {
+      "case_id": "signalboard-singapore-goal-conflict",
+      "status": "succeeded",
+      "elapsed_seconds": 17.38,
+      "workflow_elapsed_seconds": 15.484423,
+      "total_tokens": 2937,
+      "total_steps": 4,
+      "request_id": "654bd232-14f2-466a-8505-1e257faf8d23"
+    },
+    {
+      "case_id": "inspectra-us-industrial",
+      "status": "succeeded",
+      "elapsed_seconds": 21.865,
+      "workflow_elapsed_seconds": 20.553567,
+      "total_tokens": 3052,
+      "total_steps": 4,
+      "request_id": "a395a073-c88d-48ef-bdf2-72793ef39dda"
+    },
+    {
+      "case_id": "localizekit-france-retention",
+      "status": "succeeded",
+      "elapsed_seconds": 11.604,
+      "workflow_elapsed_seconds": 10.812654,
+      "total_tokens": 2749,
+      "total_steps": 4,
+      "request_id": "874c6f1c-096d-4085-a7ed-3644c8fe8165"
+    },
+    {
+      "case_id": "calmcommute-korea-awareness",
+      "status": "succeeded",
+      "elapsed_seconds": 13.729,
+      "workflow_elapsed_seconds": 12.993566,
+      "total_tokens": 2695,
+      "total_steps": 4,
+      "request_id": "469426f3-9d2c-436f-ac2e-df299afb5c4a"
+    }
+  ]
+}
