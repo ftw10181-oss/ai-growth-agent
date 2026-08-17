@@ -5,6 +5,7 @@ __pycache__/
 .pytest_cache/
 *.py[cod]
 node_modules/
+.wrangler/
 dist/
 coverage/
 .coverage
