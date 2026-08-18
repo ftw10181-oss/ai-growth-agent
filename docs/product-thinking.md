@@ -22,7 +22,7 @@ V0.1 focuses on overseas growth for AI, SaaS, and consumer technology products. 
 
 ## Hypotheses, not research claims
 
-Without live sources, “market analysis” can easily become fabricated authority. V0.1 labels insights as hypotheses and provides confidence plus validation questions. Web research belongs in a later evidence-aware release with citations, recency, source quality, and conflict handling.
+Without live sources, “market analysis” can easily become fabricated authority. V0.1 used cautious Prompt instructions, but its baseline showed that instructions alone did not reliably prevent inferred behavior from sounding factual. V0.2 turns evidence quality into a required output contract: every insight identifies its basis, confidence, validation status, and decision relevance. Web research belongs in a later release with citations, recency, source quality, and conflict handling.
 
 ## Human–AI division of work
 
@@ -40,9 +40,12 @@ The AI is good at synthesis, reframing, and enumerating plausible alternatives. 
 
 ## Evaluation approach
 
-Create 10 briefs spanning AI hardware, SaaS, and consumer apps. A growth practitioner scores each item on specificity, relevance, internal consistency, testability, and unsupported-claim risk. Automated checks cover schema validity, required sections, item counts, and forbidden quantitative claims. Failed cases become regression examples for prompt revisions.
+Use the same 12 fixed briefs spanning six business goals and multiple product families. A reviewer scores each item on specificity, relevance, internal consistency, testability, and unsupported-claim risk. Automated checks cover schema validity, required sections, evidence consistency, item counts, and forbidden claims. Failed V0.1 cases become the unchanged regression set for V0.2.
+
+## Why the quality gate is deterministic
+
+Prompt instructions are probabilistic: a model can understand a rule and still violate it on a later run. V0.2 therefore checks every completed output outside the model. Structural and evidence inconsistencies fail the API contract; behavior-first research-question patterns and risky frequency, comparative, or causal language are surfaced as visible warnings. The gate does not pretend to establish truth, and it does not silently rewrite the model's answer. It tells the operator where human review is still needed.
 
 ## Interview story
 
 The project demonstrates the work of an AI product operator: scoping a real problem, choosing an orchestration boundary, designing prompts and schemas, exposing assumptions, planning evaluation, and shipping a reviewable end-to-end slice—not simply generating text with an LLM.
-

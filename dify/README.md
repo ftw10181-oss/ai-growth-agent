@@ -4,7 +4,7 @@
 
 1. Open Dify Studio.
 2. Choose **Create from DSL file**.
-3. Upload `workflow-v0.1.yml`.
+3. Upload `workflow-v0.2.yml`.
 4. Open each LLM node and select a model available in your workspace.
 5. Confirm structured output remains enabled on both LLM nodes.
 6. Run the sample in `../demo/sample-output/request.json`.
@@ -14,7 +14,9 @@ The DSL uses Dify app DSL `0.7.0` and a default OpenAI model reference. Dify may
 
 ## Fallback path: build manually
 
-If your Dify workspace cannot resolve the imported model provider, follow `workflow-v0.1.md`. The canvas, variable names, prompts, schemas, and end outputs must stay the same because the backend depends on that contract.
+If your Dify workspace cannot resolve the imported model provider, follow `workflow-v0.2.md`. The canvas, variable names, prompts, schemas, and end outputs must stay the same because the backend depends on that contract.
+
+The reviewed `workflow-v0.1.yml` and its guide remain in the repository as the reproducible baseline used for the first 12-case evaluation.
 
 ## Source files
 
@@ -23,5 +25,4 @@ If your Dify workspace cannot resolve the imported model provider, follow `workf
 - `schemas/context-interpreter.schema.json`
 - `schemas/user-insight.schema.json`
 
-When changing a prompt or schema, update the matching content embedded in `workflow-v0.1.yml` and run the repository verification commands before committing.
-
+When changing a V0.2 prompt or schema, run `python dify/build_workflow_v02.py` to rebuild the importable DSL, then run the repository verification commands before committing.

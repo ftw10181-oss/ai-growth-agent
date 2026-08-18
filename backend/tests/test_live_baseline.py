@@ -2,7 +2,7 @@ import csv
 import json
 from pathlib import Path
 
-from app.models import GrowthBrief, UserInsightResponse
+from app.models import GrowthBrief, UserInsightResponseV01
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,7 +14,7 @@ def test_published_baseline_passes_contract_and_hard_structure_gates():
 
     for case in case_set["cases"]:
         brief = GrowthBrief.model_validate(case["input"])
-        response = UserInsightResponse.model_validate_json(
+        response = UserInsightResponseV01.model_validate_json(
             (RESULTS / f"{case['id']}.json").read_text(encoding="utf-8")
         )
 

@@ -2,7 +2,7 @@
 
 Turn a fuzzy overseas growth brief into a structured, actionable user insight.
 
-AI Growth Agent is a portfolio-grade MVP for growth operators working on AI, SaaS, and consumer technology products. V0.1 covers the first slice of the product journey:
+AI Growth Agent is a portfolio-grade MVP for growth operators working on AI, SaaS, and consumer technology products. V0.2 keeps the first vertical slice focused and makes the evidence quality of every generated insight visible:
 
 **[Open the live portfolio demo](https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site)**
 
@@ -12,11 +12,13 @@ Start → Context Interpreter → User Insight → Structured Output
 
 The system does not claim to perform live market research. It transforms user-provided context into explicit hypotheses that a growth operator can validate.
 
-## What V0.1 delivers
+## What V0.2 delivers
 
 - Six-field growth brief with validation
 - Context normalization before analysis
 - Structured user insight: JTBD, pains, motivations, barriers, and scenarios
+- Evidence basis, per-item confidence, validation status, and decision relevance
+- Deterministic post-generation quality gate for structure, evidence, research questions, and claim language
 - Dify workflow build guide, prompts, and JSON schemas
 - FastAPI adapter with a no-key demo mode and a Dify-connected mode
 - Public React/Vite demo with a server-side Dify integration
@@ -27,7 +29,8 @@ The system does not claim to perform live market research. It transforms user-pr
 1. A growth operator describes a product, market, audience, and business goal.
 2. Context Interpreter turns uneven input into a concise analysis brief and records assumptions.
 3. User Insight produces evidence-aware hypotheses rather than invented market facts.
-4. The UI renders the response as scan-friendly insight cards.
+4. A deterministic quality gate checks the output independently of the model.
+5. The UI renders both the insight cards and any fields that require human review.
 
 ## Repository map
 
@@ -39,7 +42,8 @@ The system does not claim to perform live market research. It transforms user-pr
 ├── dify/
 │   ├── prompts/             Versioned node prompts
 │   ├── schemas/             Structured-output contracts
-│   └── workflow-v0.1.md     Exact canvas setup
+│   ├── workflow-v0.1.yml    Reproducible evaluation baseline
+│   └── workflow-v0.2.yml    Evidence-aware workflow candidate
 ├── docs/                    PRD, architecture, and product decisions
 └── frontend/                React + TypeScript demo UI
 ```
@@ -74,7 +78,7 @@ Open `http://localhost:5173` and submit the pre-filled example.
 
 ### 3. Connect Dify
 
-Import [dify/workflow-v0.1.yml](dify/workflow-v0.1.yml), select a model available in your workspace, test, and publish. If the imported provider cannot be resolved, use [dify/workflow-v0.1.md](dify/workflow-v0.1.md) to build the same canvas manually. Then update `backend/.env`:
+Import [dify/workflow-v0.2.yml](dify/workflow-v0.2.yml), select a model available in your workspace, test, and publish. If the imported provider cannot be resolved, use [dify/workflow-v0.2.md](dify/workflow-v0.2.md) to build the same canvas manually. Then update `backend/.env`:
 
 ```dotenv
 APP_MODE=dify
@@ -87,6 +91,8 @@ Keep the Dify key on the backend only. The browser never calls Dify directly.
 ## API contract
 
 `POST /api/analyze`
+
+`POST /api/v2/insights` is the versioned V0.2 route.
 
 `POST /api/v1/insights` remains available as a compatibility alias.
 
@@ -105,7 +111,7 @@ See [demo/sample-output/user-insight.json](demo/sample-output/user-insight.json)
 
 ## Success criteria
 
-V0.1 is successful when a new user can submit a brief, receive valid structured output, understand which statements are assumptions, and identify at least three interview or experiment directions in under three minutes.
+V0.2 is successful when a new user can submit a brief, receive valid structured output, distinguish brief evidence from inference, and identify which hypotheses require validation in under three minutes.
 
 ## Evaluation system
 
@@ -123,23 +129,26 @@ See [evals/README.md](evals/README.md).
 
 The published Dify workflow completed **12/12 cases successfully** with **100% schema, goal-consistency, JTBD-dimension, and item-count compliance**. Median end-to-end latency was **21.5 seconds** across 35,371 model tokens.
 
-The single-reviewer content score was **3.75/5**. Relevance was strongest at **4.58/5**; unsupported-claim safety was the main weakness at **2.67/5**, because inferred behaviors were sometimes phrased as facts. Only 2/12 cases met the full publish threshold, so V0.2 will focus on explicit hypothesis labels, evidence basis, and confidence per insight.
+The single-reviewer content score was **3.75/5**. Relevance was strongest at **4.58/5**; unsupported-claim safety was the main weakness at **2.67/5**, because inferred behaviors were sometimes phrased as facts. Only 2/12 cases met the full publish threshold. V0.2 directly addresses that finding with a mandatory evidence contract on every insight item.
 
 These are internal synthetic-case results—not user research or evidence of business impact. See the [baseline report](evals/results/baseline-v0.1/report.md) and [completed scorecard](evals/results/baseline-v0.1/scorecard.csv).
 
 ## Roadmap
 
-- V0.2: market-hypothesis and value-proposition modules
-- V0.3: content strategy and growth experiments
-- V0.4: web research with citations and evidence grading
+- V0.2: evidence-aware user insight and V0.1 regression comparison
+- V0.3: market hypothesis and value proposition
+- V0.4: content strategy and growth experiments
+- V0.5: web research with citations and evidence grading
 - V1.0: saved projects, comparison, export, and evaluation dashboard
 
 ## Responsible AI choices
 
-- No claim of real-time research in V0.1
+- No claim of real-time research in V0.2
 - Assumptions are returned explicitly
+- Every JTBD and insight records evidence basis, confidence, validation status, and decision relevance
 - Prompts prohibit fabricated statistics, quotes, and competitor facts
 - Pydantic and JSON Schema validate the workflow boundary
+- A deterministic post-generation review makes risky wording and weak research questions visible instead of silently accepting them
 - A deterministic demo response keeps the portfolio reviewable without credentials
 
 ## License

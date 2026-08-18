@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { generateInsight } from "./api";
-import type { BusinessGoal, GrowthBrief, InsightItem, InsightResponse } from "./types";
+import type { BusinessGoal, GrowthBrief, InsightEvidence, InsightItem, InsightResponse } from "./types";
 
 const goals: BusinessGoal[] = [
   "Brand Awareness",
@@ -20,11 +20,30 @@ const initialBrief: GrowthBrief = {
   additional_context: "The product is entering the US market. Competitors have a strong Amazon presence. We want to test Reddit and TikTok."
 };
 
+const evidenceLabels: Record<InsightEvidence["basis"], string> = {
+  explicit_brief: "Brief evidence",
+  contextual_inference: "Context inference",
+  behavioral_hypothesis: "Behavioral hypothesis"
+};
+
+function InsightMeta({ evidence, relevance }: { evidence?: InsightEvidence; relevance?: "primary" | "secondary" }) {
+  if (!evidence && !relevance) return null;
+  return (
+    <div className="insight-meta">
+      {relevance && <span className={`relevance relevance-${relevance}`}>{relevance}</span>}
+      {evidence && <span>{evidenceLabels[evidence.basis]}</span>}
+      {evidence && <span>{evidence.confidence} confidence</span>}
+      {evidence && <span>{evidence.validation_status === "brief_supported" ? "Brief supported" : "Needs validation"}</span>}
+    </div>
+  );
+}
+
 function InsightList({ items }: { items: InsightItem[] }) {
   return (
     <ul className="insight-list">
       {items.map((item, index) => (
         <li key={`${item.insight}-${index}`}>
+          <InsightMeta evidence={item.evidence} relevance={item.decision_relevance} />
           <p>{item.insight}</p>
           <small>{item.why_it_matters}</small>
         </li>
@@ -35,16 +54,45 @@ function InsightList({ items }: { items: InsightItem[] }) {
 
 function Results({ result }: { result: InsightResponse }) {
   const insight = result.user_insight;
+  const review = result.quality_review;
   return (
     <section className="results" aria-live="polite">
       <div className="results-header">
         <div>
-          <span className="eyebrow">User Insight · V0.1</span>
+          <span className="eyebrow">User Insight · V0.2</span>
           <h2>{insight.target_user.primary_segment}</h2>
           <p>{insight.target_user.rationale}</p>
         </div>
         <span className={`confidence confidence-${insight.confidence}`}>{insight.confidence} confidence</span>
       </div>
+
+      {review && (
+        <section className={`quality-gate quality-${review.status}`} aria-label="Deterministic quality gate">
+          <div className="quality-heading">
+            <div>
+              <span className="eyebrow">Deterministic quality gate</span>
+              <h3>{review.status === "passed" ? "Ready for human validation" : "Human review required"}</h3>
+            </div>
+            <span className="quality-status">
+              {review.status === "passed" ? "4 checks passed" : `${review.issue_count} flag${review.issue_count === 1 ? "" : "s"}`}
+            </span>
+          </div>
+          <div className="quality-checks">
+            {review.checks.map((check) => (
+              <div key={check.code} className={`quality-check check-${check.status}`}>
+                <span aria-hidden="true">{check.status === "passed" ? "✓" : "!"}</span>
+                <div><strong>{check.label}</strong><small>{check.detail}</small></div>
+              </div>
+            ))}
+          </div>
+          {review.issues.length > 0 && (
+            <details className="quality-issues">
+              <summary>See flagged fields</summary>
+              <ul>{review.issues.map((issue, index) => <li key={`${issue.path}-${index}`}><code>{issue.path}</code> — {issue.message}</li>)}</ul>
+            </details>
+          )}
+        </section>
+      )}
 
       <details className="context" open>
         <summary>How the brief was interpreted</summary>
@@ -57,7 +105,10 @@ function Results({ result }: { result: InsightResponse }) {
           <ul className="jobs">
             {insight.jobs_to_be_done.map((item, index) => (
               <li key={index}>
-                <span>{item.dimension}</span>
+                <div className="job-labels">
+                  <span>{item.dimension}</span>
+                  <InsightMeta evidence={item.evidence} relevance={item.decision_relevance} />
+                </div>
                 <p>{item.job}</p>
                 <small>{item.why_it_matters}</small>
               </li>
@@ -265,7 +316,7 @@ export default function App() {
             <a href="#case-study">Case study</a>
             <a href="https://github.com/ftw10181-oss/ai-growth-agent" target="_blank" rel="noreferrer">GitHub ↗</a>
           </div>
-          <span className="version">V0.1</span>
+          <span className="version">V0.2</span>
         </nav>
         <div className="hero-copy">
           <span className="eyebrow">From brief to testable hypotheses</span>
@@ -295,7 +346,7 @@ export default function App() {
           </div>
           <label>Additional context <span className="optional">optional</span><textarea value={brief.additional_context} onChange={(event) => update("additional_context", event.target.value)} maxLength={2000} rows={3} /></label>
           <div className="submit-row">
-            <p>No web research in V0.1. Output is designed for validation.</p>
+            <p>No web research in V0.2. Every inferred insight is marked for validation.</p>
             <button disabled={loading}>{loading ? "Interpreting brief…" : "Generate user insight"}<span aria-hidden="true">→</span></button>
           </div>
           {error && <p className="error" role="alert">{error}</p>}

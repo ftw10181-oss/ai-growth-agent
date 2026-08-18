@@ -12,14 +12,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from app.models import GrowthBrief, UserInsightResponse  # noqa: E402
+from app.models import GrowthBrief, UserInsightResponse, UserInsightResponseV01  # noqa: E402
 
 
 RISK_PATTERNS = {
     "quantitative_claim": re.compile(r"\b\d+(?:\.\d+)?\s*(?:%|percent|million|billion)\b", re.I),
     "implied_research": re.compile(r"\b(?:research shows|studies show|data shows|according to research)\b", re.I),
     "unsupported_frequency": re.compile(r"\b(?:many|most|often|frequently|significantly)\b", re.I),
+    "unsupported_causality": re.compile(
+        r"\b(?:leads? to|results? in|directly impacts?|improves?|increases?|decreases?|enhances?)\b",
+        re.I,
+    ),
 }
+
+HYPOTHESIS_MARKERS = re.compile(r"\b(?:hypothesis to test|may|could)\b", re.I)
 
 
 def load_json(path: Path):
@@ -44,6 +50,9 @@ def main() -> int:
 
     case_data = load_json(ROOT / "evals" / "cases.json")
     cases = {case["id"]: case for case in case_data["cases"]}
+    response_contract = (
+        UserInsightResponseV01 if "v0.1" in args.output_dir.name else UserInsightResponse
+    )
     failures = []
     review_flags = []
 
@@ -55,7 +64,7 @@ def main() -> int:
 
         try:
             brief = GrowthBrief.model_validate(case["input"])
-            response = UserInsightResponse.model_validate(load_json(output_path))
+            response = response_contract.model_validate(load_json(output_path))
         except Exception as exc:  # validation details belong in evaluation logs
             failures.append(f"{case_id}: contract failure: {exc}")
             continue
@@ -69,7 +78,9 @@ def main() -> int:
             if path and path[0] in {"research_questions", "assumptions_to_validate"}:
                 continue
             for label, pattern in RISK_PATTERNS.items():
-                if pattern.search(text):
+                if pattern.search(text) and not (
+                    label == "unsupported_causality" and HYPOTHESIS_MARKERS.search(text)
+                ):
                     review_flags.append(
                         f"{case_id}: review flag: {label} at user_insight.{'.'.join(path)}"
                     )

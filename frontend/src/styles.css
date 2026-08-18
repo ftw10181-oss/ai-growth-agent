@@ -70,6 +70,22 @@ button:disabled { opacity: .6; cursor: wait; }
 .results-header h2 { font: 600 26px/1.2 "Manrope"; letter-spacing: -.035em; margin: 9px 0; }
 .results-header p { color: var(--muted); line-height: 1.55; }
 .confidence { flex: 0 0 auto; align-self: flex-start; padding: 7px 10px; border-radius: 100px; background: #ecf2e8; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.quality-gate { margin: 24px 0; padding: 18px; border: 1px solid #b9d3bf; border-radius: 12px; background: #edf6eb; }
+.quality-review_required { border-color: #ddc79d; background: #fbf3e4; }
+.quality-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.quality-heading h3 { margin: 6px 0 0; font: 600 17px "Manrope"; }
+.quality-status { flex: 0 0 auto; padding: 6px 9px; border-radius: 100px; background: var(--forest); color: var(--accent); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.quality-review_required .quality-status { background: #855d2d; color: white; }
+.quality-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+.quality-check { display: flex; gap: 9px; padding: 10px; border-radius: 9px; background: rgba(255,255,255,.72); }
+.quality-check > span { display: grid; place-items: center; flex: 0 0 20px; width: 20px; height: 20px; border-radius: 50%; background: #d9ead9; color: #27543a; font-size: 11px; font-weight: 700; }
+.quality-check.check-warning > span { background: #f4dfb4; color: #754e20; }
+.quality-check strong { display: block; margin-bottom: 3px; font-size: 11px; }
+.quality-check small { font-size: 10px; }
+.quality-issues { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(117,78,32,.18); font-size: 11px; }
+.quality-issues summary { cursor: pointer; font-weight: 700; }
+.quality-issues ul { margin: 9px 0 0; padding-left: 18px; color: var(--muted); line-height: 1.5; }
+.quality-issues code { color: #754e20; font-size: 10px; }
 .context { margin: 24px 0; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
 .context summary { cursor: pointer; font-size: 13px; font-weight: 700; }
 .context p { color: var(--muted); line-height: 1.55; font-size: 13px; }
@@ -83,6 +99,13 @@ article h3, .assumptions h3 { margin: 0 0 14px; font: 600 15px "Manrope"; }
 .insight-list p, .jobs p { margin: 0 0 5px; font-size: 13px; line-height: 1.45; }
 small { color: var(--muted); line-height: 1.4; display: block; }
 .jobs span { display: inline-block; margin-bottom: 6px; color: #51715e; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.job-labels { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.insight-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.insight-meta span { display: inline-flex; align-items: center; margin: 0; padding: 4px 7px; border-radius: 100px; background: #eef1e9; color: #68736b; font-size: 8px; font-weight: 700; letter-spacing: .05em; line-height: 1; text-transform: uppercase; }
+.insight-meta .relevance-primary { background: var(--forest); color: var(--accent); }
+.insight-meta .relevance-secondary { background: #e4e8df; color: #69746c; }
+.job-labels > span { flex: 0 0 auto; }
+.job-labels .insight-meta { justify-content: flex-end; }
 .research-card { background: var(--forest); color: white; }
 .research-card ol { margin: 0; padding-left: 20px; color: #d6e2da; }
 .research-card li { padding: 6px 0; line-height: 1.45; font-size: 13px; }
@@ -165,6 +188,8 @@ footer { max-width: 1440px; margin: 0 auto; padding: 0 max(5vw, 24px) 30px; disp
   .wide-card { grid-column: auto; }
   form, .results, .empty-state { padding: 22px; }
   .form-heading, .submit-row, .results-header { flex-direction: column; align-items: stretch; }
+  .quality-heading { flex-direction: column; }
+  .quality-checks { grid-template-columns: 1fr; }
   .submit-row p { max-width: none; }
   button { justify-content: space-between; }
   .case-study { padding-top: 50px; }

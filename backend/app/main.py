@@ -9,7 +9,7 @@ settings = get_settings()
 
 app = FastAPI(
     title="AI Growth Agent API",
-    version="0.1.0",
+    version="0.2.0",
     description="A stable product boundary for the AI Growth Agent Dify workflow."
 )
 
@@ -24,10 +24,11 @@ app.add_middleware(
 
 @app.get("/health")
 async def health(config: Settings = Depends(get_settings)) -> dict[str, str]:
-    return {"status": "ok", "mode": config.app_mode, "version": "0.1.0"}
+    return {"status": "ok", "mode": config.app_mode, "version": "0.2.0"}
 
 
 @app.post("/api/analyze", response_model=UserInsightResponse)
+@app.post("/api/v2/insights", response_model=UserInsightResponse, include_in_schema=False)
 @app.post("/api/v1/insights", response_model=UserInsightResponse, include_in_schema=False)
 async def create_insight(
     brief: GrowthBrief, config: Settings = Depends(get_settings)

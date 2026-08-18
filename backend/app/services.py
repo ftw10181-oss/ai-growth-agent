@@ -1,13 +1,14 @@
 import json
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Optional
 from uuid import uuid4
 
 import httpx
 from pydantic import ValidationError
 
 from .config import Settings
-from .models import GrowthBrief, UserInsightResponse
+from .models import GrowthBrief, UserInsight, UserInsightResponse
+from .quality import evaluate_quality
 
 
 class InsightServiceError(RuntimeError):
@@ -22,6 +23,45 @@ class InsightService(ABC):
 
 class MockInsightService(InsightService):
     async def generate(self, brief: GrowthBrief) -> UserInsightResponse:
+        contextual_evidence = {
+            "basis": "contextual_inference",
+            "confidence": "medium",
+            "validation_status": "needs_validation",
+        }
+        behavioral_evidence = {
+            "basis": "behavioral_hypothesis",
+            "confidence": "low",
+            "validation_status": "needs_validation",
+        }
+
+        def insight_item(
+            insight: str,
+            why_it_matters: str,
+            relevance: str = "primary",
+            evidence: Optional[dict] = None,
+        ) -> dict:
+            return {
+                "insight": insight,
+                "why_it_matters": why_it_matters,
+                "decision_relevance": relevance,
+                "evidence": evidence or contextual_evidence,
+            }
+
+        def job_item(
+            job: str,
+            dimension: str,
+            why_it_matters: str,
+            relevance: str = "primary",
+            evidence: Optional[dict] = None,
+        ) -> dict:
+            return {
+                "job": job,
+                "dimension": dimension,
+                "why_it_matters": why_it_matters,
+                "decision_relevance": relevance,
+                "evidence": evidence or contextual_evidence,
+            }
+
         context = {
             "brief_summary": (
                 f"{brief.product} is being positioned for {brief.target_audience} in "
@@ -49,41 +89,46 @@ class MockInsightService(InsightService):
                 "rationale": "Their communication stakes and repeated travel create observable moments where translation friction may justify a dedicated device."
             },
             "jobs_to_be_done": [
-                {"job": "When a business conversation shifts languages, I want to understand and respond without interrupting the flow, so I can keep the meeting productive.", "dimension": "functional", "why_it_matters": "Live conversational continuity is the clearest product-value hypothesis."},
-                {"job": "When I speak with a new international contact, I want confidence that I understood the nuance, so I can avoid an embarrassing mistake.", "dimension": "emotional", "why_it_matters": "Reduced anxiety may be more motivating than translation speed alone."},
-                {"job": "When colleagues see me operating across languages, I want to appear prepared and respectful, so I can build trust quickly.", "dimension": "social", "why_it_matters": "Professional credibility can shape willingness to adopt visible hardware."}
+                job_item("When a business conversation shifts languages, I want to understand and respond without interrupting the flow, so I can keep the meeting productive.", "functional", "Live conversational continuity is the clearest product-value hypothesis."),
+                job_item("When I speak with a new international contact, I want confidence that I understood the nuance, so I can avoid an embarrassing mistake.", "emotional", "Reduced anxiety may be more motivating than translation speed alone.", evidence=behavioral_evidence),
+                job_item("When colleagues see me operating across languages, I want to appear prepared and respectful, so I can build trust quickly.", "social", "Professional credibility can shape willingness to adopt visible hardware.", "secondary", behavioral_evidence)
             ],
             "pain_points": [
-                {"insight": "Pausing to type into a phone breaks eye contact and conversational rhythm.", "why_it_matters": "Hands-free interaction can be tested against familiar phone-based workarounds."},
-                {"insight": "Fast group conversations may move on before a translated response is ready.", "why_it_matters": "Perceived latency is likely a critical activation criterion."},
-                {"insight": "Travelers may be unsure whether translations preserve business-specific nuance.", "why_it_matters": "Trust and error recovery should appear in onboarding and proof points."}
+                insight_item("Pausing to type into a phone could break eye contact and conversational rhythm.", "Hands-free interaction can be tested against familiar phone-based workarounds."),
+                insight_item("Fast group conversations may move on before a translated response is ready.", "Perceived latency is a candidate activation criterion."),
+                insight_item("Travelers may be unsure whether translations preserve business-specific nuance.", "Trust and error recovery should be tested in onboarding and proof points.", "secondary", behavioral_evidence)
             ],
             "purchase_motivations": [
-                {"insight": "A near-term trip with several multilingual meetings creates urgency.", "why_it_matters": "Trip planning offers a concrete acquisition moment."},
-                {"insight": "Reducing dependence on interpreters or phone handoffs feels operationally efficient.", "why_it_matters": "Convenience may support a productivity-oriented value proposition."},
-                {"insight": "A low-risk trial can demonstrate performance in the buyer's own accent and vocabulary.", "why_it_matters": "Experiential proof may overcome abstract feature comparisons."}
+                insight_item("A near-term trip with several multilingual meetings may create urgency.", "Trip planning offers a concrete acquisition moment."),
+                insight_item("Reducing dependence on interpreters or phone handoffs may feel operationally efficient.", "Convenience can be tested as a productivity-oriented value proposition."),
+                insight_item("A low-risk trial can demonstrate performance in the buyer's own accent and vocabulary.", "Experiential proof may overcome abstract feature comparisons.", "secondary", behavioral_evidence)
             ],
             "adoption_barriers": [
-                {"insight": "Concern that a visible device feels awkward or impolite in a meeting.", "why_it_matters": "The product needs a socially acceptable usage ritual."},
-                {"insight": "Privacy concerns about recording confidential conversations.", "why_it_matters": "Data handling may block enterprise or executive use."},
-                {"insight": "Uncertainty about accuracy across accents, jargon, and noisy rooms.", "why_it_matters": "Generic accuracy claims will not answer situational risk."}
+                insight_item("A visible device may feel awkward or impolite in a meeting.", "The product may need a socially acceptable usage ritual.", evidence=behavioral_evidence),
+                insight_item("Recording or processing a confidential conversation may create privacy concerns.", "Data handling could block enterprise or executive use."),
+                insight_item("Accuracy across accents, jargon, and noisy rooms is not yet established.", "Generic accuracy claims will not answer situational risk.")
             ],
             "typical_scenarios": [
-                {"insight": "An informal conversation begins after a conference session without an interpreter present.", "why_it_matters": "Spontaneous networking highlights speed and portability."},
-                {"insight": "A traveler visits a supplier site where several participants prefer the local language.", "why_it_matters": "Multi-party and noisy-environment behavior becomes testable."},
-                {"insight": "Two attendees clarify a sensitive contract detail during a meal or taxi ride.", "why_it_matters": "Privacy, nuance, and discreet use converge in a high-stakes moment."}
+                insight_item("An informal conversation begins after a conference session without an interpreter present.", "Spontaneous networking makes speed and portability testable."),
+                insight_item("A traveler visits a supplier site where several participants prefer the local language.", "Multi-party and noisy-environment behavior becomes testable."),
+                insight_item("Two attendees clarify a sensitive contract detail during a meal or taxi ride.", "Privacy, nuance, and discreet use converge in a high-stakes moment.", "secondary", behavioral_evidence)
             ],
             "research_questions": [
-                "Tell me about the last time language friction changed the outcome of a business conversation.",
-                "What translation workaround did you use, and where did it fail?",
-                "What would you need to observe before trusting a wearable translator in a meeting?",
+                "Think about the most recent time language friction changed a business conversation. What happened?",
+                "What do you use today when a business conversation shifts languages, and where does it fall short?",
+                "What evidence or result would you need before trusting a wearable translator in a meeting?",
                 "In which situations would wearing or sharing earbuds feel unacceptable?"
             ],
             "assumptions_to_validate": context["assumptions"],
             "confidence": "medium"
         }
+        parsed_insight = UserInsight.model_validate(user_insight)
         return UserInsightResponse(
-            request_id=str(uuid4()), mode="mock", context=context, user_insight=user_insight
+            request_id=str(uuid4()),
+            mode="mock",
+            context=context,
+            user_insight=parsed_insight,
+            quality_review=evaluate_quality(parsed_insight),
         )
 
 
@@ -137,11 +182,15 @@ class DifyInsightService(InsightService):
         if not isinstance(outputs, dict):
             raise InsightServiceError("The AI workflow returned an unexpected response shape.")
         try:
+            parsed_insight = UserInsight.model_validate(
+                _parse_object(outputs.get("user_insight"), "user_insight")
+            )
             return UserInsightResponse(
                 request_id=body.get("workflow_run_id") or body.get("task_id") or str(uuid4()),
                 mode="dify",
                 context=_parse_object(outputs.get("context"), "context"),
-                user_insight=_parse_object(outputs.get("user_insight"), "user_insight")
+                user_insight=parsed_insight,
+                quality_review=evaluate_quality(parsed_insight),
             )
         except ValidationError as exc:
             raise InsightServiceError("The AI workflow returned an unexpected response shape.") from exc

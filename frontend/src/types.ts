@@ -18,6 +18,30 @@ export interface GrowthBrief {
 export interface InsightItem {
   insight: string;
   why_it_matters: string;
+  decision_relevance?: "primary" | "secondary";
+  evidence?: InsightEvidence;
+}
+
+export interface InsightEvidence {
+  basis: "explicit_brief" | "contextual_inference" | "behavioral_hypothesis";
+  confidence: "low" | "medium" | "high";
+  validation_status: "brief_supported" | "needs_validation";
+}
+
+export interface QualityReview {
+  status: "passed" | "review_required";
+  issue_count: number;
+  checks: Array<{
+    code: string;
+    label: string;
+    status: "passed" | "warning";
+    detail: string;
+  }>;
+  issues: Array<{
+    code: string;
+    path: string;
+    message: string;
+  }>;
 }
 
 export interface InsightResponse {
@@ -35,6 +59,8 @@ export interface InsightResponse {
       job: string;
       dimension: "functional" | "emotional" | "social";
       why_it_matters: string;
+      decision_relevance?: "primary" | "secondary";
+      evidence?: InsightEvidence;
     }>;
     pain_points: InsightItem[];
     purchase_motivations: InsightItem[];
@@ -44,4 +70,5 @@ export interface InsightResponse {
     assumptions_to_validate: string[];
     confidence: "low" | "medium" | "high";
   };
+  quality_review?: QualityReview;
 }

@@ -20,6 +20,7 @@ def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+    assert response.json()["version"] == "0.2.0"
 
 
 def test_mock_insight_matches_contract() -> None:
@@ -29,6 +30,15 @@ def test_mock_insight_matches_contract() -> None:
     assert body["mode"] == "mock"
     assert len(body["user_insight"]["jobs_to_be_done"]) >= 3
     assert body["context"]["primary_goal"] == "User Acquisition"
+    assert body["user_insight"]["pain_points"][0]["evidence"]["validation_status"] == "needs_validation"
+    assert body["quality_review"]["status"] == "passed"
+    assert len(body["quality_review"]["checks"]) == 4
+
+
+def test_v02_insight_alias_is_available() -> None:
+    response = client.post("/api/v2/insights", json=VALID_BRIEF)
+    assert response.status_code == 200
+    assert response.json()["mode"] == "mock"
 
 
 def test_versioned_insight_alias_remains_available() -> None:
