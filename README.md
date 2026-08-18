@@ -1,16 +1,43 @@
-# AI Growth Agent
+<p align="center">
+  <img src="docs/assets/ai-growth-agent-banner.jpg" alt="AI Growth Agent — from fuzzy growth briefs to testable user insights" width="100%" />
+</p>
 
-Turn a fuzzy overseas growth brief into a structured, actionable user insight.
+<p align="center">
+  <strong>An evidence-aware AI workflow for growth operators working on AI, SaaS, and consumer technology products.</strong>
+</p>
 
-AI Growth Agent is a portfolio-grade MVP for growth operators working on AI, SaaS, and consumer technology products. V0.2.1 keeps the first vertical slice focused, makes evidence quality visible, and deterministically reframes risky claim language as hypotheses:
+<p align="center">
+  <a href="https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site"><strong>Live Demo</strong></a>
+  ·
+  <a href="docs/architecture.md">Architecture</a>
+  ·
+  <a href="evals/README.md">Evaluation</a>
+  ·
+  <a href="demo/sample-output/user-insight.json">Sample Output</a>
+</p>
 
-**[Open the live portfolio demo](https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site)**
+<p align="center">
+  <img alt="Version" src="https://img.shields.io/badge/version-v0.2.1-4f46e5" />
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-3776ab" />
+  <img alt="React" src="https://img.shields.io/badge/React-19-149eca" />
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-16a34a" />
+</p>
+
+## The product
+
+AI Growth Agent turns an uneven product brief into structured user-insight hypotheses—JTBD, pains, motivations, barriers, and usage scenarios—while making assumptions, evidence quality, and validation needs explicit.
 
 ```text
-Start → Context Interpreter → User Insight → Safe-wording revision → Quality Gate
+Growth brief → Context Interpreter → User Insight → Safe-wording revision → Quality Gate
 ```
 
-The system does not claim to perform live market research. It transforms user-provided context into explicit hypotheses that a growth operator can validate.
+The system deliberately does **not** claim to perform live market research. It transforms user-provided context into hypotheses that a growth operator can validate.
+
+## Why it matters
+
+- **Useful, not theatrical:** output is designed for decisions and follow-up research, not generic AI prose.
+- **Evidence-aware by default:** every insight records its basis, confidence, validation status, and decision relevance.
+- **Reviewable without credentials:** the public demo and deterministic mock mode expose the full product journey safely.
 
 ## What V0.2.1 delivers
 
