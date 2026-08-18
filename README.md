@@ -114,9 +114,19 @@ Import [dify/workflow-v0.2.yml](dify/workflow-v0.2.yml), select a model availabl
 APP_MODE=dify
 DIFY_BASE_URL=https://api.dify.ai/v1
 DIFY_API_KEY=app-your-workflow-key
+LIVE_DAILY_LIMIT=50
+LIVE_PER_VISITOR_DAILY_LIMIT=2
+LIVE_MIN_INTERVAL_SECONDS=60
+LIVE_CACHE_TTL_SECONDS=86400
+LIVE_FALLBACK_TO_MOCK=true
 ```
 
 Keep the Dify key on the backend only. The browser never calls Dify directly.
+When the live quota is exhausted or Dify is unavailable, the public demo
+returns a deterministic mock result instead of failing. The included counters
+are designed for a single backend process or as best-effort Worker-isolate
+protection; use a shared counter and a provider-side hard budget for strict
+multi-instance enforcement.
 
 ## API contract
 
