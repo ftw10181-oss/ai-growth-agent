@@ -6,7 +6,27 @@ interface Env {
   ASSETS: AssetsBinding;
   DIFY_API_KEY?: string;
   DIFY_BASE_URL?: string;
+  LIVE_DAILY_LIMIT?: string;
+  LIVE_PER_VISITOR_DAILY_LIMIT?: string;
+  LIVE_MIN_INTERVAL_SECONDS?: string;
+  LIVE_CACHE_TTL_SECONDS?: string;
+  LIVE_FALLBACK_TO_MOCK?: string;
 }
+
+interface VisitorUsage {
+  count: number;
+  lastRequestAt: number;
+}
+
+interface CachedResult {
+  expiresAt: number;
+  body: Record<string, unknown>;
+}
+
+let usageDay = new Date().toISOString().slice(0, 10);
+let globalLiveCount = 0;
+const visitorUsage = new Map<string, VisitorUsage>();
+const resultCache = new Map<string, CachedResult>();
 
 const BUSINESS_GOALS = new Set([
   "Brand Awareness",
@@ -179,15 +199,168 @@ function evaluateQuality(value: unknown, autoRevisionCount = 0) {
   return { status, issue_count: issues.length, auto_revision_count: autoRevisionCount, checks, issues };
 }
 
+function boundedNumber(value: string | undefined, fallback: number, maximum: number): number {
+  if (value === undefined || value.trim() === "") return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.min(maximum, Math.max(0, parsed)) : fallback;
+}
+
+function settingEnabled(value: string | undefined, fallback = true): boolean {
+  if (value === undefined) return fallback;
+  return !["0", "false", "no", "off"].includes(value.trim().toLowerCase());
+}
+
+async function digest(value: string): Promise<string> {
+  const bytes = new TextEncoder().encode(value);
+  const hash = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function resetUsageIfNeeded(): void {
+  const today = new Date().toISOString().slice(0, 10);
+  if (today !== usageDay) {
+    usageDay = today;
+    globalLiveCount = 0;
+    visitorUsage.clear();
+    resultCache.clear();
+  }
+}
+
+function buildMockResponse(brief: Record<string, string>): Record<string, unknown> {
+  const evidence = {
+    basis: "contextual_inference",
+    confidence: "medium",
+    validation_status: "needs_validation",
+  };
+  const behavioralEvidence = {
+    basis: "behavioral_hypothesis",
+    confidence: "low",
+    validation_status: "needs_validation",
+  };
+  const insightItem = (insight: string, whyItMatters: string, secondary = false) => ({
+    insight,
+    why_it_matters: whyItMatters,
+    decision_relevance: secondary ? "secondary" : "primary",
+    evidence: secondary ? behavioralEvidence : evidence,
+  });
+  const jobItem = (job: string, dimension: string, whyItMatters: string) => ({
+    job,
+    dimension,
+    why_it_matters: whyItMatters,
+    decision_relevance: dimension === "social" ? "secondary" : "primary",
+    evidence: dimension === "functional" ? evidence : behavioralEvidence,
+  });
+  const userInsight = {
+    target_user: {
+      primary_segment: `${brief.target_market} ${brief.target_audience}`,
+      rationale: `This segment is the starting hypothesis for testing demand for ${brief.product}.`,
+    },
+    jobs_to_be_done: [
+      jobItem(`When I face the problem described by ${brief.product}, I want a faster way to make progress.`, "functional", "The core workflow should prove practical value quickly."),
+      jobItem("When I try a new AI product, I want confidence that its recommendations are grounded.", "emotional", "Trust can determine whether a user completes a first run."),
+      jobItem("When I share the result with colleagues, I want it to look credible and actionable.", "social", "Shareability may support organic acquisition."),
+    ],
+    pain_points: [
+      insightItem("Users may spend too much time turning scattered information into a clear decision.", "Time-to-insight is a testable activation metric."),
+      insightItem("Generic AI output may feel difficult to trust or apply.", "The product should expose assumptions and validation needs."),
+      insightItem("A new workflow may feel like extra work before its value is visible.", "The first-run experience should minimize setup friction.", true),
+    ],
+    purchase_motivations: [
+      insightItem(`A near-term ${brief.business_goal.toLowerCase()} decision may create urgency.`, "A concrete decision moment can anchor acquisition messaging."),
+      insightItem("A structured report may reduce the effort needed to align a team.", "Reusable outputs can strengthen perceived value."),
+      insightItem("A low-risk trial can help users compare the workflow with their current process.", "Experiential proof can reduce adoption uncertainty.", true),
+    ],
+    adoption_barriers: [
+      insightItem("Users may question whether the analysis reflects real customer evidence.", "Clear evidence labels and research prompts are essential."),
+      insightItem("Sensitive business inputs may create privacy concerns.", "Data-handling expectations should be explicit."),
+      insightItem("The suggested actions may not fit every market or growth stage.", "Users need a clear way to refine context.", true),
+    ],
+    typical_scenarios: [
+      insightItem("A growth operator needs to prepare an initial market or user hypothesis before research.", "This is a clear pre-research use case."),
+      insightItem("A small team needs a shared starting point for deciding what to test next.", "A structured result can support prioritization."),
+      insightItem("A founder wants to turn an early product brief into interview questions.", "Research-question generation creates an actionable handoff.", true),
+    ],
+    research_questions: [
+      "Think about the most recent time you faced this growth problem. What happened?",
+      "What do you use today to make this decision, and where does it fall short?",
+      "What evidence or result would you need before trusting an AI-generated recommendation?",
+      "Which part of this workflow would be unacceptable to automate?",
+    ],
+    assumptions_to_validate: [
+      `${brief.target_audience} experiences this problem often enough to seek a dedicated workflow.`,
+      `The proposed value is relevant to the ${brief.target_market} market.`,
+    ],
+    confidence: "medium",
+  };
+  return {
+    request_id: crypto.randomUUID(),
+    mode: "mock",
+    context: {
+      brief_summary: `${brief.product} is being explored for ${brief.target_audience} in ${brief.target_market}, with ${brief.business_goal} as the immediate goal.`,
+      product_category: "AI-enabled growth workflow",
+      target_market: brief.target_market,
+      target_audience: brief.target_audience,
+      growth_stage: "unknown",
+      primary_goal: brief.business_goal,
+      known_constraints: [],
+      channel_signals: [],
+      assumptions: userInsight.assumptions_to_validate,
+      ambiguities: ["These outputs are hypotheses and require customer or market validation."],
+    },
+    user_insight: userInsight,
+    quality_review: evaluateQuality(userInsight),
+  };
+}
+
+function mockResponse(brief: Record<string, string>, reason: string): Response {
+  return Response.json(buildMockResponse(brief), {
+    headers: {
+      "X-AI-Fallback": reason,
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+async function visitorId(request: Request): Promise<string> {
+  const forwarded = request.headers.get("CF-Connecting-IP")
+    || request.headers.get("X-Forwarded-For")?.split(",", 1)[0].trim()
+    || "anonymous";
+  return digest(forwarded);
+}
+
+async function cacheKey(brief: Record<string, string>): Promise<string> {
+  const normalized = JSON.stringify(brief, Object.keys(brief).sort());
+  return digest(normalized);
+}
+
+function admitLive(id: string, env: Env): { allowed: boolean; reason?: string; retryAfter?: number } {
+  resetUsageIfNeeded();
+  const now = Date.now();
+  const usage = visitorUsage.get(id) || { count: 0, lastRequestAt: 0 };
+  const minimumIntervalMs = boundedNumber(env.LIVE_MIN_INTERVAL_SECONDS, 60, 3600) * 1000;
+  if (minimumIntervalMs > 0 && usage.lastRequestAt > 0 && now - usage.lastRequestAt < minimumIntervalMs) {
+    return { allowed: false, reason: "rate_limited", retryAfter: Math.max(1, Math.ceil((minimumIntervalMs - (now - usage.lastRequestAt)) / 1000)) };
+  }
+  const visitorLimit = boundedNumber(env.LIVE_PER_VISITOR_DAILY_LIMIT, 2, 1000);
+  if (visitorLimit > 0 && usage.count >= visitorLimit) {
+    return { allowed: false, reason: "visitor_daily_limit" };
+  }
+  const dailyLimit = boundedNumber(env.LIVE_DAILY_LIMIT, 50, 100000);
+  if (dailyLimit > 0 && globalLiveCount >= dailyLimit) {
+    return { allowed: false, reason: "global_daily_limit" };
+  }
+  usage.count += 1;
+  usage.lastRequestAt = now;
+  visitorUsage.set(id, usage);
+  globalLiveCount += 1;
+  return { allowed: true };
+}
+
 function json(detail: string, status: number): Response {
   return Response.json({ detail }, { status });
 }
 
 async function analyze(request: Request, env: Env): Promise<Response> {
-  if (!env.DIFY_API_KEY) {
-    return json("Live AI service is not configured.", 503);
-  }
-
   let brief: unknown;
   try {
     brief = await request.json();
@@ -196,6 +369,33 @@ async function analyze(request: Request, env: Env): Promise<Response> {
   }
   if (!isValidBrief(brief)) {
     return json("Invalid growth brief.", 422);
+  }
+
+  if (!env.DIFY_API_KEY) {
+    return mockResponse(brief, "live_service_not_configured");
+  }
+
+  const key = await cacheKey(brief);
+  const cached = resultCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) {
+    return Response.json(cached.body, {
+      headers: { "X-AI-Cache": "HIT", "Cache-Control": "private, no-store" },
+    });
+  }
+  if (cached) resultCache.delete(key);
+
+  const admission = admitLive(await visitorId(request), env);
+  if (!admission.allowed) {
+    if (admission.reason === "rate_limited") {
+      return Response.json(
+        { detail: "Too many requests. Please wait before trying again." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(admission.retryAfter || 60) },
+        },
+      );
+    }
+    return mockResponse(brief, admission.reason || "quota_limit");
   }
 
   const baseUrl = (env.DIFY_BASE_URL || "https://api.dify.ai/v1").replace(/\/$/, "");
@@ -215,26 +415,42 @@ async function analyze(request: Request, env: Env): Promise<Response> {
     });
 
     if (!response.ok) {
+      if (settingEnabled(env.LIVE_FALLBACK_TO_MOCK)) {
+        return mockResponse(brief, `upstream_${response.status}`);
+      }
       return json("The AI workflow could not complete the request.", 502);
     }
     const body = (await response.json()) as Record<string, unknown>;
     const data = isRecord(body.data) ? body.data : null;
     const outputs = data && isRecord(data.outputs) ? data.outputs : null;
     if (!data || data.status !== "succeeded" || !outputs) {
+      if (settingEnabled(env.LIVE_FALLBACK_TO_MOCK)) {
+        return mockResponse(brief, "upstream_invalid_response");
+      }
       return json("The AI workflow returned an unexpected response.", 502);
     }
 
     const rawUserInsight = parseOutput(outputs.user_insight);
     const { insight: userInsight, revisionCount } = normalizeClaimLanguage(rawUserInsight);
-    return Response.json({
+    const result = {
       request_id: String(body.workflow_run_id || body.task_id || crypto.randomUUID()),
       mode: "dify",
       context: parseOutput(outputs.context),
       user_insight: userInsight,
       quality_review: evaluateQuality(userInsight, revisionCount),
+    };
+    const cacheTtlSeconds = boundedNumber(env.LIVE_CACHE_TTL_SECONDS, 86400, 604800);
+    if (cacheTtlSeconds > 0) {
+      resultCache.set(key, { expiresAt: Date.now() + cacheTtlSeconds * 1000, body: result });
+    }
+    return Response.json(result, {
+      headers: { "X-AI-Cache": "MISS", "Cache-Control": "private, no-store" },
     });
   } catch (error) {
     const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+    if (settingEnabled(env.LIVE_FALLBACK_TO_MOCK)) {
+      return mockResponse(brief, timedOut ? "upstream_timeout" : "upstream_error");
+    }
     return json(
       timedOut ? "The AI workflow timed out. Please try again." : "The AI workflow is currently unavailable.",
       timedOut ? 504 : 502,
