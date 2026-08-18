@@ -20,7 +20,7 @@ def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
-    assert response.json()["version"] == "0.2.0"
+    assert response.json()["version"] == "0.2.1"
 
 
 def test_mock_insight_matches_contract() -> None:
@@ -32,6 +32,7 @@ def test_mock_insight_matches_contract() -> None:
     assert body["context"]["primary_goal"] == "User Acquisition"
     assert body["user_insight"]["pain_points"][0]["evidence"]["validation_status"] == "needs_validation"
     assert body["quality_review"]["status"] == "passed"
+    assert body["quality_review"]["auto_revision_count"] == 0
     assert len(body["quality_review"]["checks"]) == 4
 
 

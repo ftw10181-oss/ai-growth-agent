@@ -2,23 +2,25 @@
 
 Turn a fuzzy overseas growth brief into a structured, actionable user insight.
 
-AI Growth Agent is a portfolio-grade MVP for growth operators working on AI, SaaS, and consumer technology products. V0.2 keeps the first vertical slice focused and makes the evidence quality of every generated insight visible:
+AI Growth Agent is a portfolio-grade MVP for growth operators working on AI, SaaS, and consumer technology products. V0.2.1 keeps the first vertical slice focused, makes evidence quality visible, and deterministically reframes risky claim language as hypotheses:
 
 **[Open the live portfolio demo](https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site)**
 
 ```text
-Start → Context Interpreter → User Insight → Structured Output
+Start → Context Interpreter → User Insight → Safe-wording revision → Quality Gate
 ```
 
 The system does not claim to perform live market research. It transforms user-provided context into explicit hypotheses that a growth operator can validate.
 
-## What V0.2 delivers
+## What V0.2.1 delivers
 
 - Six-field growth brief with validation
 - Context normalization before analysis
 - Structured user insight: JTBD, pains, motivations, barriers, and scenarios
 - Evidence basis, per-item confidence, validation status, and decision relevance
 - Deterministic post-generation quality gate for structure, evidence, research questions, and claim language
+- Transparent safe-wording revision that preserves the original claim while marking it as a hypothesis
+- Separate `passed`, `passed_with_notes`, and `review_required` outcomes so soft warnings do not look like system failures
 - Dify workflow build guide, prompts, and JSON schemas
 - FastAPI adapter with a no-key demo mode and a Dify-connected mode
 - Public React/Vite demo with a server-side Dify integration
@@ -29,8 +31,9 @@ The system does not claim to perform live market research. It transforms user-pr
 1. A growth operator describes a product, market, audience, and business goal.
 2. Context Interpreter turns uneven input into a concise analysis brief and records assumptions.
 3. User Insight produces evidence-aware hypotheses rather than invented market facts.
-4. A deterministic quality gate checks the output independently of the model.
-5. The UI renders both the insight cards and any fields that require human review.
+4. A deterministic server layer prefixes unsupported causal or comparative wording with `Hypothesis to test —`.
+5. The quality gate checks the revised output independently of the model and separates blockers from review notes.
+6. The UI renders the insight cards, the automatic revision count, and any remaining review notes.
 
 ## Repository map
 
@@ -92,7 +95,7 @@ Keep the Dify key on the backend only. The browser never calls Dify directly.
 
 `POST /api/analyze`
 
-`POST /api/v2/insights` is the versioned V0.2 route.
+`POST /api/v2/insights` is the versioned V0.2 contract route; V0.2.1 is a compatible safety-layer update.
 
 `POST /api/v1/insights` remains available as a compatibility alias.
 
@@ -111,7 +114,7 @@ See [demo/sample-output/user-insight.json](demo/sample-output/user-insight.json)
 
 ## Success criteria
 
-V0.2 is successful when a new user can submit a brief, receive valid structured output, distinguish brief evidence from inference, and identify which hypotheses require validation in under three minutes.
+V0.2.1 is successful when a new user can submit a brief, receive valid structured output, distinguish brief evidence from inference, see risky claims reframed as hypotheses, and identify any remaining review notes in under three minutes.
 
 ## Evaluation system
 
@@ -135,7 +138,7 @@ These are internal synthetic-case results—not user research or evidence of bus
 
 ## Roadmap
 
-- V0.2: evidence-aware user insight and V0.1 regression comparison
+- V0.2.1: evidence-aware insight, deterministic safe-wording revision, and clearer quality states
 - V0.3: market hypothesis and value proposition
 - V0.4: content strategy and growth experiments
 - V0.5: web research with citations and evidence grading
@@ -143,11 +146,13 @@ These are internal synthetic-case results—not user research or evidence of bus
 
 ## Responsible AI choices
 
-- No claim of real-time research in V0.2
+- No claim of real-time research in V0.2.1
 - Assumptions are returned explicitly
 - Every JTBD and insight records evidence basis, confidence, validation status, and decision relevance
 - Prompts prohibit fabricated statistics, quotes, and competitor facts
 - Pydantic and JSON Schema validate the workflow boundary
+- The server records every automatic wording revision; it adds an explicit hypothesis marker without deleting or inventing substantive content
+- Only structure or evidence failures are blocking; research-pattern and claim-language findings remain visible as review notes
 - A deterministic post-generation review makes risky wording and weak research questions visible instead of silently accepting them
 - A deterministic demo response keeps the portfolio reviewable without credentials
 

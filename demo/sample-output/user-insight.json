@@ -81,6 +81,7 @@
   "quality_review": {
     "status": "passed",
     "issue_count": 0,
+    "auto_revision_count": 0,
     "checks": [
       {
         "code": "structure_contract",

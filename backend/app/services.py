@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from .config import Settings
 from .models import GrowthBrief, UserInsight, UserInsightResponse
-from .quality import evaluate_quality
+from .quality import evaluate_quality, normalize_claim_language
 
 
 class InsightServiceError(RuntimeError):
@@ -122,13 +122,15 @@ class MockInsightService(InsightService):
             "assumptions_to_validate": context["assumptions"],
             "confidence": "medium"
         }
-        parsed_insight = UserInsight.model_validate(user_insight)
+        parsed_insight, revision_count = normalize_claim_language(
+            UserInsight.model_validate(user_insight)
+        )
         return UserInsightResponse(
             request_id=str(uuid4()),
             mode="mock",
             context=context,
             user_insight=parsed_insight,
-            quality_review=evaluate_quality(parsed_insight),
+            quality_review=evaluate_quality(parsed_insight, revision_count),
         )
 
 
@@ -182,15 +184,17 @@ class DifyInsightService(InsightService):
         if not isinstance(outputs, dict):
             raise InsightServiceError("The AI workflow returned an unexpected response shape.")
         try:
-            parsed_insight = UserInsight.model_validate(
-                _parse_object(outputs.get("user_insight"), "user_insight")
+            parsed_insight, revision_count = normalize_claim_language(
+                UserInsight.model_validate(
+                    _parse_object(outputs.get("user_insight"), "user_insight")
+                )
             )
             return UserInsightResponse(
                 request_id=body.get("workflow_run_id") or body.get("task_id") or str(uuid4()),
                 mode="dify",
                 context=_parse_object(outputs.get("context"), "context"),
                 user_insight=parsed_insight,
-                quality_review=evaluate_quality(parsed_insight),
+                quality_review=evaluate_quality(parsed_insight, revision_count),
             )
         except ValidationError as exc:
             raise InsightServiceError("The AI workflow returned an unexpected response shape.") from exc

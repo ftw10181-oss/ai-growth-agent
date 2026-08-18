@@ -29,8 +29,9 @@ export interface InsightEvidence {
 }
 
 export interface QualityReview {
-  status: "passed" | "review_required";
+  status: "passed" | "passed_with_notes" | "review_required";
   issue_count: number;
+  auto_revision_count: number;
   checks: Array<{
     code: string;
     label: string;

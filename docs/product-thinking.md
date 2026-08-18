@@ -42,9 +42,11 @@ The AI is good at synthesis, reframing, and enumerating plausible alternatives. 
 
 Use the same 12 fixed briefs spanning six business goals and multiple product families. A reviewer scores each item on specificity, relevance, internal consistency, testability, and unsupported-claim risk. Automated checks cover schema validity, required sections, evidence consistency, item counts, and forbidden claims. Failed V0.1 cases become the unchanged regression set for V0.2.
 
-## Why the quality gate is deterministic
+## Why the quality gate and safe-wording revision are deterministic
 
-Prompt instructions are probabilistic: a model can understand a rule and still violate it on a later run. V0.2 therefore checks every completed output outside the model. Structural and evidence inconsistencies fail the API contract; behavior-first research-question patterns and risky frequency, comparative, or causal language are surfaced as visible warnings. The gate does not pretend to establish truth, and it does not silently rewrite the model's answer. It tells the operator where human review is still needed.
+Prompt instructions are probabilistic: a model can understand a rule and still violate it on a later run. V0.2.1 therefore applies two server-side steps after schema validation. First, a deterministic revision layer prefixes risky frequency, comparative, or causal wording with `Hypothesis to test —`; it preserves the original wording after that marker and records the number of revisions. Second, the quality gate evaluates the revised output.
+
+This layer does not establish truth, remove substantive content, or invent supporting evidence. It changes the epistemic framing so an inference cannot be mistaken for a verified finding. Structural and evidence failures remain blocking. Research-question mismatches and any unresolved wording findings appear as non-blocking review notes, because they affect usefulness but do not mean the workflow failed.
 
 ## Interview story
 

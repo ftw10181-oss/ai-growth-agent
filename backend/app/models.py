@@ -194,8 +194,9 @@ class QualityIssue(BaseModel):
 class QualityReview(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    status: Literal["passed", "review_required"]
+    status: Literal["passed", "passed_with_notes", "review_required"]
     issue_count: int = Field(ge=0)
+    auto_revision_count: int = Field(ge=0)
     checks: list[QualityCheck] = Field(min_length=4, max_length=4)
     issues: list[QualityIssue]
 

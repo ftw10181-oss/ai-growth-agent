@@ -68,7 +68,36 @@ const sectionMinimums: Record<string, number> = {
   typical_scenarios: 2,
 };
 
-function evaluateQuality(value: unknown) {
+function normalizeClaimLanguage(value: unknown): { insight: unknown; revisionCount: number } {
+  const insight = isRecord(value) ? JSON.parse(JSON.stringify(value)) as Record<string, unknown> : value;
+  if (!isRecord(insight)) return { insight, revisionCount: 0 };
+  let revisionCount = 0;
+
+  const reframe = (text: string): string => {
+    const hasRisk = riskPatterns.some(([, pattern]) => pattern.test(text));
+    if (hasRisk && !hypothesisMarkers.test(text)) {
+      revisionCount += 1;
+      return `Hypothesis to test — ${text}`;
+    }
+    return text;
+  };
+
+  if (isRecord(insight.target_user) && typeof insight.target_user.rationale === "string") {
+    insight.target_user.rationale = reframe(insight.target_user.rationale);
+  }
+  insightSections.forEach((section) => {
+    const items = Array.isArray(insight[section]) ? insight[section] as unknown[] : [];
+    items.forEach((item) => {
+      if (!isRecord(item)) return;
+      const contentKey = section === "jobs_to_be_done" ? "job" : "insight";
+      if (typeof item[contentKey] === "string") item[contentKey] = reframe(item[contentKey] as string);
+      if (typeof item.why_it_matters === "string") item.why_it_matters = reframe(item.why_it_matters);
+    });
+  });
+  return { insight, revisionCount };
+}
+
+function evaluateQuality(value: unknown, autoRevisionCount = 0) {
   const insight = isRecord(value) ? value : {};
   const issues: QualityIssue[] = [];
 
@@ -143,9 +172,11 @@ function evaluateQuality(value: unknown) {
     { code: "structure_contract", label: "Structure contract", status: structurePassed ? "passed" : "warning", detail: structurePassed ? "Required sections, item counts, and primary priorities passed." : "A structural requirement needs review." },
     { code: "evidence_contract", label: "Evidence contract", status: evidencePassed ? "passed" : "warning", detail: evidencePassed ? "Evidence basis, confidence, and validation status are consistent." : "An evidence rule needs review." },
     { code: "research_question_patterns", label: "Research question patterns", status: researchIssueCount ? "warning" : "passed", detail: researchIssueCount ? `${researchIssueCount} behavior-first question pattern(s) need review.` : "Recent behavior, workaround, and proof threshold are covered." },
-    { code: "claim_language", label: "Claim language", status: wordingIssueCount ? "warning" : "passed", detail: wordingIssueCount ? `${wordingIssueCount} potentially unsupported phrase(s) need human review.` : "No unsupported frequency, comparative, or causal phrasing was detected." },
+    { code: "claim_language", label: "Claim language", status: wordingIssueCount ? "warning" : "passed", detail: wordingIssueCount ? `${wordingIssueCount} potentially unsupported phrase(s) need human review.` : autoRevisionCount ? `${autoRevisionCount} high-risk phrase(s) were reframed as explicit hypotheses before this check.` : "No unsupported frequency, comparative, or causal phrasing was detected." },
   ];
-  return { status: issues.length ? "review_required" : "passed", issue_count: issues.length, checks, issues };
+  const hardIssue = issues.some((issue) => issue.code === "structure_contract" || issue.code === "evidence_contract");
+  const status = hardIssue ? "review_required" : issues.length ? "passed_with_notes" : "passed";
+  return { status, issue_count: issues.length, auto_revision_count: autoRevisionCount, checks, issues };
 }
 
 function json(detail: string, status: number): Response {
@@ -193,13 +224,14 @@ async function analyze(request: Request, env: Env): Promise<Response> {
       return json("The AI workflow returned an unexpected response.", 502);
     }
 
-    const userInsight = parseOutput(outputs.user_insight);
+    const rawUserInsight = parseOutput(outputs.user_insight);
+    const { insight: userInsight, revisionCount } = normalizeClaimLanguage(rawUserInsight);
     return Response.json({
       request_id: String(body.workflow_run_id || body.task_id || crypto.randomUUID()),
       mode: "dify",
       context: parseOutput(outputs.context),
       user_insight: userInsight,
-      quality_review: evaluateQuality(userInsight),
+      quality_review: evaluateQuality(userInsight, revisionCount),
     });
   } catch (error) {
     const timedOut = error instanceof DOMException && error.name === "TimeoutError";
@@ -223,7 +255,7 @@ const worker = {
       return Response.json({
         status: "ok",
         mode: env.DIFY_API_KEY ? "dify" : "unconfigured",
-        version: "0.2.0",
+        version: "0.2.1",
       });
     }
     return env.ASSETS.fetch(request);

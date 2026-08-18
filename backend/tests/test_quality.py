@@ -1,7 +1,7 @@
 import asyncio
 
 from app.models import BusinessGoal, GrowthBrief
-from app.quality import evaluate_quality
+from app.quality import evaluate_quality, normalize_claim_language
 from app.services import MockInsightService
 
 
@@ -43,7 +43,7 @@ def test_unsupported_causal_language_is_flagged() -> None:
 
     review = evaluate_quality(insight)
 
-    assert review.status == "review_required"
+    assert review.status == "passed_with_notes"
     assert any(issue.code == "unsupported_causality" for issue in review.issues)
     assert any(issue.path == "purchase_motivations.0.why_it_matters" for issue in review.issues)
 
@@ -74,5 +74,30 @@ def test_research_question_order_is_flagged() -> None:
 
     review = evaluate_quality(insight)
 
-    assert review.status == "review_required"
+    assert review.status == "passed_with_notes"
     assert sum(issue.code == "research_question_pattern" for issue in review.issues) == 3
+
+
+def test_risky_claim_is_reframed_before_quality_review() -> None:
+    insight = mock_insight()
+    first_motivation = insight.purchase_motivations[0].model_copy(
+        update={"why_it_matters": "This improves conversion and increases revenue."}
+    )
+    unsafe = insight.model_copy(
+        update={
+            "purchase_motivations": [
+                first_motivation,
+                *insight.purchase_motivations[1:],
+            ]
+        }
+    )
+
+    normalized, revision_count = normalize_claim_language(unsafe)
+    review = evaluate_quality(normalized, auto_revision_count=revision_count)
+
+    assert revision_count == 1
+    assert normalized.purchase_motivations[0].why_it_matters.startswith("Hypothesis to test —")
+    assert review.status == "passed"
+    assert review.issue_count == 0
+    assert review.auto_revision_count == 1
+    assert "1 high-risk phrase" in review.checks[-1].detail

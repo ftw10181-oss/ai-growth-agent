@@ -42,7 +42,40 @@ def _reviewable_strings(insight: UserInsight):
             yield f"{section_name}.{index}.why_it_matters", item.why_it_matters
 
 
-def evaluate_quality(insight: UserInsight) -> QualityReview:
+def normalize_claim_language(insight: UserInsight) -> tuple[UserInsight, int]:
+    """Reframe unsupported claim wording as an explicit hypothesis before review."""
+    payload = insight.model_dump()
+    revisions = 0
+
+    def reframe(text: str) -> str:
+        nonlocal revisions
+        has_risk = any(pattern.search(text) for pattern in RISK_PATTERNS.values())
+        if has_risk and not HYPOTHESIS_MARKERS.search(text):
+            revisions += 1
+            return f"Hypothesis to test — {text}"
+        return text
+
+    target_user = payload["target_user"]
+    target_user["rationale"] = reframe(target_user["rationale"])
+
+    for section_name in (
+        "jobs_to_be_done",
+        "pain_points",
+        "purchase_motivations",
+        "adoption_barriers",
+        "typical_scenarios",
+    ):
+        content_field = "job" if section_name == "jobs_to_be_done" else "insight"
+        for item in payload[section_name]:
+            item[content_field] = reframe(item[content_field])
+            item["why_it_matters"] = reframe(item["why_it_matters"])
+
+    return UserInsight.model_validate(payload), revisions
+
+
+def evaluate_quality(
+    insight: UserInsight, auto_revision_count: int = 0
+) -> QualityReview:
     """Run deterministic checks after the model output passes the hard schema."""
     issues: list[QualityIssue] = []
 
@@ -111,14 +144,29 @@ def evaluate_quality(insight: UserInsight) -> QualityReview:
             detail=(
                 f"{len(wording_issues)} potentially unsupported phrase(s) need human review."
                 if wording_issues
-                else "No unsupported frequency, comparative, or causal phrasing was detected."
+                else (
+                    f"{auto_revision_count} high-risk phrase(s) were reframed as explicit hypotheses before this check."
+                    if auto_revision_count
+                    else "No unsupported frequency, comparative, or causal phrasing was detected."
+                )
             ),
         ),
     ]
 
+    hard_issue_codes = {"structure_contract", "evidence_contract"}
+    has_hard_issue = any(issue.code in hard_issue_codes for issue in issues)
+    status = (
+        "review_required"
+        if has_hard_issue
+        else "passed_with_notes"
+        if issues
+        else "passed"
+    )
+
     return QualityReview(
-        status="review_required" if issues else "passed",
+        status=status,
         issue_count=len(issues),
+        auto_revision_count=auto_revision_count,
         checks=checks,
         issues=issues,
     )

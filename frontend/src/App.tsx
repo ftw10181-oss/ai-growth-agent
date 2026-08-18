@@ -55,11 +55,23 @@ function InsightList({ items }: { items: InsightItem[] }) {
 function Results({ result }: { result: InsightResponse }) {
   const insight = result.user_insight;
   const review = result.quality_review;
+  const qualityTitle = review?.status === "review_required"
+    ? "Human review required"
+    : review?.status === "passed_with_notes"
+      ? "Passed with review notes"
+      : "Quality checks passed";
+  const qualityBadge = review?.status === "review_required"
+    ? `${review.issue_count} blocking flag${review.issue_count === 1 ? "" : "s"}`
+    : review?.status === "passed_with_notes"
+      ? `${review.issue_count} review note${review.issue_count === 1 ? "" : "s"}`
+      : review?.auto_revision_count
+        ? `${review.auto_revision_count} phrase${review.auto_revision_count === 1 ? "" : "s"} reframed`
+        : "4 checks passed";
   return (
     <section className="results" aria-live="polite">
       <div className="results-header">
         <div>
-          <span className="eyebrow">User Insight · V0.2</span>
+          <span className="eyebrow">User Insight · V0.2.1</span>
           <h2>{insight.target_user.primary_segment}</h2>
           <p>{insight.target_user.rationale}</p>
         </div>
@@ -71,12 +83,15 @@ function Results({ result }: { result: InsightResponse }) {
           <div className="quality-heading">
             <div>
               <span className="eyebrow">Deterministic quality gate</span>
-              <h3>{review.status === "passed" ? "Ready for human validation" : "Human review required"}</h3>
+              <h3>{qualityTitle}</h3>
             </div>
-            <span className="quality-status">
-              {review.status === "passed" ? "4 checks passed" : `${review.issue_count} flag${review.issue_count === 1 ? "" : "s"}`}
-            </span>
+            <span className="quality-status">{qualityBadge}</span>
           </div>
+          {review.auto_revision_count > 0 && (
+            <p className="quality-auto-note">
+              The service transparently reframed {review.auto_revision_count} high-risk phrase{review.auto_revision_count === 1 ? "" : "s"} as explicit hypotheses before this review.
+            </p>
+          )}
           <div className="quality-checks">
             {review.checks.map((check) => (
               <div key={check.code} className={`quality-check check-${check.status}`}>
@@ -87,7 +102,7 @@ function Results({ result }: { result: InsightResponse }) {
           </div>
           {review.issues.length > 0 && (
             <details className="quality-issues">
-              <summary>See flagged fields</summary>
+              <summary>{review.status === "review_required" ? "See blocking fields" : "See review notes"}</summary>
               <ul>{review.issues.map((issue, index) => <li key={`${issue.path}-${index}`}><code>{issue.path}</code> — {issue.message}</li>)}</ul>
             </details>
           )}
@@ -178,7 +193,7 @@ function CaseStudy() {
       <div className="case-section workflow-section">
         <div className="section-heading">
           <span className="card-index">04 · How it works</span>
-          <h3>A two-stage reasoning workflow.</h3>
+          <h3>A two-stage AI workflow with a deterministic safety layer.</h3>
         </div>
         <div className="workflow-steps" aria-label="AI Growth Agent workflow">
           <div className="workflow-step">
@@ -195,6 +210,11 @@ function CaseStudy() {
             <strong>03</strong>
             <div><h4>User Insight</h4><p>Returns testable jobs, pains, motivations, barriers, scenarios, and questions.</p></div>
           </div>
+          <span className="workflow-arrow" aria-hidden="true">→</span>
+          <div className="workflow-step">
+            <strong>04</strong>
+            <div><h4>Quality Gate</h4><p>Reframes risky claims as hypotheses, then separates blockers from review notes.</p></div>
+          </div>
         </div>
       </div>
 
@@ -206,6 +226,7 @@ function CaseStudy() {
             <li>No invented statistics, quotes, competitor claims, or citations</li>
             <li>Assumptions and ambiguities remain visible</li>
             <li>Confidence and research questions encourage human validation</li>
+            <li>High-risk claim wording is transparently reframed—not hidden</li>
             <li>The human owns prioritization and commercial decisions</li>
           </ul>
         </article>
@@ -316,7 +337,7 @@ export default function App() {
             <a href="#case-study">Case study</a>
             <a href="https://github.com/ftw10181-oss/ai-growth-agent" target="_blank" rel="noreferrer">GitHub ↗</a>
           </div>
-          <span className="version">V0.2</span>
+          <span className="version">V0.2.1</span>
         </nav>
         <div className="hero-copy">
           <span className="eyebrow">From brief to testable hypotheses</span>
@@ -346,7 +367,7 @@ export default function App() {
           </div>
           <label>Additional context <span className="optional">optional</span><textarea value={brief.additional_context} onChange={(event) => update("additional_context", event.target.value)} maxLength={2000} rows={3} /></label>
           <div className="submit-row">
-            <p>No web research in V0.2. Every inferred insight is marked for validation.</p>
+            <p>No web research in V0.2.1. Every inferred insight is marked for validation.</p>
             <button disabled={loading}>{loading ? "Interpreting brief…" : "Generate user insight"}<span aria-hidden="true">→</span></button>
           </div>
           {error && <p className="error" role="alert">{error}</p>}
