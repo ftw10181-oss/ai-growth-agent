@@ -1,0 +1,20 @@
+[tool.ruff]
+# Conservative rule set chosen to (a) catch genuine bugs and (b) stay green on
+# the existing codebase without forcing a large style churn in CI.
+line-length = 100
+target-version = "py311"
+src = ["."]
+
+[tool.ruff.lint]
+# E/F/W: standard errors + pyflakes (undefined names, unused imports, syntax).
+# B:     bugbear — flags obvious correctness foot-guns.
+select = ["E", "F", "W", "B"]
+# Rules intentionally disabled to match the existing codebase and avoid noise.
+ignore = [
+    "E501",  # line length is soft; keep it readable rather than failing CI
+    "B008",  # FastAPI-style Depends(...) in default args is idiomatic here
+    "B905",  # zip() without strict= is acceptable in this codebase
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F401"]
