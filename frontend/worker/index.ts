@@ -474,6 +474,10 @@ const worker = {
         version: "0.2.1",
       });
     }
+    // Map the pretty demo path to the built demo.html asset.
+    if (url.pathname === "/demo" || url.pathname === "/demo/") {
+      return env.ASSETS.fetch(new Request(new URL("/demo.html", url), request));
+    }
     return env.ASSETS.fetch(request);
   },
 };

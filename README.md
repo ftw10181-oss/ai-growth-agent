@@ -1,362 +1,247 @@
-<p align="center">
-  <img src="docs/assets/ai-growth-agent-banner.jpg" alt="AI Growth Agent — from fuzzy growth briefs to testable user insights" width="100%" />
-</p>
+<div align="center">
 
-<p align="center">
-  <strong>An evidence-aware AI Agent that turns a fuzzy growth brief into testable user-insight hypotheses — built for AI product managers and growth engineers who care about <em>governed</em> LLM output, not just generated prose.</strong>
-</p>
+# AI Growth Agent
 
-<p align="center">
-  <a href="https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site"><strong>🚀 Live Demo</strong></a>
-  ·
-  <a href="docs/architecture.md">Architecture</a>
-  ·
-  <a href="evals/README.md">Evaluation System</a>
-  ·
-  <a href="demo/sample-output/user-insight.json">Sample Output</a>
-</p>
+**Evidence-aware user insight, generated from a fuzzy growth brief.**
 
-<p align="center">
-  <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/ftw10181-oss/ai-growth-agent/ci.yml?label=CI&logo=github&logoColor=white" />
-  <img alt="Version" src="https://img.shields.io/badge/version-v0.2.1-4f46e5" />
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-3776ab" />
-  <img alt="React" src="https://img.shields.io/badge/React-19-149eca" />
-  <img alt="LLM-Evals" src="https://img.shields.io/badge/LLM%20Evaluation-12%20cases%20%7C%205%20dims-0ea5e9" />
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-16a34a" />
-</p>
+[![CI](https://img.shields.io/github/actions/workflow/status/ftw10181-oss/ai-growth-agent/ci.yml?branch=main&label=CI)](https://github.com/ftw10181-oss/ai-growth-agent/actions/workflows/ci.yml)
+[![Backend Tests](https://img.shields.io/badge/backend-29%20passed-2ea44f)](./backend/tests/)
+[![Evals](https://img.shields.io/badge/evals-contract%20gate-12%2F12-2ea44f)](./evals/)
+[![Frontend](https://img.shields.io/badge/frontend-React%2019%20%2B%20TS%207-0a7ea4)](./frontend/)
+[![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+
+</div>
+
+AI Growth Agent turns a half-formed product idea and target audience into a structured **Growth Insight Report** — jobs to be done, pain points, purchase motivations, adoption barriers, recommendations, and research questions — with every claim tagged by **evidence basis**, **confidence**, and **decision relevance**. Outputs are checked by an offline **LLM evaluation contract**, and regressions fail the build.
+
+It is built as a portfolio piece for **AI Product Manager**, **AI Application Engineer**, and **Growth Engineer** roles: the focus is the **product surface, the reasoning contract, and the evaluation loop**, not the infra underneath.
 
 ---
 
-## The story: why this project exists
+## Live Demo
 
-Most AI products are demoed with one polished prompt and one hand-picked happy path. The moment you run them against a *real* growth brief — sparse context, conflicting goals, unfamiliar domains — they drift into confident, unverifiable market facts. That is not a product; it is a hallucination engine with a nice UI.
+![AI Growth Agent — Live Demo showing Growth Insight Report with Confidence, Evidence, and Recommendations](docs/images/demo.png)
 
-**AI Growth Agent is the counter-example.** It treats LLM output as a software engineering problem: the output must be *structured*, *evidence-aware*, *automatically checkable*, and *honest about what it does not know*.
+A standalone `/demo` route ships with the frontend. No signup. No API key. Mock mode runs out of the box.
 
-The project grew out of a practical question a growth operator asked daily:
+**Try it locally:**
 
-> "I have a fuzzy brief for a new market. What user insight can I actually act on — and how do I know which parts are safe to believe?"
+```bash
+# 1. Backend (mock mode — no external services needed)
+cd backend
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+APP_MODE=mock .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
 
-The answer is a three-layer system — a **contract-governed AI Agent**, a **deterministic quality gate**, and a **repeatable LLM evaluation harness** — that turns that fuzzy brief into decision-ready hypotheses with explicit evidence, confidence, and validation status.
-
-This is not a wrapper around an API. It is an argument about how AI growth tooling *should* be built: **governed, evaluated, and versioned like real software.**
-
----
-
-## Demo
-
-Try the full journey without an API key or Dify account:
-
-<p align="center">
-  <a href="https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site"><strong>▶ Open the live demo</strong></a>
-</p>
-
-**What you'll see in under 3 minutes:**
-
-1. Submit a six-field growth brief (product, market, audience, goal, context).
-2. A **Context Interpreter** normalizes uneven input into a concise analysis brief and records explicit assumptions and ambiguities.
-3. The **User Insight** stage generates hypotheses across JTBD (functional / emotional / social), pains, motivations, barriers, and scenarios — each tagged with an **evidence basis**, **confidence**, and **validation status**.
-4. A **deterministic quality gate** independently checks structure, evidence consistency, research-question quality, and risky claim language — and reframes unsupported claims as `Hypothesis to test —`.
-5. The UI renders insight cards, the auto-revision count, and any remaining review notes.
-
-<details>
-<summary><strong>Click to preview the frozen sample output</strong> (same shape as live, no credentials needed)</summary>
-
-*Input brief:* "AI Translation Earbuds for frequent international business travelers in the US; goal = User Acquisition."
-
-*Structured insight produced:*
-
-```json
-{
-  "jobs_to_be_done": [
-    {
-      "job": "When a business conversation shifts languages, I want to understand and respond without interrupting the flow...",
-      "dimension": "functional",
-      "decision_relevance": "primary",
-      "evidence": {
-        "basis": "contextual_inference",
-        "confidence": "medium",
-        "validation_status": "needs_validation"
-      }
-    }
-  ],
-  "pain_points": [
-    {
-      "insight": "Fast group conversations may move on before a translated response is ready.",
-      "decision_relevance": "primary",
-      "evidence": {"basis": "contextual_inference", "confidence": "medium", "validation_status": "needs_validation"}
-    }
-  ],
-  "research_questions": [
-    "Think about the most recent time language friction changed a business conversation. What happened?",
-    "What do you use today when a business conversation shifts languages, and where does it fall short?",
-    "What evidence or result would you need before trusting a wearable translator in a meeting?"
-  ],
-  "quality_review": {
-    "status": "passed",
-    "auto_revision_count": 0,
-    "checks": [
-      {"code": "structure_contract", "status": "passed"},
-      {"code": "evidence_contract", "status": "passed"},
-      {"code": "research_question_patterns", "status": "passed"},
-      {"code": "claim_language", "status": "passed"}
-    ]
-  }
-}
+# 2. Frontend (in another terminal)
+cd frontend
+npm install
+npm run dev
+# open http://localhost:5173/demo.html
 ```
 
-Full frozen response: [`demo/sample-output/user-insight.json`](demo/sample-output/user-insight.json)
-</details>
+**What you can do in the demo**
+
+- Fill in `Product`, `What does it do`, `Target market`, `Business goal`, `Target audience`, `Additional context`.
+- Hit **Generate report** — the form is prefilled with a worked example so you see a full report on first load.
+- Inspect each item: the `Primary` / `Hypothesis` tag, `Inference — medium` badge, and the side panel's **Confidence by section**, **Evidence legend**, **Validate next**, and **Assumptions to check** tell you where the report is solid and where it needs a human in the loop.
+
+In production the same `/api/analyze` endpoint is served from the Cloudflare Worker in `frontend/worker/index.ts`; swap `APP_MODE=mock` for `APP_MODE=dify` to route to a real LLM via Dify.
+
+---
+
+## The Story
+
+A growth team rarely starts a research pass with a clean spec. They start with a one-paragraph brief, a Slack thread, maybe a Reddit thread, and a vague goal like "explore US user acquisition". Asking an LLM to "do growth research" on that input produces fluent paragraphs that look like insight but carry no provenance — every sentence is either a restatement of the brief, an unsupported inference, or, in the worst case, a fabrication.
+
+Three things have to be true before an AI-written report is usable inside a growth team:
+
+1. **Every claim has a basis.** Stated in the brief, derived from context, or marked as a hypothesis that still needs user testing.
+2. **Every section has a confidence number** the team can read at a glance, so they know which block to push into a meeting and which block to put behind a research question.
+3. **The system is testable.** A change in the prompt, the model, or the parser cannot silently lower the quality of the output — there is a regression suite that fails CI when it does.
+
+AI Growth Agent is the small product that gets those three things right. It wraps an LLM (real or mock) in an agent workflow that emits a typed schema, attaches evidence metadata to each item, and is guarded by an offline evaluation contract that runs on every commit.
+
+---
+
+## Why This Matters
+
+A traditional LLM call is a one-shot text generator.
+
+```
+Input → AI → Text
+```
+
+AI Growth Agent inserts three layers between the prompt and the output:
+
+```
+Input (Growth Brief)
+   ↓
+AI Agent Reasoning       — job, pain, motivation, barrier, recommendation
+   ↓
+Evidence Check           — basis, validation status, source attribution
+   ↓
+Confidence Evaluation    — per-section score, overall confidence
+   ↓
+Actionable Growth Insight — typed report, recommendations, research questions
+```
+
+The bet is simple: AI output is not valuable because it generates text — it is valuable because a human can act on it. Action requires provenance. This product is built around that contract.
+
+---
+
+## Product Case
+
+This case study explains how AI Growth Agent transforms fragmented user feedback into structured and evidence-based growth insights — from the problem it exists for, to a worked scenario and the roadmap ahead.
+
+- **Background** — why overseas growth teams struggle to turn scattered feedback into insight
+- **Problem** — manual analysis is slow, hard to validate, and does not scale
+- **Solution** — the agent reasoning → evidence → confidence pipeline
+- **Example scenario** — a worked, method-only walkthrough (no claimed business results)
+- **Product value & future** — what the report returns to the team, and where it goes next
+
+[Read the product case study →](docs/product-case.md)
+
+---
+
+## How It Works
+
+1. **Input.** The user describes a product, a market, an audience, and a goal through the demo form or the `/api/analyze` endpoint.
+2. **Agent reasoning.** The LLM is asked to populate a typed `InsightResponse` schema — Jobs, Pain Points, Purchase Motivations, Adoption Barriers, Recommendations, and Assumptions — rather than to write free-form prose.
+3. **Evidence layer.** Each emitted item is decorated with `evidence.basis` (`explicit_brief`, `inferred_from_context`, or `hypothesis`), `evidence.confidence` (`high`, `medium`, `low`), and `evidence.validation_status`. Recommendations are tagged with `decision_relevance` (`primary` or `supporting`).
+4. **Evaluation system.** An offline suite (`evals/check_outputs.py`) replays a frozen set of 12 cases against the response schema and asserts structural invariants: every `recommendation` must trace to a `pain_point`, every `assumption` must be self-contained, every `hypothesis` must surface as a `research_question`. CI fails the build when invariants break.
+5. **Report.** The frontend renders the report in a layout designed for review: confidence scores per section, an evidence legend, a "validate next" panel of research questions, and an "assumptions to check" panel for the human reviewer.
+
+---
+
+## Key Features
+
+- **Structured insight generation.** Every output is a typed `InsightResponse` (Pydantic v2 on the backend, TypeScript on the frontend), so the report cannot drift into unstructured prose.
+- **Evidence-based reasoning.** Each item carries a `basis` (`explicit_brief` / `inferred_from_context` / `hypothesis`) and a `validation_status` so the team can tell what is grounded and what is conjecture.
+- **Per-section confidence scoring.** Overall confidence and per-section confidence (`Overall insight`, `Jobs to be done`, `Pain points`) are computed from the evidence metadata and surfaced in the UI.
+- **Recommendation→pain traceability.** Every recommendation links back to a pain point and a decision relevance, so a reviewer can audit why an action is on the list.
+- **LLM output evaluation as a contract.** `evals/check_outputs.py` runs 12 frozen cases offline and asserts schema invariants on every CI run — no live LLM calls, no flake.
+- **Quality guardrails in CI.** Three jobs run in parallel: backend pytest + ruff, frontend typecheck + eslint + build, and the offline evaluation gate. A regression in any layer fails the build.
+- **Pluggable LLM backend.** `APP_MODE=mock` runs without any external service; `APP_MODE=dify` routes through a Dify workflow, both served from the same `/api/analyze` contract.
+- **Edge-deployed demo surface.** The demo is a Cloudflare Worker that serves the React 19 + TypeScript 7 frontend from `/` and `/demo`, keeping the public surface at zero infrastructure cost.
 
 ---
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    subgraph Frontend
-        UI[React 18 + TS UI]
-    end
-
-    subgraph Edge[Cloudflare Worker — API gateway]
-        GW[Rate limit / quota]
-        CACHE[(Result cache)]
-        FALLBACK[mock fallback]
-    end
-
-    subgraph Backend[FastAPI adapter]
-        NORM[Context normalizer]
-        SAFE[Safe-wording revision]
-        GATE[Deterministic quality gate]
-    end
-
-    subgraph Dify[Dify workflow]
-        N1[01 · Context Interpreter]
-        N2[02 · User Insight]
-    end
-
-    UI --> GW
-    GW --> CACHE
-    CACHE --> FALLBACK
-    GW --> NORM --> SAFE --> GATE
-    SAFE --> N1 --> N2 --> SAFE
-    GATE --> UI
-    FALLBACK --> UI
-
-    classDef gate fill:#fef3c7,stroke:#f59e0b;
-    class GATE,SAFE gate;
 ```
-
-**Data flow, end to end:**
-
-```text
-Growth brief
-   └─▶ Cloudflare Worker (rate-limit · quota · cache)
-         └─▶ Context Interpreter → normalized brief + assumptions
-               └─▶ User Insight → evidence-aware hypotheses
-                     └─▶ Safe-wording revision (claim → "Hypothesis to test —")
-                           └─▶ Deterministic quality gate (4 checks)
-                                 └─▶ [fail → mock fallback]  ──▶ rendered UI
-```
-
-**Why it's built this way:**
-
-| Layer | Technology | Why it exists |
-|---|---|---|
-| **Frontend** | React 18 + TypeScript + Vite | Lightweight, portable demo; deploys to edge |
-| **API gateway** | Cloudflare Worker | Rate limits, per-visitor quota, result cache, graceful degradation at the edge — not in the model prompt |
-| **Orchestration** | Dify workflow (YAML DSL) | Two versioned LLM nodes (`01-context-interpreter` → `02-user-insight`) with JSON-Schema-bound structured output |
-| **Contract layer** | Pydantic v2 + JSON Schema | Cross-field invariants enforced at the boundary (e.g. `high confidence` requires `explicit_brief` evidence) |
-| **Quality gate** | Deterministic Python/TS checks | *Independently* re-checks structure, evidence, research questions, and claim language — no model is the judge of itself |
-| **Evaluation** | `evals/` harness | 12 fixed briefs, hard contract gates, 5-dimension rubric, frozen baseline |
-
-> **Key design decision:** the quality gate runs *outside* the LLM. It is deterministic and transparent, so a recruiter or reviewer can trace exactly how risky wording got reframed and why a result `passed` vs. `review_required`.
-
-### Repository map
-
-```text
-.
-├── backend/                 FastAPI service + Dify adapter
-│   └── app/
-│       ├── models.py        Pydantic v2 domain models (V0.1/V0.2 contracts)
-│       ├── quality.py       Deterministic post-generation quality gate
-│       ├── protection.py    Rate-limit / quota helpers
-│       └── services.py      Dify-call + mock-fallback logic
-├── demo/sample-output/      Frozen, portfolio-ready example
-├── evals/                   Fixed cases, rubric, checker, baseline report
-├── dify/
-│   ├── prompts/             Versioned node prompts
-│   ├── schemas/             Structured-output contracts
-│   └── workflow-v0.2.yml    Evidence-aware workflow (reproducible)
-├── docs/                    PRD, architecture, product decisions
-└── frontend/                React + TypeScript demo UI + Cloudflare Worker
+┌───────────────────────────── Frontend ─────────────────────────────┐
+│  React 19 + TypeScript 7 + Vite 8 (MPA)                            │
+│  /         — main app                                              │
+│  /demo     — standalone Growth Insight Report demo                 │
+│  Cloudflare Worker: routes /api/* → backend, serves /demo & assets │
+└────────────────────────────────────────────────────────────────────┘
+                              │ HTTP
+                              ▼
+┌─────────────────────────── Backend ─────────────────────────────────┐
+│  FastAPI + Pydantic v2                                             │
+│  POST /api/analyze  →  analyze() → mock engine | Dify workflow     │
+│  Strict response schema: InsightResponse, EvidenceMeta, etc.        │
+└────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────── Evals ───────────────────────────────────┐
+│  evals/check_outputs.py — offline contract gate (12 cases)          │
+│  evals/run_live_baseline.py — optional live quality run             │
+│  evals/results/baseline-v0.1/run-summary.json — frozen baseline     │
+└────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌───────────────────────────── CI ────────────────────────────────────┐
+│  backend  → pytest + ruff                                          │
+│  frontend → tsc --noEmit + eslint + vite build                      │
+│  evals    → python evals/check_outputs.py evals/results/baseline-v0.1│
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Run locally
+## Project Structure
 
-Prerequisites: Python 3.11+ and Node.js 20+.
-
-### 1. Backend (mock mode — no API key needed)
-
-```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-uvicorn app.main:app --reload
+```
+ai-growth-agent/
+├── backend/                # FastAPI + Pydantic v2 API
+│   ├── app/                # Routes, schemas, engines (mock / dify)
+│   ├── tests/              # 29 pytest cases
+│   └── requirements.txt
+├── frontend/               # React 19 + TS 7 + Vite 8 + Cloudflare Worker
+│   ├── src/                # App + Demo surfaces, shared Insight types
+│   ├── worker/             # Cloudflare Worker entry (routes /api/*)
+│   ├── demo.html           # Standalone demo entry (MPA build)
+│   └── package.json
+├── evals/                  # Offline LLM evaluation contract
+│   ├── cases.json          # 12 frozen input/expected cases
+│   ├── check_outputs.py    # CI gate (structural invariants)
+│   ├── run_live_baseline.py# Optional live quality run
+│   └── results/baseline-v0.1/
+├── dify/                   # Dify workflow definition for live mode
+├── docs/
+│   ├── architecture-analysis.md
+│   └── images/demo.png     # README demo screenshot
+├── .github/workflows/ci.yml
+└── README.md
 ```
 
-The default `APP_MODE=mock` is intentional: the full product journey runs without exposing an API key. API docs at `http://localhost:8000/docs`.
+---
 
-### 2. Frontend
+## Quality & Evaluation
 
-```bash
-cd frontend
-npm install
-cp .env.example .env
-npm run dev
-```
+The evaluation suite is the part of this project I am most opinionated about, so it gets its own section.
 
-Open `http://localhost:5173` and submit the pre-filled example.
+- **Offline contract** — `evals/check_outputs.py` runs the 12 frozen cases in `evals/cases.json` against the `InsightResponse` schema and asserts structural invariants (recommendations trace to pain points, hypotheses surface as research questions, assumptions are self-contained, etc.). It is the CI gate. It runs without any live LLM, so it is fast and deterministic.
+- **Live quality run** — `evals/run_live_baseline.py` is the optional path that exercises the real LLM (mock or Dify) and writes a `run-summary.json` with `case_count`, `success`, `failure`, and per-check counters. The baseline at `evals/results/baseline-v0.1/` is the reference; CI compares against it.
+- **What gets asserted** — schema validity, evidence metadata presence, recommendation traceability, assumption self-containment, and per-section confidence coherence. Any violation fails CI on the `evals` job.
 
-### 3. Connect Dify (optional, for live mode)
+---
 
-Import [dify/workflow-v0.2.yml](dify/workflow-v0.2.yml), select a model in your workspace, test, and publish. If the imported provider can't resolve, use [dify/workflow-v0.2.md](dify/workflow-v0.2.md) to build the same canvas manually. Then update `backend/.env`:
+## Tech Stack
 
-```dotenv
-APP_MODE=dify
-DIFY_BASE_URL=https://api.dify.ai/v1
-DIFY_API_KEY=app-your-workflow-key
-LIVE_DAILY_LIMIT=50
-LIVE_PER_VISITOR_DAILY_LIMIT=2
-LIVE_MIN_INTERVAL_SECONDS=60
-LIVE_CACHE_TTL_SECONDS=86400
-LIVE_FALLBACK_TO_MOCK=true
-```
+| Layer    | Choice                                                          | Why                                                                    |
+| -------- | --------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Backend  | Python 3.11+, FastAPI, Pydantic v2, pytest, ruff                 | Strict typed schema, fast iteration, low ceremony                       |
+| Frontend | React 19, TypeScript 7 (tsgo), Vite 8 (MPA), Cloudflare Worker   | Typed surface, fast build, edge deployment of the demo                  |
+| Evals    | Python (stdlib), JSON fixtures                                | Deterministic offline gate; no live LLM dependency in CI                |
+| CI       | GitHub Actions (3 parallel jobs)                                | Backend tests, frontend build/lint, evaluation gate                     |
 
-Keep the Dify key on the backend only. The browser never calls Dify directly. When the live quota is exhausted or Dify is unavailable, the demo returns a deterministic mock result instead of failing. The in-process counters are best-effort for a single backend or Worker isolate; use a shared counter + provider-side hard budget for strict multi-instance enforcement.
+---
 
-### 4. Development checks (CI-ready)
-
-Every check below is what [GitHub Actions](.github/workflows/ci.yml) runs on every push/PR. Run them locally to match CI:
+## Local Development
 
 ```bash
-# Backend — tests + lint + format
-cd backend
-pip install -r requirements-dev.txt
-pytest -v
-ruff check .
-ruff format --check .
+# Backend (mock mode)
+cd backend && python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+APP_MODE=mock .venv/bin/uvicorn app.main:app --port 8000
 
-# Frontend — type-check + lint + production build
-cd ../frontend
-npm ci
+# Frontend
+cd ../frontend && npm install
+npm run dev                # → http://localhost:5173/  (app)
+                           # → http://localhost:5173/demo.html  (demo)
 npm run typecheck
-npm run lint
-npm run build
+npm run build              # MPA build → dist/client/{index,demo}.html
 
-# LLM Evaluation — offline contract gate (no API key required)
-cd ..
-pip install -r backend/requirements.txt
-python evals/check_outputs.py evals/results/baseline-v0.1
+# Evaluations
+cd ../evals
+python3 check_outputs.py evals/results/baseline-v0.1   # offline gate
+python3 run_live_baseline.py                           # live run (writes run-summary.json)
 ```
 
-> The evaluation gate reuses the backend Pydantic contracts, so a CI failure here means the committed baseline no longer satisfies the schema — exactly the drift this repo is designed to catch.
-
----
-
-## API contract
-
-`POST /api/analyze` — the unified route.
-
-`POST /api/v2/insights` — versioned V0.2 contract; V0.2.1 is a compatible safety-layer update.
-`POST /api/v1/insights` — compatibility alias.
-
-```json
-{
-  "product": "AI Translation Earbuds",
-  "product_description": "Real-time AI translation earbuds for cross-language communication.",
-  "target_market": "United States",
-  "target_audience": "Frequent international business travelers",
-  "business_goal": "User Acquisition",
-  "additional_context": "Entering the US market; test Reddit and TikTok."
-}
-```
-
-Full response: [`demo/sample-output/user-insight.json`](demo/sample-output/user-insight.json).
-
----
-
-## LLM Evaluation system
-
-This repository does not trust one polished example. It ships a **repeatable evaluation harness**:
-
-- **12 fixed briefs** covering six business goals and multiple product categories
-- **Boundary cases** for sparse context, goal conflict, and unfamiliar domains
-- **Hard contract gates** (structure, evidence, goal-consistency, JTBD dimensions, item counts)
-- **Five-dimension human scoring rubric** (relevance, claim safety, actionability, clarity, completeness)
-- **Offline checker** (`evals/check_outputs.py`) that reuses the backend Pydantic models — no drift between contract and checks
-
-See [evals/README.md](evals/README.md).
-
-### V0.1 live baseline (honest numbers)
-
-The published Dify workflow completed **12/12 cases** with **100% schema, goal-consistency, JTBD-dimension, and item-count compliance**. Median end-to-end latency **21.5s** across **35,371 model tokens**.
-
-Single-reviewer content score **3.75/5**. Relevance was strongest (**4.58/5**); **unsupported-claim safety was the main weakness (2.67/5)** — inferred behaviors were sometimes phrased as facts, so only 2/12 cases met the full publish threshold.
-
-**V0.2 exists *because* of that finding**: it adds a mandatory evidence contract to every insight item and a deterministic safe-wording revision. This is what a healthy evaluation loop looks like — measure honestly, then make the next version fix the measured weakness.
-
-These are internal synthetic-case results, not user research or evidence of business impact. See the [baseline report](evals/results/baseline-v0.1/report.md) and [scorecard](evals/results/baseline-v0.1/scorecard.csv).
-
----
-
-## What V0.2.1 delivers
-
-- Six-field growth brief with validation
-- Context normalization before analysis, with explicit assumptions
-- Structured user insight: JTBD (functional/emotional/social), pains, motivations, barriers, scenarios
-- Evidence basis, per-item confidence, validation status, and decision relevance on every item
-- Deterministic quality gate: structure, evidence, research questions, and claim language
-- Transparent safe-wording revision that preserves the original claim while marking it as a hypothesis
-- Distinct `passed`, `passed_with_notes`, and `review_required` outcomes — soft warnings don't look like failures
-- Reproducible Dify workflow build + prompts + JSON schemas
-- FastAPI adapter with a no-key demo mode and a Dify-connected mode
-- Public React/Vite demo with server-side Dify integration
-
-## Success criteria
-
-V0.2.1 succeeds when a new user can submit a brief, receive valid structured output, distinguish brief evidence from inference, see risky claims reframed as hypotheses, and identify any remaining review notes — **in under three minutes**.
+Copy `backend/.env.example` to `backend/.env` and set `DIFY_API_KEY` (and any other Dify settings) to point the backend at a real LLM via the workflow in `dify/`.
 
 ---
 
 ## Roadmap
 
-- **V0.2.1** ✅ evidence-aware insight, deterministic safe-wording revision, clearer quality states
-- **V0.3** — market hypothesis and value proposition
-- **V0.4** — content strategy and growth experiments
-- **V0.5** — web research with citations and evidence grading
-- **V1.0** — saved projects, comparison, export, and evaluation dashboard
-
----
-
-## Responsible AI choices
-
-- No claim of real-time market research in V0.2.1
-- Assumptions are returned explicitly
-- Every JTBD and insight records evidence basis, confidence, validation status, and decision relevance
-- Prompts prohibit fabricated statistics, quotes, and competitor facts
-- Pydantic and JSON Schema validate the workflow boundary
-- The server records every automatic wording revision; it adds an explicit hypothesis marker without deleting or inventing content
-- Only structure or evidence failures are blocking; research-pattern and claim-language findings remain visible as review notes
-- A deterministic post-generation review surfaces risky wording instead of silently accepting it
-- A deterministic demo response keeps the portfolio reviewable without credentials
+- **Confidence calibration.** The current confidence labels are derived from `evidence.basis`; the next step is to calibrate them against human-rated samples held in `evals/cases.json`.
+- **Live evaluation runs in CI.** Today the live run is opt-in; promoting it to a scheduled CI job, and diffing `run-summary.json` against the baseline, is the natural next guardrail.
+- **Per-prompt variant testing.** The schema, not the prompt, is the contract today. Adding prompt variants behind the same contract is the obvious A/B surface.
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[MIT](./LICENSE)
