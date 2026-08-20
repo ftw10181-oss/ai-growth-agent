@@ -47,6 +47,21 @@ npm run dev
 
 In production the same `/api/analyze` endpoint is served from the Cloudflare Worker in `frontend/worker/index.ts`; swap `APP_MODE=mock` for `APP_MODE=dify` to route to a real LLM via Dify.
 
+### Deployment (Cloudflare Pages)
+
+> **Status: placeholder.** The public URL below is filled in once the Cloudflare Pages project is live — no fake address is listed here.
+
+- **Live Demo URL:** `https://<project>.pages.dev` *(to be added after first deploy)*
+
+The demo deploys to the edge as a Cloudflare Pages project in **Advanced mode** — no separate backend is required in production:
+
+- `npm run build` emits static assets to `dist/client/` and compiles the Worker in `frontend/worker/index.ts` into a single self-contained file.
+- `scripts/prepare-sites-build.mjs` copies that Worker to `dist/client/_worker.js`, which Cloudflare Pages runs for every route — serving `/api/analyze`, `/health`, and `/demo` from the edge.
+- With no `DIFY_API_KEY` configured, the Worker returns mock reports out of the box; set the key as a Pages secret to route `/api/analyze` to a real LLM via the Dify workflow in `dify/`.
+- Local preview of the exact Pages artifact: `cd frontend && npm run preview:pages`; production deploy: `npm run deploy:pages` (requires `wrangler login` and a Cloudflare account).
+
+*(Full walkthrough — connecting the GitHub repo, build settings, output directory, and secret configuration — is added here once the first deploy is confirmed.)*
+
 ---
 
 ## The Story
@@ -222,7 +237,7 @@ cd ../frontend && npm install
 npm run dev                # → http://localhost:5173/  (app)
                            # → http://localhost:5173/demo.html  (demo)
 npm run typecheck
-npm run build              # MPA build → dist/client/{index,demo}.html
+npm run build              # MPA build → dist/client/{index,demo}.html + _worker.js
 
 # Evaluations
 cd ../evals
