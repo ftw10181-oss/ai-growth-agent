@@ -24,6 +24,8 @@ It is built as a portfolio piece for **AI Product Manager**, **AI Application En
 
 A standalone `/demo` route ships with the frontend. No signup. No API key. Mock mode runs out of the box.
 
+**Try it live:** [ai-growth-agent.pages.dev/demo](https://ai-growth-agent.pages.dev/demo)
+
 **Try it locally:**
 
 ```bash
@@ -49,9 +51,7 @@ In production the same `/api/analyze` endpoint is served from the Cloudflare Wor
 
 ### Deployment (Cloudflare Pages)
 
-> **Status: placeholder.** The public URL below is filled in once the Cloudflare Pages project is live — no fake address is listed here.
-
-- **Live Demo URL:** `https://<project>.pages.dev` *(to be added after first deploy)*
+> **Live:** [ai-growth-agent.pages.dev](https://ai-growth-agent.pages.dev) — deployed to Cloudflare Pages (Advanced mode), running in mock mode.
 
 The demo deploys to the edge as a Cloudflare Pages project in **Advanced mode** — no separate backend is required in production:
 
@@ -60,7 +60,7 @@ The demo deploys to the edge as a Cloudflare Pages project in **Advanced mode** 
 - With no `DIFY_API_KEY` configured, the Worker returns mock reports out of the box; set the key as a Pages secret to route `/api/analyze` to a real LLM via the Dify workflow in `dify/`.
 - Local preview of the exact Pages artifact: `cd frontend && npm run preview:pages`; production deploy: `npm run deploy:pages` (requires `wrangler login` and a Cloudflare account).
 
-*(Full walkthrough — connecting the GitHub repo, build settings, output directory, and secret configuration — is added here once the first deploy is confirmed.)*
+**Deployment settings** (Cloudflare Pages project `ai-growth-agent`): production branch `main`, root directory `frontend`, build command `npm ci && npm run build`, output directory `dist/client`. To route `/api/analyze` to a real LLM, add `DIFY_API_KEY` as a Pages project secret; until then the demo stays in mock mode.
 
 ---
 

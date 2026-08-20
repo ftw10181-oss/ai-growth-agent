@@ -474,9 +474,11 @@ const worker = {
         version: "0.2.1",
       });
     }
-    // Map the pretty demo path to the built demo.html asset.
+    // Map the pretty demo path to the built demo.html asset. The Assets
+    // layer canonicalizes /demo.html and /demo/ to /demo and serves
+    // demo.html there, so request the canonical path to avoid a 308 loop.
     if (url.pathname === "/demo" || url.pathname === "/demo/") {
-      return env.ASSETS.fetch(new Request(new URL("/demo.html", url), request));
+      return env.ASSETS.fetch(new Request(new URL("/demo", url), request));
     }
     return env.ASSETS.fetch(request);
   },
