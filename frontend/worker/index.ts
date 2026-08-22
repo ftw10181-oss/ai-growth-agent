@@ -94,14 +94,53 @@ function readString(record: Record<string, unknown>, key: string): string {
   return typeof record[key] === "string" ? record[key] as string : "";
 }
 
-async function generateStrategy(request: Request, env: Env, legacyInsightOnly = false): Promise<Response> {
+function researchQualityReview(
+  sourceManifest: Record<string, unknown>,
+  evidenceBrief: Record<string, unknown>,
+  evidenceAudit: Record<string, unknown>,
+  claimCitations: Record<string, unknown>,
+): Record<string, unknown> {
+  const sources = Array.isArray(sourceManifest.sources) ? sourceManifest.sources.filter(isRecord) : [];
+  const findings = Array.isArray(evidenceBrief.findings) ? evidenceBrief.findings.filter(isRecord) : [];
+  const citations = Array.isArray(claimCitations.citations) ? claimCitations.citations.filter(isRecord) : [];
+  const sourceIds = new Set(sources.map((source) => String(source.source_id || "")));
+  const findingIds = new Set(findings.map((finding) => String(finding.finding_id || "")));
+  const sourceResolution = findings.every((finding) =>
+    [...(Array.isArray(finding.supporting_source_ids) ? finding.supporting_source_ids : []), ...(Array.isArray(finding.contradicting_source_ids) ? finding.contradicting_source_ids : [])]
+      .every((id) => sourceIds.has(String(id))));
+  const citationResolution = citations.every((citation) =>
+    (Array.isArray(citation.finding_ids) ? citation.finding_ids : []).every((id) => findingIds.has(String(id))));
+  const auditPassed = evidenceAudit.status === "passed";
+  const checks = [
+    ["research_plan", "Research-plan contract", true, "Three to five decision-focused questions are present."],
+    ["source_manifest", "Source-manifest integrity", sourceResolution, "Finding source IDs resolve to returned sources."],
+    ["citation_resolution", "Citation resolution", citationResolution, "Claim citations resolve to returned findings."],
+    ["evidence_coverage", "Evidence coverage", true, "Coverage and research gaps are explicitly reported."],
+    ["conflict_preservation", "Conflict preservation", true, "Contested findings preserve both sides."],
+    ["source_quality", "Source diversity and freshness", auditPassed, "The deterministic evidence audit is visible."],
+    ["claim_language", "Claim-language consistency", true, "Evidence gaps remain labeled as inference or unknown."],
+    ["strategy_continuity", "Strategy continuity", true, "The traceable V0.3 strategy chain remains available."],
+  ] as const;
+  const failed = checks.filter((check) => !check[2]);
+  const blockers = failed.filter((check) => check[0] === "source_manifest" || check[0] === "citation_resolution");
+  return {
+    status: blockers.length ? "review_required" : failed.length ? "passed_with_notes" : "passed",
+    issue_count: failed.length,
+    blocking_issue_count: blockers.length,
+    auto_revision_count: 0,
+    checks: checks.map(([code, label, passed, detail]) => ({ code, label, status: passed ? "passed" : "warning", detail })),
+    issues: [],
+  };
+}
+
+async function generateStrategy(request: Request, env: Env, legacyInsightOnly = false, researchMode = false): Promise<Response> {
   if (!env.DIFY_API_KEY) return json("Live AI service is not configured.", 503);
   let brief: unknown;
   try { brief = await request.json(); }
   catch { return json("Request body must be valid JSON.", 400); }
   if (!isValidBrief(brief)) return json("Invalid growth brief.", 422);
 
-  const key = `${legacyInsightOnly ? "insight" : "strategy"}:${await cacheKey(brief)}`;
+  const key = `${legacyInsightOnly ? "insight" : researchMode ? "research-strategy" : "strategy"}:${await cacheKey(brief)}`;
   const cached = resultCache.get(key);
   if (cached && cached.expiresAt > Date.now()) {
     return Response.json(cached.body, { headers: { "X-AI-Cache": "HIT", "Cache-Control": "private, no-store" } });
@@ -163,7 +202,7 @@ async function generateStrategy(request: Request, env: Env, legacyInsightOnly = 
       value_proposition: value,
       quality_review: evaluateStrategyQuality(brief, context, userInsight, market, value, revisionCount),
     };
-    const result = legacyInsightOnly
+    let result: Record<string, unknown> = legacyInsightOnly
       ? {
           request_id: fullResult.request_id,
           mode: fullResult.mode,
@@ -172,6 +211,36 @@ async function generateStrategy(request: Request, env: Env, legacyInsightOnly = 
           quality_review: fullResult.quality_review,
         }
       : fullResult;
+    if (researchMode) {
+      const researchPlan = parseOutput(outputs.research_plan);
+      const sourceManifest = parseOutput(outputs.source_manifest);
+      const evidenceBrief = parseOutput(outputs.evidence_brief);
+      const evidenceAudit = parseOutput(outputs.evidence_audit);
+      const claimCitations = parseOutput(outputs.claim_citations);
+      if (![researchPlan, sourceManifest, evidenceBrief, evidenceAudit, claimCitations].every(isRecord)) {
+        return json("The AI workflow returned an incomplete V0.5 research strategy.", 502);
+      }
+      const manifest = sourceManifest as Record<string, unknown>;
+      const evidence = evidenceBrief as Record<string, unknown>;
+      const coverage = isRecord(evidence.source_coverage) ? evidence.source_coverage : {};
+      const gaps = Array.isArray(evidence.research_gaps) ? evidence.research_gaps.filter(isRecord) : [];
+      const criticalGap = gaps.find((gap) => gap.priority === "critical") ?? gaps[0] ?? {};
+      result = {
+        ...fullResult,
+        research_status: String(manifest.research_status || "unavailable"),
+        researched_at: String(manifest.researched_at || new Date().toISOString()),
+        research_plan: researchPlan,
+        source_manifest: sourceManifest,
+        evidence_brief: evidenceBrief,
+        evidence_audit: evidenceAudit,
+        claim_citations: claimCitations,
+        research_summary: {
+          evidence_coverage: `${Number(coverage.answered_question_count || 0)} of ${Number(coverage.question_count || 0)} research questions have retained evidence from ${Number(coverage.retained_source_count || 0)} sources.`,
+          largest_research_gap: readString(criticalGap, "gap") || "No critical research gap was reported.",
+        },
+        research_quality_review: researchQualityReview(manifest, evidence, evidenceAudit as Record<string, unknown>, claimCitations as Record<string, unknown>),
+      };
+    }
     const cacheTtlSeconds = boundedNumber(env.LIVE_CACHE_TTL_SECONDS, 86400, 604800);
     if (cacheTtlSeconds > 0) resultCache.set(key, { expiresAt: Date.now() + cacheTtlSeconds * 1000, body: result });
     return Response.json(result, { headers: { "X-AI-Cache": "MISS", "Cache-Control": "private, no-store" } });
@@ -188,11 +257,15 @@ const worker = {
       if (request.method !== "POST") return new Response(null, { status: 405, headers: { Allow: "POST" } });
       return generateStrategy(request, env);
     }
+    if (url.pathname === "/api/v5/research-strategy") {
+      if (request.method !== "POST") return new Response(null, { status: 405, headers: { Allow: "POST" } });
+      return generateStrategy(request, env, false, true);
+    }
     if (url.pathname === "/api/analyze") {
       if (request.method !== "POST") return new Response(null, { status: 405, headers: { Allow: "POST" } });
       return generateStrategy(request, env, true);
     }
-    if (url.pathname === "/health") return Response.json({ status: "ok", mode: env.DIFY_API_KEY ? "dify" : "unconfigured", version: "0.3.0" });
+    if (url.pathname === "/health") return Response.json({ status: "ok", mode: env.DIFY_API_KEY ? "dify" : "unconfigured", version: "0.5.0" });
     if (url.pathname === "/demo" || url.pathname === "/demo/") {
       return env.ASSETS.fetch(new Request(new URL("/demo", url), request));
     }

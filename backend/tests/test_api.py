@@ -12,7 +12,7 @@ VALID_BRIEF = {
     "target_market": "United States",
     "target_audience": "Frequent international business travelers",
     "business_goal": "User Acquisition",
-    "additional_context": "Entering the US market; test Reddit and TikTok."
+    "additional_context": "Entering the US market; test Reddit and TikTok.",
 }
 
 
@@ -20,7 +20,7 @@ def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
-    assert response.json()["version"] == "0.3.0"
+    assert response.json()["version"] == "0.5.0"
 
 
 def test_mock_insight_matches_contract() -> None:
@@ -30,7 +30,10 @@ def test_mock_insight_matches_contract() -> None:
     assert body["mode"] == "mock"
     assert len(body["user_insight"]["jobs_to_be_done"]) >= 3
     assert body["context"]["primary_goal"] == "User Acquisition"
-    assert body["user_insight"]["pain_points"][0]["evidence"]["validation_status"] == "needs_validation"
+    assert (
+        body["user_insight"]["pain_points"][0]["evidence"]["validation_status"]
+        == "needs_validation"
+    )
     assert body["quality_review"]["status"] == "passed"
     assert body["quality_review"]["auto_revision_count"] == 0
     assert len(body["quality_review"]["checks"]) == 4
@@ -49,9 +52,7 @@ def test_versioned_insight_alias_remains_available() -> None:
 
 
 def test_invalid_goal_is_rejected() -> None:
-    response = client.post(
-        "/api/analyze", json={**VALID_BRIEF, "business_goal": "Go Viral"}
-    )
+    response = client.post("/api/analyze", json={**VALID_BRIEF, "business_goal": "Go Viral"})
     assert response.status_code == 422
 
 
@@ -64,5 +65,20 @@ def test_v03_strategy_returns_four_traceable_modules() -> None:
     assert body["quality_review"]["status"] == "passed"
     assert body["quality_review"]["blocking_issue_count"] == 0
     assert len(body["quality_review"]["checks"]) == 6
-    assert body["strategy_summary"]["primary_value"] == body["value_proposition"]["primary_value"]["statement"]
+    assert (
+        body["strategy_summary"]["primary_value"]
+        == body["value_proposition"]["primary_value"]["statement"]
+    )
     assert body["market_hypothesis"]["validation_priorities"][0]["priority"] == "critical"
+
+
+def test_v05_research_strategy_returns_evidence_contract() -> None:
+    response = client.post("/api/v5/research-strategy", json=VALID_BRIEF)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["research_status"] == "offline_fixture"
+    assert len(body["research_plan"]["questions"]) == 5
+    assert len(body["evidence_brief"]["findings"]) == 5
+    assert len(body["research_quality_review"]["checks"]) == 8
+    assert body["claim_citations"]["citations"][0]["claim_status"] == "inference"

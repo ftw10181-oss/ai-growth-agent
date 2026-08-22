@@ -207,6 +207,12 @@ export interface ResearchStrategyResponse extends StrategyResponse {
       source_diversity_note: string;
     };
   };
+  evidence_audit: {
+    status: "passed" | "passed_with_notes";
+    issue_count: number;
+    issues: Array<{ code: string; path: string; message: string }>;
+    minimum_relevance: number;
+  };
   claim_citations: {
     citations: Array<{
       claim_path: string;

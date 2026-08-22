@@ -71,7 +71,9 @@ def _traceable_items(value: Any, path: str) -> Iterator[tuple[str, dict[str, Any
             yield from _traceable_items(child, f"{path}.{index}")
 
 
-def _evidenced_user_items(value: Any, path: str = "user_insight") -> Iterator[tuple[str, dict[str, Any]]]:
+def _evidenced_user_items(
+    value: Any, path: str = "user_insight"
+) -> Iterator[tuple[str, dict[str, Any]]]:
     if isinstance(value, dict):
         if isinstance(value.get("evidence"), dict):
             yield path, value
@@ -82,9 +84,7 @@ def _evidenced_user_items(value: Any, path: str = "user_insight") -> Iterator[tu
             yield from _evidenced_user_items(child, f"{path}.{index}")
 
 
-def _resolve_ref(
-    reference: str, roots: dict[str, Any]
-) -> tuple[bool, Any, InsightEvidence | None]:
+def _resolve_ref(reference: str, roots: dict[str, Any]) -> tuple[bool, Any, InsightEvidence | None]:
     parts = reference.split(".")
     current = roots.get(parts[0])
     if current is None:
@@ -105,18 +105,26 @@ def _resolve_ref(
         inherited_evidence = InsightEvidence.model_validate(current["evidence"])
     if parts[0] == "context" and inherited_evidence is None:
         inferred_fields = {"product_category", "assumptions", "ambiguities"}
-        basis = "contextual_inference" if len(parts) > 1 and parts[1] in inferred_fields else "explicit_brief"
+        basis = (
+            "contextual_inference"
+            if len(parts) > 1 and parts[1] in inferred_fields
+            else "explicit_brief"
+        )
         inherited_evidence = InsightEvidence(
             basis=basis,
             confidence="medium" if basis == "contextual_inference" else "high",
-            validation_status="needs_validation" if basis == "contextual_inference" else "brief_supported",
+            validation_status="needs_validation"
+            if basis == "contextual_inference"
+            else "brief_supported",
         )
     return True, current, inherited_evidence
 
 
 def _item_text(item: dict[str, Any]) -> str:
     ignored = {"source_refs", "evidence", "priority", "support_status"}
-    return " ".join(str(value) for key, value in item.items() if key not in ignored and isinstance(value, str))
+    return " ".join(
+        str(value) for key, value in item.items() if key not in ignored and isinstance(value, str)
+    )
 
 
 def _tokens(text: str) -> set[str]:
@@ -154,7 +162,9 @@ def normalize_strategy_claim_language(
                     continue
                 if not isinstance(value, str) or HYPOTHESIS_MARKER.search(value):
                     continue
-                if MARKET_ASSERTION_PATTERN.search(value) or UNSUPPORTED_STRENGTH_PATTERN.search(value):
+                if MARKET_ASSERTION_PATTERN.search(value) or UNSUPPORTED_STRENGTH_PATTERN.search(
+                    value
+                ):
                     item[key] = f"Hypothesis to test — {value}"
                     revision_count += 1
 
@@ -204,24 +214,28 @@ def evaluate_strategy_quality(
         for reference in item["source_refs"]:
             if reference.split(".", 1)[0] not in allowed_roots:
                 reference_issues += 1
-                issues.append(_issue(
-                    "invalid_source_root",
-                    f"{path}.source_refs",
-                    f"{reference} is not an allowed upstream source for this module.",
-                    severity="high",
-                    blocking=True,
-                ))
+                issues.append(
+                    _issue(
+                        "invalid_source_root",
+                        f"{path}.source_refs",
+                        f"{reference} is not an allowed upstream source for this module.",
+                        severity="high",
+                        blocking=True,
+                    )
+                )
                 continue
             valid, _, evidence = _resolve_ref(reference, roots)
             if not valid:
                 reference_issues += 1
-                issues.append(_issue(
-                    "invalid_source_ref",
-                    f"{path}.source_refs",
-                    f"{reference} does not resolve to an upstream field.",
-                    severity="high",
-                    blocking=True,
-                ))
+                issues.append(
+                    _issue(
+                        "invalid_source_ref",
+                        f"{path}.source_refs",
+                        f"{reference} does not resolve to an upstream field.",
+                        severity="high",
+                        blocking=True,
+                    )
+                )
             elif evidence is not None:
                 source_evidence.append(evidence)
 
@@ -229,19 +243,23 @@ def evaluate_strategy_quality(
         if item_evidence and source_evidence:
             downstream = InsightEvidence.model_validate(item_evidence)
             weakest_basis = min(BASIS_RANK[source.basis] for source in source_evidence)
-            weakest_confidence = min(CONFIDENCE_RANK[source.confidence] for source in source_evidence)
+            weakest_confidence = min(
+                CONFIDENCE_RANK[source.confidence] for source in source_evidence
+            )
             if (
                 BASIS_RANK[downstream.basis] > weakest_basis
                 or CONFIDENCE_RANK[downstream.confidence] > weakest_confidence
             ):
                 evidence_issues += 1
-                issues.append(_issue(
-                    "evidence_stronger_than_source",
-                    f"{path}.evidence",
-                    "Downstream evidence is stronger than at least one cited upstream source.",
-                    severity="high",
-                    blocking=True,
-                ))
+                issues.append(
+                    _issue(
+                        "evidence_stronger_than_source",
+                        f"{path}.evidence",
+                        "Downstream evidence is stronger than at least one cited upstream source.",
+                        severity="high",
+                        blocking=True,
+                    )
+                )
 
         text = _item_text(item)
         if item_evidence:
@@ -250,66 +268,80 @@ def evaluate_strategy_quality(
             unsupported_strength = UNSUPPORTED_STRENGTH_PATTERN.search(text)
             if evidence.basis == "explicit_brief" and (risky_market_claim or unsupported_strength):
                 claim_issues += 1
-                issues.append(_issue(
-                    "unsupported_explicit_market_claim",
-                    path,
-                    "This comparative or market claim is labeled as explicit brief evidence but is not directly established by the brief.",
-                    severity="high",
-                    blocking=True,
-                ))
-            elif (risky_market_claim or unsupported_strength) and not HYPOTHESIS_MARKER.search(text):
+                issues.append(
+                    _issue(
+                        "unsupported_explicit_market_claim",
+                        path,
+                        "This comparative or market claim is labeled as explicit brief evidence but is not directly established by the brief.",
+                        severity="high",
+                        blocking=True,
+                    )
+                )
+            elif (risky_market_claim or unsupported_strength) and not HYPOTHESIS_MARKER.search(
+                text
+            ):
                 claim_issues += 1
-                issues.append(_issue(
-                    "unsupported_claim_language",
-                    path,
-                    "Use neutral or explicit hypothesis language for frequency, comparative, or causal wording.",
-                ))
+                issues.append(
+                    _issue(
+                        "unsupported_claim_language",
+                        path,
+                        "Use neutral or explicit hypothesis language for frequency, comparative, or causal wording.",
+                    )
+                )
 
     for path, item in _evidenced_user_items(user_data):
         evidence = InsightEvidence.model_validate(item["evidence"])
         text = _item_text(item)
         if evidence.basis == "explicit_brief" and MARKET_ASSERTION_PATTERN.search(text):
             claim_issues += 1
-            issues.append(_issue(
-                "unsupported_explicit_market_claim",
-                path,
-                "The user-insight item introduces a market or alternative claim that is not explicit in the brief.",
-                severity="high",
-                blocking=True,
-            ))
+            issues.append(
+                _issue(
+                    "unsupported_explicit_market_claim",
+                    path,
+                    "The user-insight item introduces a market or alternative claim that is not explicit in the brief.",
+                    severity="high",
+                    blocking=True,
+                )
+            )
 
     primary_refs = value_proposition.primary_value.source_refs
     primary_roots = {reference.split(".", 1)[0] for reference in primary_refs}
     if not {"user_insight", "market_hypothesis"}.issubset(primary_roots):
         grounding_issues += 1
-        issues.append(_issue(
-            "primary_value_missing_decision_link",
-            "value_proposition.primary_value.source_refs",
-            "Primary value must cite both a user insight and a market hypothesis.",
-            severity="high",
-            blocking=True,
-        ))
+        issues.append(
+            _issue(
+                "primary_value_missing_decision_link",
+                "value_proposition.primary_value.source_refs",
+                "Primary value must cite both a user insight and a market hypothesis.",
+                severity="high",
+                blocking=True,
+            )
+        )
 
     segment_tokens = _tokens(user_insight.target_user.primary_segment)
     audience_tokens = _tokens(context.target_audience)
     if audience_tokens and not audience_tokens.intersection(segment_tokens):
         grounding_issues += 1
-        issues.append(_issue(
-            "target_user_drift",
-            "user_insight.target_user.primary_segment",
-            "The primary user no longer overlaps with the normalized target audience.",
-            severity="high",
-            blocking=True,
-        ))
+        issues.append(
+            _issue(
+                "target_user_drift",
+                "user_insight.target_user.primary_segment",
+                "The primary user no longer overlaps with the normalized target audience.",
+                severity="high",
+                blocking=True,
+            )
+        )
     if context.primary_goal != brief.business_goal:
         grounding_issues += 1
-        issues.append(_issue(
-            "business_goal_drift",
-            "context.primary_goal",
-            "The normalized business goal differs from the submitted brief.",
-            severity="high",
-            blocking=True,
-        ))
+        issues.append(
+            _issue(
+                "business_goal_drift",
+                "context.primary_goal",
+                "The normalized business goal differs from the submitted brief.",
+                severity="high",
+                blocking=True,
+            )
+        )
 
     brief_tokens = _tokens(f"{brief.product_description} {context.brief_summary}")
     for index, reason in enumerate(value_proposition.reasons_to_believe):
@@ -319,13 +351,15 @@ def evaluate_strategy_quality(
         overlap = capability_tokens.intersection(brief_tokens)
         if not any(ref.startswith("context.") for ref in reason.source_refs) or len(overlap) < 2:
             grounding_issues += 1
-            issues.append(_issue(
-                "reason_to_believe_not_grounded",
-                f"value_proposition.reasons_to_believe.{index}",
-                "A brief-supported capability must cite context and materially overlap with the submitted product description.",
-                severity="high",
-                blocking=True,
-            ))
+            issues.append(
+                _issue(
+                    "reason_to_believe_not_grounded",
+                    f"value_proposition.reasons_to_believe.{index}",
+                    "A brief-supported capability must cite context and materially overlap with the submitted product description.",
+                    severity="high",
+                    blocking=True,
+                )
+            )
 
     testability_issues = 0
     for index, priority in enumerate(market_hypothesis.validation_priorities):
@@ -334,11 +368,13 @@ def evaluate_strategy_quality(
             and MEASURABLE_SIGNAL.search(priority.fail_signal)
         ):
             testability_issues += 1
-            issues.append(_issue(
-                "validation_signal_not_measurable",
-                f"market_hypothesis.validation_priorities.{index}",
-                "Pass and fail signals should include an observable threshold, count, percentage, or time bound.",
-            ))
+            issues.append(
+                _issue(
+                    "validation_signal_not_measurable",
+                    f"market_hypothesis.validation_priorities.{index}",
+                    "Pass and fail signals should include an observable threshold, count, percentage, or time bound.",
+                )
+            )
 
     checks = [
         QualityCheck(
@@ -351,13 +387,17 @@ def evaluate_strategy_quality(
             code="reference_integrity",
             label="Reference integrity",
             status="warning" if reference_issues else "passed",
-            detail=f"{reference_issues} invalid or downstream reference(s) found." if reference_issues else "Every source reference resolves to an allowed upstream field.",
+            detail=f"{reference_issues} invalid or downstream reference(s) found."
+            if reference_issues
+            else "Every source reference resolves to an allowed upstream field.",
         ),
         QualityCheck(
             code="evidence_inheritance",
             label="Evidence inheritance",
             status="warning" if evidence_issues else "passed",
-            detail=f"{evidence_issues} item(s) claim stronger evidence than a cited source." if evidence_issues else "Downstream evidence does not exceed cited upstream evidence.",
+            detail=f"{evidence_issues} item(s) claim stronger evidence than a cited source."
+            if evidence_issues
+            else "Downstream evidence does not exceed cited upstream evidence.",
         ),
         QualityCheck(
             code="market_claim_grounding",
@@ -375,13 +415,17 @@ def evaluate_strategy_quality(
             code="decision_continuity",
             label="Decision continuity",
             status="warning" if grounding_issues else "passed",
-            detail=f"{grounding_issues} target, value, goal, or product-grounding issue(s) found." if grounding_issues else "Target user, goal, primary value, and product support remain connected.",
+            detail=f"{grounding_issues} target, value, goal, or product-grounding issue(s) found."
+            if grounding_issues
+            else "Target user, goal, primary value, and product support remain connected.",
         ),
         QualityCheck(
             code="validation_testability",
             label="Validation testability",
             status="warning" if testability_issues else "passed",
-            detail=f"{testability_issues} validation plan(s) need measurable pass and fail signals." if testability_issues else "Every validation priority has measurable pass and fail signals.",
+            detail=f"{testability_issues} validation plan(s) need measurable pass and fail signals."
+            if testability_issues
+            else "Every validation priority has measurable pass and fail signals.",
         ),
     ]
 

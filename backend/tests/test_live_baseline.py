@@ -44,6 +44,4 @@ def test_published_baseline_summary_and_scorecard_are_complete():
     assert summary["success_count"] == 12
     assert summary["failure_count"] == 0
     assert len(scorecard) == 12
-    assert {row["case_id"] for row in scorecard} == {
-        case["case_id"] for case in summary["cases"]
-    }
+    assert {row["case_id"] for row in scorecard} == {case["case_id"] for case in summary["cases"]}

@@ -24,27 +24,35 @@ def _question(question_id: str, priority: str = "important") -> dict:
 
 
 def test_research_plan_requires_unique_ids_and_critical_question():
-    plan = ResearchPlan.model_validate({
-        "decision_context": "Choose the initial growth wedge before scaling acquisition.",
-        "questions": [
-            _question("RQ-001", "critical"),
-            _question("RQ-002"),
-            _question("RQ-003", "exploratory"),
-        ],
-        "search_limits": {
-            "max_queries": 5,
-            "max_results_per_query": 5,
-            "max_retained_sources": 10,
-        },
-    })
+    plan = ResearchPlan.model_validate(
+        {
+            "decision_context": "Choose the initial growth wedge before scaling acquisition.",
+            "questions": [
+                _question("RQ-001", "critical"),
+                _question("RQ-002"),
+                _question("RQ-003", "exploratory"),
+            ],
+            "search_limits": {
+                "max_queries": 5,
+                "max_results_per_query": 5,
+                "max_retained_sources": 10,
+            },
+        }
+    )
 
     assert len(plan.questions) == 3
 
     with pytest.raises(ValidationError):
-        ResearchPlan.model_validate({
-            **plan.model_dump(mode="json"),
-            "questions": [_question("RQ-001", "critical"), _question("RQ-001"), _question("RQ-003")],
-        })
+        ResearchPlan.model_validate(
+            {
+                **plan.model_dump(mode="json"),
+                "questions": [
+                    _question("RQ-001", "critical"),
+                    _question("RQ-001"),
+                    _question("RQ-003"),
+                ],
+            }
+        )
 
 
 def test_contested_finding_preserves_both_sides_and_cannot_be_high_confidence():
@@ -68,35 +76,44 @@ def test_contested_finding_preserves_both_sides_and_cannot_be_high_confidence():
 
 def test_evidence_backed_citation_requires_a_finding():
     with pytest.raises(ValidationError):
-        ClaimCitation.model_validate({
-            "claim_path": "market_hypothesis.growth_wedge.entry_scenario",
-            "finding_ids": [],
-            "claim_status": "evidence_backed",
-            "explanation": "The claim needs direct evidence.",
-        })
+        ClaimCitation.model_validate(
+            {
+                "claim_path": "market_hypothesis.growth_wedge.entry_scenario",
+                "finding_ids": [],
+                "claim_status": "evidence_backed",
+                "explanation": "The claim needs direct evidence.",
+            }
+        )
 
 
 def test_evidence_audit_count_and_status_are_consistent():
-    assert EvidenceAudit.model_validate({
-        "status": "passed",
-        "issue_count": 0,
-        "issues": [],
-        "minimum_relevance": 0.5,
-    }).status == "passed"
+    assert (
+        EvidenceAudit.model_validate(
+            {
+                "status": "passed",
+                "issue_count": 0,
+                "issues": [],
+                "minimum_relevance": 0.5,
+            }
+        ).status
+        == "passed"
+    )
 
     with pytest.raises(ValidationError):
-        EvidenceAudit.model_validate({
-            "status": "passed",
-            "issue_count": 1,
-            "issues": [
-                {
-                    "code": "confidence_capped",
-                    "path": "findings.0.confidence",
-                    "message": "Confidence was capped by deterministic evidence rules.",
-                }
-            ],
-            "minimum_relevance": 0.5,
-        })
+        EvidenceAudit.model_validate(
+            {
+                "status": "passed",
+                "issue_count": 1,
+                "issues": [
+                    {
+                        "code": "confidence_capped",
+                        "path": "findings.0.confidence",
+                        "message": "Confidence was capped by deterministic evidence rules.",
+                    }
+                ],
+                "minimum_relevance": 0.5,
+            }
+        )
 
 
 def test_source_manifest_rejects_duplicate_urls():
@@ -117,9 +134,11 @@ def test_source_manifest_rejects_duplicate_urls():
     }
 
     with pytest.raises(ValidationError):
-        SourceManifest.model_validate({
-            "research_status": "complete",
-            "researched_at": "2026-08-22T00:00:00Z",
-            "sources": [source, {**source, "source_id": "SRC-002"}],
-            "failed_query_ids": [],
-        })
+        SourceManifest.model_validate(
+            {
+                "research_status": "complete",
+                "researched_at": "2026-08-22T00:00:00Z",
+                "sources": [source, {**source, "source_id": "SRC-002"}],
+                "failed_query_ids": [],
+            }
+        )

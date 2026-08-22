@@ -2,7 +2,7 @@
 
 # AI Growth Agent
 
-**Traceable growth strategy, generated from a fuzzy product brief.**
+**Evidence-backed growth intelligence, generated from a fuzzy product brief.**
 
 [![CI](https://img.shields.io/github/actions/workflow/status/ftw10181-oss/ai-growth-agent/ci.yml?branch=main&label=CI)](https://github.com/ftw10181-oss/ai-growth-agent/actions/workflows/ci.yml)
 [![Backend Tests](https://img.shields.io/badge/backend-pytest%20passing-2ea44f)](./backend/tests/)
@@ -12,26 +12,26 @@
 
 </div>
 
-AI Growth Agent turns a half-formed product idea and target audience into a structured, decision-ready growth strategy. V0.3 connects **Context**, **User Insight**, **Market Hypothesis**, and **Value Proposition** so the user can see how each recommendation was formed, what evidence it inherits, and what should be validated next.
+AI Growth Agent turns a half-formed product idea and target audience into a structured, source-aware growth strategy. V0.5 plans decision-focused research, retrieves current sources, applies a deterministic Evidence Gate, and then connects **User Insight**, **Market Hypothesis**, and **Value Proposition** to the retained findings.
 
 It is built as a portfolio piece for **AI Product Manager**, **AI Application Engineer**, and **Growth Engineer** roles: the focus is the **product surface, the reasoning contract, and the evaluation loop**, not the infra underneath.
 
 ---
 
-## V0.3 — From Insight to Strategy
+## V0.5 — Research Before Recommendation
 
 ```text
-Growth Brief → Context → User Insight → Market Hypothesis → Value Proposition → Quality Gate
+Growth Brief → Research Plan → Search → Evidence Gate → Strategy → Citation Map
 ```
 
-- A four-decision executive summary: primary user, growth wedge, primary value, and biggest risk
-- Item-level `source_refs` that connect downstream strategy to upstream context and user evidence
-- Measurable pass/fail signals for every validation priority
-- Six deterministic checks for structure, reference integrity, evidence inheritance, market-claim grounding, decision continuity, and testability
-- Transparent automatic reframing of risky inferred claims as hypotheses—without upgrading evidence or hiding the original substance
-- A recruiter-facing interface that explains the product decisions, architecture, responsible-AI boundary, and evaluation loop
+- Three to five bounded research questions and up to ten retained sources
+- A deterministic Evidence Gate that removes mismatched sources and caps unsupported confidence
+- An Evidence Board showing coverage, supported/contested/insufficient findings, source links, limitations, and remaining gaps
+- A claim citation map that marks material strategy claims as evidence-backed, contested, inference, or unknown
+- Eight research-quality checks while preserving every V0.3 route and strategy contract
+- Server-side credentials, daily usage limits, request throttling, and bounded caching
 
-**Live V0.3 portfolio:** [ai-growth-agent-portfolio.markus12138467907.chatgpt.site](https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site/)
+**Live portfolio:** [ai-growth-agent-portfolio.markus12138467907.chatgpt.site](https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site/)
 
 The original standalone `/demo` route remains as the V0.2.1 evidence-aware insight showcase.
 

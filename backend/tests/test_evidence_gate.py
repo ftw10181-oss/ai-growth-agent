@@ -2,9 +2,7 @@ import importlib.util
 from pathlib import Path
 
 
-MODULE_PATH = (
-    Path(__file__).parents[2] / "dify" / "code" / "validate_evidence_brief.py"
-)
+MODULE_PATH = Path(__file__).parents[2] / "dify" / "code" / "validate_evidence_brief.py"
 SPEC = importlib.util.spec_from_file_location("validate_evidence_brief", MODULE_PATH)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader

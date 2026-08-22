@@ -20,9 +20,7 @@ RISK_PATTERNS = {
     ),
 }
 
-HYPOTHESIS_MARKERS = re.compile(
-    r"\b(?:hypothesis to test|may|could)\b", re.IGNORECASE
-)
+HYPOTHESIS_MARKERS = re.compile(r"\b(?:hypothesis to test|may|could)\b", re.IGNORECASE)
 
 
 def _reviewable_strings(insight: UserInsight):
@@ -73,9 +71,7 @@ def normalize_claim_language(insight: UserInsight) -> tuple[UserInsight, int]:
     return UserInsight.model_validate(payload), revisions
 
 
-def evaluate_quality(
-    insight: UserInsight, auto_revision_count: int = 0
-) -> QualityReview:
+def evaluate_quality(insight: UserInsight, auto_revision_count: int = 0) -> QualityReview:
     """Run deterministic checks after the model output passes the hard schema."""
     issues: list[QualityIssue] = []
 
@@ -108,12 +104,8 @@ def evaluate_quality(
                     )
                 )
 
-    research_issues = [
-        issue for issue in issues if issue.code == "research_question_pattern"
-    ]
-    wording_issues = [
-        issue for issue in issues if issue.code != "research_question_pattern"
-    ]
+    research_issues = [issue for issue in issues if issue.code == "research_question_pattern"]
+    wording_issues = [issue for issue in issues if issue.code != "research_question_pattern"]
     checks = [
         QualityCheck(
             code="structure_contract",
@@ -155,13 +147,7 @@ def evaluate_quality(
 
     hard_issue_codes = {"structure_contract", "evidence_contract"}
     has_hard_issue = any(issue.code in hard_issue_codes for issue in issues)
-    status = (
-        "review_required"
-        if has_hard_issue
-        else "passed_with_notes"
-        if issues
-        else "passed"
-    )
+    status = "review_required" if has_hard_issue else "passed_with_notes" if issues else "passed"
 
     return QualityReview(
         status=status,

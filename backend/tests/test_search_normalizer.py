@@ -2,9 +2,7 @@ import importlib.util
 from pathlib import Path
 
 
-MODULE_PATH = (
-    Path(__file__).parents[2] / "dify" / "code" / "normalize_search_results.py"
-)
+MODULE_PATH = Path(__file__).parents[2] / "dify" / "code" / "normalize_search_results.py"
 SPEC = importlib.util.spec_from_file_location("normalize_search_results", MODULE_PATH)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
@@ -150,10 +148,7 @@ def test_normalizer_balances_global_source_budget_across_queries():
                     "results": [
                         {
                             "title": f"Query {query_index} result {result_index}",
-                            "url": (
-                                "https://example.com/"
-                                f"q{query_index}-result-{result_index}"
-                            ),
+                            "url": ("https://example.com/" f"q{query_index}-result-{result_index}"),
                             "content": "Search evidence.",
                             "score": 1 - (result_index / 10),
                         }
@@ -171,9 +166,7 @@ def test_normalizer_balances_global_source_budget_across_queries():
 
     assert len(output["sources"]) == 10
     retained_query_ids = [
-        query_id
-        for source in output["sources"]
-        for query_id in source["query_ids"]
+        query_id for source in output["sources"] for query_id in source["query_ids"]
     ]
     assert set(retained_query_ids) == {
         "RQ-001",

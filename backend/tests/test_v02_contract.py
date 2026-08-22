@@ -31,8 +31,7 @@ def test_v02_mock_attaches_evidence_to_every_insight() -> None:
     assert all(item.evidence.validation_status for section in sections for item in section)
     assert all(item.decision_relevance for section in sections for item in section)
     assert all(
-        any(item.decision_relevance == "primary" for item in section)
-        for section in sections
+        any(item.decision_relevance == "primary" for item in section) for section in sections
     )
 
 
@@ -42,8 +41,7 @@ def test_every_major_section_requires_primary_relevance() -> None:
     response = asyncio.run(MockInsightService().generate(BRIEF))
     payload = response.user_insight.model_dump()
     payload["adoption_barriers"] = [
-        {**item, "decision_relevance": "secondary"}
-        for item in payload["adoption_barriers"]
+        {**item, "decision_relevance": "secondary"} for item in payload["adoption_barriers"]
     ]
 
     with pytest.raises(

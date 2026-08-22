@@ -49,9 +49,7 @@ def test_dify_dsl_matches_public_contract() -> None:
     assert set(context_schema["required"]) == set(NormalizedContext.model_json_schema()["required"])
     assert set(insight_schema["required"]) == set(UserInsightV01.model_json_schema()["required"])
 
-    end_outputs = {
-        item["variable"]: item["value_selector"] for item in nodes["end"]["outputs"]
-    }
+    end_outputs = {item["variable"]: item["value_selector"] for item in nodes["end"]["outputs"]}
     assert end_outputs == {
         "context": ["context_interpreter", "structured_output"],
         "user_insight": ["user_insight", "structured_output"],
@@ -114,9 +112,7 @@ def test_v03_dify_dsl_adds_traceable_strategy_modules() -> None:
     assert set(value_schema["required"]) == set(ValueProposition.model_json_schema()["required"])
     assert value_schema["properties"]["message_pillars"]["minItems"] == 3
 
-    end_outputs = {
-        item["variable"]: item["value_selector"] for item in nodes["end"]["outputs"]
-    }
+    end_outputs = {item["variable"]: item["value_selector"] for item in nodes["end"]["outputs"]}
     assert end_outputs == {
         "context": ["context_interpreter", "structured_output"],
         "user_insight": ["user_insight", "structured_output"],
@@ -249,18 +245,16 @@ def test_v05_dify_dsl_adds_bounded_research_and_citation_contracts() -> None:
 
         walk_schema(schema)
 
-    search_limit_properties = nodes["research_planner"]["structured_output"][
-        "schema"
-    ]["properties"]["search_limits"]["properties"]
+    search_limit_properties = nodes["research_planner"]["structured_output"]["schema"][
+        "properties"
+    ]["search_limits"]["properties"]
     assert search_limit_properties["max_queries"] == {"type": "integer", "const": 5}
     assert search_limit_properties["max_retained_sources"] == {
         "type": "integer",
         "const": 10,
     }
 
-    end_outputs = {
-        item["variable"]: item["value_selector"] for item in nodes["end"]["outputs"]
-    }
+    end_outputs = {item["variable"]: item["value_selector"] for item in nodes["end"]["outputs"]}
     assert end_outputs == {
         "context": ["context_interpreter", "structured_output"],
         "research_plan": ["research_planner", "structured_output"],
@@ -273,6 +267,8 @@ def test_v05_dify_dsl_adds_bounded_research_and_citation_contracts() -> None:
         "claim_citations": ["claim_citation_mapper", "structured_output"],
     }
 
-    grounding = (Path(__file__).parents[2] / "dify" / "prompts" / "09-evidence-grounding-addendum.md").read_text()
+    grounding = (
+        Path(__file__).parents[2] / "dify" / "prompts" / "09-evidence-grounding-addendum.md"
+    ).read_text()
     for node_id in ("user_insight", "market_hypothesis", "value_proposition"):
         assert grounding in nodes[node_id]["prompt_template"][0]["text"]

@@ -42,9 +42,7 @@ def test_invalid_source_reference_blocks_strategy() -> None:
     opportunity = strategy.market_hypothesis.opportunity_statement.model_copy(
         update={"source_refs": ["context.missing_field"]}
     )
-    market = strategy.market_hypothesis.model_copy(
-        update={"opportunity_statement": opportunity}
-    )
+    market = strategy.market_hypothesis.model_copy(update={"opportunity_statement": opportunity})
     strategy = strategy.model_copy(update={"market_hypothesis": market})
 
     result = review(strategy)
@@ -118,7 +116,10 @@ def test_primary_value_must_link_user_and_market_decisions() -> None:
 def test_vague_validation_signals_are_non_blocking_notes() -> None:
     strategy = mock_strategy()
     priority = strategy.market_hypothesis.validation_priorities[0].model_copy(
-        update={"pass_signal": "High user interest after interviews.", "fail_signal": "Low user interest after interviews."}
+        update={
+            "pass_signal": "High user interest after interviews.",
+            "fail_signal": "Low user interest after interviews.",
+        }
     )
     market = strategy.market_hypothesis.model_copy(
         update={

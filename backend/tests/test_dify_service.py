@@ -87,9 +87,7 @@ def test_dify_service_accepts_object_outputs(monkeypatch) -> None:
     )
 
     result = asyncio.run(
-        DifyInsightService(
-            Settings(app_mode="dify", dify_api_key="app-test-key")
-        ).generate(BRIEF)
+        DifyInsightService(Settings(app_mode="dify", dify_api_key="app-test-key")).generate(BRIEF)
     )
 
     assert result.mode == "dify"
@@ -116,9 +114,7 @@ def test_dify_service_accepts_json_encoded_outputs(monkeypatch) -> None:
     )
 
     result = asyncio.run(
-        DifyInsightService(
-            Settings(app_mode="dify", dify_api_key="app-test-key")
-        ).generate(BRIEF)
+        DifyInsightService(Settings(app_mode="dify", dify_api_key="app-test-key")).generate(BRIEF)
     )
 
     assert result.request_id == "task-string-output"
@@ -142,9 +138,9 @@ def test_dify_service_rejects_failed_workflow(monkeypatch) -> None:
 
     with pytest.raises(InsightServiceError, match="could not complete"):
         asyncio.run(
-            DifyInsightService(
-                Settings(app_mode="dify", dify_api_key="app-test-key")
-            ).generate(BRIEF)
+            DifyInsightService(Settings(app_mode="dify", dify_api_key="app-test-key")).generate(
+                BRIEF
+            )
         )
 
 
@@ -167,9 +163,9 @@ def test_dify_service_rejects_missing_job_dimension(monkeypatch) -> None:
 
     with pytest.raises(InsightServiceError, match="unexpected response shape"):
         asyncio.run(
-            DifyInsightService(
-                Settings(app_mode="dify", dify_api_key="app-test-key")
-            ).generate(BRIEF)
+            DifyInsightService(Settings(app_mode="dify", dify_api_key="app-test-key")).generate(
+                BRIEF
+            )
         )
 
 

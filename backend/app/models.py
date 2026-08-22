@@ -366,9 +366,7 @@ class Objection(BaseModel):
 class MessageTest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    angle: Literal[
-        "feature_led", "pain_led", "scenario_led", "confidence_led", "social_value_led"
-    ]
+    angle: Literal["feature_led", "pain_led", "scenario_led", "confidence_led", "social_value_led"]
     variant_a: str = Field(min_length=10)
     variant_b: str = Field(min_length=10)
     primary_metric: str = Field(min_length=3)
@@ -499,9 +497,7 @@ class ResearchSource(BaseModel):
     published_at: Optional[date] = None
     retrieved_at: datetime
     query_ids: list[str] = Field(min_length=1, max_length=5)
-    source_class: Literal[
-        "primary", "independent_secondary", "vendor", "community", "unknown"
-    ]
+    source_class: Literal["primary", "independent_secondary", "vendor", "community", "unknown"]
     relevance_score: float = Field(ge=0, le=1)
     freshness: Literal["current", "dated", "unknown"]
     snippet: str = Field(min_length=10, max_length=1200)
@@ -630,9 +626,7 @@ class EvidenceAudit(BaseModel):
 class ClaimCitation(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    claim_path: str = Field(
-        pattern=r"^(user_insight|market_hypothesis|value_proposition)\."
-    )
+    claim_path: str = Field(pattern=r"^(user_insight|market_hypothesis|value_proposition)\.")
     finding_ids: list[str] = Field(max_length=5)
     claim_status: Literal["evidence_backed", "contested", "inference", "unknown"]
     explanation: str = Field(min_length=8, max_length=400)

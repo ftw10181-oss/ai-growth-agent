@@ -7,10 +7,10 @@ from threading import Lock
 from typing import Optional, Union
 
 from .config import Settings
-from .models import GrowthBrief, StrategyResponse, UserInsightResponse
+from .models import GrowthBrief, ResearchStrategyResponse, StrategyResponse, UserInsightResponse
 
 
-ProtectedResponse = Union[UserInsightResponse, StrategyResponse]
+ProtectedResponse = Union[UserInsightResponse, StrategyResponse, ResearchStrategyResponse]
 
 
 @dataclass(frozen=True)
@@ -103,9 +103,7 @@ class LiveUsageGuard:
 
 
 def brief_cache_key(brief: GrowthBrief) -> str:
-    normalized = json.dumps(
-        brief.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
-    )
+    normalized = json.dumps(brief.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
 

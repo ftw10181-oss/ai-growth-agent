@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
-import { generateStrategy } from "./api";
-import type { BusinessGoal, GrowthBrief, InsightEvidence, InsightItem, StrategyResponse, TraceableItem } from "./types";
+import { generateResearchStrategy } from "./api";
+import type { BusinessGoal, GrowthBrief, InsightEvidence, InsightItem, ResearchStrategyResponse, StrategyResponse, TraceableItem } from "./types";
 
 const goals: BusinessGoal[] = [
   "Brand Awareness",
@@ -102,7 +102,43 @@ function QualityGate({ review }: { review: StrategyResponse["quality_review"] })
   );
 }
 
-function Results({ result }: { result: StrategyResponse }) {
+function EvidenceBoard({ result }: { result: ResearchStrategyResponse }) {
+  const coverage = result.evidence_brief.source_coverage;
+  const sourceById = new Map(result.source_manifest.sources.map((source) => [source.source_id, source]));
+  const statusLabel = result.research_status.replaceAll("_", " ");
+  return (
+    <section className="evidence-board" aria-label="Evidence Board">
+      <div className="evidence-board-heading">
+        <div><span className="eyebrow">Evidence Board · V0.5</span><h3>Research before recommendation.</h3></div>
+        <span className={`research-status status-${result.research_status}`}>{statusLabel}</span>
+      </div>
+      <div className="coverage-strip">
+        <div><strong>{coverage.answered_question_count}/{coverage.question_count}</strong><span>questions answered</span></div>
+        <div><strong>{coverage.retained_source_count}</strong><span>sources retained</span></div>
+        <div><strong>{result.evidence_brief.findings.filter((item) => item.status === "supported").length}</strong><span>supported findings</span></div>
+        <div><strong>{result.evidence_audit.issue_count}</strong><span>gate corrections</span></div>
+      </div>
+      <p className="research-summary">{result.research_summary.evidence_coverage}</p>
+      <div className="finding-list">
+        {result.evidence_brief.findings.map((finding) => {
+          const ids = [...finding.supporting_source_ids, ...finding.contradicting_source_ids];
+          return (
+            <article key={finding.finding_id} className={`evidence-finding finding-${finding.status}`}>
+              <div className="finding-topline"><span>{finding.finding_id}</span><span>{finding.status}</span><span>{finding.confidence} confidence</span></div>
+              <h4>{finding.claim}</h4><p>{finding.implication}</p>
+              {ids.length > 0 && <div className="source-links">{ids.map((id) => { const source = sourceById.get(id); return source ? <a key={id} href={source.url} target="_blank" rel="noreferrer">{id} · {source.domain} ↗</a> : null; })}</div>}
+              {finding.limitations.length > 0 && <small>Limits: {finding.limitations.join(" ")}</small>}
+            </article>
+          );
+        })}
+      </div>
+      <details className="research-plan"><summary>View the five research questions</summary><ol>{result.research_plan.questions.map((question) => <li key={question.question_id}><strong>{question.question_id}</strong> {question.question}</li>)}</ol></details>
+      <p className="research-gap"><strong>Largest gap:</strong> {result.research_summary.largest_research_gap}</p>
+    </section>
+  );
+}
+
+function Results({ result }: { result: ResearchStrategyResponse }) {
   const { strategy_summary: summary, user_insight: insight, market_hypothesis: market, value_proposition: value } = result;
   return (
     <section className="results strategy-results" aria-live="polite">
@@ -122,7 +158,9 @@ function Results({ result }: { result: StrategyResponse }) {
         <article className="risk-summary"><span>Biggest risk</span><p>{summary.biggest_risk}</p></article>
       </div>
 
-      <QualityGate review={result.quality_review} />
+      <EvidenceBoard result={result} />
+
+      <QualityGate review={result.research_quality_review} />
 
       <details className="context" open>
         <summary>01 · Context Interpreter</summary>
@@ -204,7 +242,7 @@ function Results({ result }: { result: StrategyResponse }) {
         {value.message_tests.map((test) => <div key={test.angle}><span>{test.angle.replaceAll("_", " ")}</span><p><strong>A</strong> {test.variant_a}</p><p><strong>B</strong> {test.variant_b}</p><small>Measure: {test.primary_metric} · Learn: {test.expected_learning}</small></div>)}
       </article>
 
-      <p className="run-meta">Run {result.request_id.slice(0, 8)} · {result.mode} mode · hypotheses, not verified market research</p>
+      <p className="run-meta">Run {result.request_id.slice(0, 8)} · {result.mode} mode · researched {new Date(result.researched_at).toLocaleDateString()}</p>
     </section>
   );
 }
@@ -262,14 +300,14 @@ function CaseStudy() {
 
 export default function App() {
   const [brief, setBrief] = useState<GrowthBrief>(initialBrief);
-  const [result, setResult] = useState<StrategyResponse | null>(null);
+  const [result, setResult] = useState<ResearchStrategyResponse | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const update = (key: keyof GrowthBrief, value: string) => setBrief((current) => ({ ...current, [key]: value }));
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault(); setError(""); setLoading(true);
-    try { setResult(await generateStrategy(brief)); }
+    try { setResult(await generateResearchStrategy(brief)); }
     catch (caught) { setError(caught instanceof Error ? caught.message : "Something went wrong."); }
     finally { setLoading(false); }
   }
@@ -277,8 +315,8 @@ export default function App() {
   return (
     <main>
       <header className="hero">
-        <nav><span className="brand-mark">AG</span><strong>AI Growth Agent</strong><div className="nav-links"><a href="#demo">Try demo</a><a href="#case-study">Case study</a><a href="https://github.com/ftw10181-oss/ai-growth-agent" target="_blank" rel="noreferrer">GitHub ↗</a></div><span className="version">V0.3</span></nav>
-        <div className="hero-copy"><span className="eyebrow">From brief to decision-ready growth strategy</span><h1>Turn assumptions into a testable growth strategy.</h1><p>Connect user insight, market hypotheses, value propositions, and validation priorities—without presenting AI inference as market fact.</p><div className="hero-actions"><a className="primary-action" href="#demo">Try the live workflow <span aria-hidden="true">↓</span></a><a className="secondary-action" href="#case-study">Read the case study</a></div></div>
+        <nav><span className="brand-mark">AG</span><strong>AI Growth Agent</strong><div className="nav-links"><a href="#demo">Try demo</a><a href="#case-study">Case study</a><a href="https://github.com/ftw10181-oss/ai-growth-agent" target="_blank" rel="noreferrer">GitHub ↗</a></div><span className="version">V0.5</span></nav>
+        <div className="hero-copy"><span className="eyebrow">Evidence-backed growth intelligence</span><h1>Research first. Recommend second.</h1><p>Turn a fuzzy product brief into source-aware findings, a traceable growth strategy, and an explicit list of what still needs human validation.</p><div className="hero-actions"><a className="primary-action" href="#demo">Run evidence workflow <span aria-hidden="true">↓</span></a><a className="secondary-action" href="#case-study">Read the case study</a></div></div>
       </header>
 
       <section className="workspace" id="demo">
@@ -288,10 +326,10 @@ export default function App() {
           <label>Product description<textarea value={brief.product_description} onChange={(event) => update("product_description", event.target.value)} minLength={20} maxLength={2000} rows={3} required /></label>
           <div className="field-row"><label>Target audience<input value={brief.target_audience} onChange={(event) => update("target_audience", event.target.value)} minLength={5} maxLength={500} required /></label><label>Business goal<select value={brief.business_goal} onChange={(event) => update("business_goal", event.target.value)}>{goals.map((goal) => <option key={goal}>{goal}</option>)}</select></label></div>
           <label>Additional context <span className="optional">optional</span><textarea value={brief.additional_context} onChange={(event) => update("additional_context", event.target.value)} maxLength={2000} rows={3} /></label>
-          <div className="submit-row"><p>V0.3 does not perform web research. Inferred recommendations remain hypotheses.</p><button disabled={loading}>{loading ? "Building strategy…" : "Generate growth strategy"}<span aria-hidden="true">→</span></button></div>
+          <div className="submit-row"><p>V0.5 searches up to five questions, validates evidence, then builds the strategy.</p><button disabled={loading}>{loading ? "Researching evidence…" : "Research & build strategy"}<span aria-hidden="true">→</span></button></div>
           {error && <p className="error" role="alert">{error}</p>}
         </form>
-        {result ? <Results result={result} /> : <aside className="empty-state"><span className="step">02</span><h2>Your strategy chain will appear here.</h2><p>The agent connects the growth brief to a primary user, opportunity frame, value proposition, and measurable validation plan.</p><div className="pipeline"><span>Context</span><i>→</i><span>User</span><i>→</i><span>Market</span><i>→</i><span>Value</span></div></aside>}
+        {result ? <Results result={result} /> : <aside className="empty-state"><span className="step">02</span><h2>Your Evidence Board will appear here.</h2><p>The agent plans research, retrieves current sources, audits evidence strength, and only then creates a traceable strategy.</p><div className="pipeline"><span>Plan</span><i>→</i><span>Search</span><i>→</i><span>Gate</span><i>→</i><span>Strategy</span></div></aside>}
       </section>
       <CaseStudy />
       <footer><span>Built by Markus for overseas growth operators</span><span>Traceable · transparent · testable</span></footer>

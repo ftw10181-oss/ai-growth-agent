@@ -69,7 +69,9 @@ def test_explicit_hypothesis_language_avoids_claim_warning() -> None:
 
 def test_research_question_order_is_flagged() -> None:
     insight = mock_insight().model_copy(
-        update={"research_questions": ["Why would you buy this?", "What is hard?", "Would you switch?"]}
+        update={
+            "research_questions": ["Why would you buy this?", "What is hard?", "Would you switch?"]
+        }
     )
 
     review = evaluate_quality(insight)

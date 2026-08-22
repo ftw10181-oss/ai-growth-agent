@@ -121,6 +121,31 @@ small { color: var(--muted); line-height: 1.4; display: block; }
 .strategy-summary article > span, .micro-label { color: #567260; font-size: 9px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
 .strategy-summary article p { margin: 7px 0 0; font: 600 12px/1.45 "Manrope"; }
 .strategy-summary .risk-summary { background: #f4eadb; }
+.evidence-board { margin: 24px 0; padding: 20px; border-radius: 14px; background: #122d21; color: white; }
+.evidence-board-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.evidence-board-heading h3 { margin: 6px 0 0; font: 600 20px "Manrope"; }
+.research-status { padding: 6px 9px; border-radius: 100px; background: var(--accent); color: var(--forest); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.status-partial, .status-unavailable { background: #f2d08d; }
+.coverage-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin: 18px 0; overflow: hidden; border-radius: 10px; background: rgba(255,255,255,.12); }
+.coverage-strip div { padding: 14px; background: rgba(255,255,255,.06); }
+.coverage-strip strong { display: block; color: var(--accent); font: 600 22px "Manrope"; }
+.coverage-strip span { color: #b9cbbf; font-size: 9px; }
+.research-summary { color: #c8d8ce; font-size: 12px; line-height: 1.5; }
+.finding-list { display: grid; gap: 8px; margin-top: 14px; }
+.evidence-finding { border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.055); }
+.evidence-finding h4 { margin: 10px 0 7px; font: 600 13px/1.45 "Manrope"; }
+.evidence-finding p { margin: 0 0 9px; color: #c8d8ce; font-size: 11px; line-height: 1.5; }
+.evidence-finding small { color: #9db1a4; font-size: 9px; }
+.finding-topline { display: flex; flex-wrap: wrap; gap: 6px; }
+.finding-topline span { padding: 4px 6px; border-radius: 100px; background: rgba(255,255,255,.1); color: #b9cbbf; font-size: 8px; font-weight: 700; text-transform: uppercase; }
+.finding-supported .finding-topline span:nth-child(2) { background: var(--accent); color: var(--forest); }
+.finding-contested .finding-topline span:nth-child(2) { background: #f2d08d; color: #5d411d; }
+.source-links { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.source-links a { padding: 5px 7px; border-radius: 6px; background: rgba(216,255,85,.1); color: var(--accent); font-size: 9px; text-decoration: none; }
+.research-plan { margin-top: 14px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,.12); color: #c8d8ce; font-size: 10px; }
+.research-plan summary { cursor: pointer; color: white; font-weight: 700; }
+.research-plan li { padding: 4px 0; line-height: 1.45; }
+.research-gap { margin: 8px 0 0; padding: 10px; border-radius: 8px; background: rgba(242,208,141,.1); color: #e6d2aa; font-size: 10px; line-height: 1.5; }
 .context-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 14px; }
 .context-columns strong { font-size: 11px; }
 .context-columns ul { margin: 6px 0 0; padding-left: 17px; color: var(--muted); font-size: 11px; line-height: 1.5; }
@@ -257,7 +282,7 @@ footer { max-width: 1440px; margin: 0 auto; padding: 0 max(5vw, 24px) 30px; disp
   .nav-links { display: none; }
   .hero-actions { flex-direction: column; align-items: stretch; }
   .field-row, .result-grid { grid-template-columns: 1fr; }
-  .strategy-summary, .context-columns, .market-grid, .validation-list dl, .message-grid { grid-template-columns: 1fr; }
+  .strategy-summary, .context-columns, .market-grid, .validation-list dl, .message-grid, .coverage-strip { grid-template-columns: 1fr; }
   .wide-market-card { grid-column: auto; }
   .wide-card { grid-column: auto; }
   form, .results, .empty-state { padding: 22px; }
