@@ -1,5 +1,6 @@
+from datetime import date, datetime
 from enum import Enum
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -437,3 +438,226 @@ class StrategyResponse(BaseModel):
     market_hypothesis: MarketHypothesis
     value_proposition: ValueProposition
     quality_review: StrategyQualityReview
+
+
+ResearchDimension = Literal[
+    "user_behavior",
+    "market_context",
+    "competitor",
+    "channel",
+    "risk",
+    "product_expectation",
+]
+
+
+class ResearchQuestion(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    question_id: str = Field(pattern=r"^RQ-[0-9]{3}$")
+    question: str = Field(min_length=15, max_length=240)
+    dimension: ResearchDimension
+    decision_impact: str = Field(min_length=15, max_length=300)
+    evidence_needed: str = Field(min_length=15, max_length=300)
+    query: str = Field(min_length=8, max_length=220)
+    recency_preference: Literal["last_12_months", "last_24_months", "any"]
+    priority: Priority
+
+
+class SearchLimits(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    max_queries: Literal[5]
+    max_results_per_query: int = Field(ge=3, le=5)
+    max_retained_sources: Literal[10]
+
+
+class ResearchPlan(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    decision_context: str = Field(min_length=20, max_length=500)
+    questions: list[ResearchQuestion] = Field(min_length=3, max_length=5)
+    search_limits: SearchLimits
+
+    @model_validator(mode="after")
+    def require_unique_questions_and_critical_priority(self):
+        ids = [question.question_id for question in self.questions]
+        if len(ids) != len(set(ids)):
+            raise ValueError("research question IDs must be unique")
+        if not any(question.priority == "critical" for question in self.questions):
+            raise ValueError("research plan must include a critical question")
+        return self
+
+
+class ResearchSource(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_id: str = Field(pattern=r"^SRC-[0-9]{3}$")
+    title: str = Field(min_length=3, max_length=300)
+    url: str = Field(pattern=r"^https://")
+    domain: str = Field(min_length=3, max_length=253)
+    publisher: Optional[str] = Field(default=None, max_length=160)
+    published_at: Optional[date] = None
+    retrieved_at: datetime
+    query_ids: list[str] = Field(min_length=1, max_length=5)
+    source_class: Literal[
+        "primary", "independent_secondary", "vendor", "community", "unknown"
+    ]
+    relevance_score: float = Field(ge=0, le=1)
+    freshness: Literal["current", "dated", "unknown"]
+    snippet: str = Field(min_length=10, max_length=1200)
+    limitations: list[str] = Field(max_length=4)
+
+    @model_validator(mode="after")
+    def validate_query_ids(self):
+        if len(self.query_ids) != len(set(self.query_ids)):
+            raise ValueError("source query IDs must be unique")
+        if not all(
+            len(value) == 6 and value.startswith("RQ-") and value[3:].isdigit()
+            for value in self.query_ids
+        ):
+            raise ValueError("source query IDs must use the RQ-000 pattern")
+        return self
+
+
+class SourceManifest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    research_status: Literal["complete", "partial", "unavailable", "offline_fixture"]
+    researched_at: datetime
+    sources: list[ResearchSource] = Field(max_length=10)
+    failed_query_ids: list[str] = Field(max_length=5)
+
+    @model_validator(mode="after")
+    def validate_source_manifest(self):
+        ids = [source.source_id for source in self.sources]
+        if len(ids) != len(set(ids)):
+            raise ValueError("source IDs must be unique")
+        urls = [source.url for source in self.sources]
+        if len(urls) != len(set(urls)):
+            raise ValueError("source URLs must be canonical and unique")
+        if self.research_status == "unavailable" and self.sources:
+            raise ValueError("unavailable research cannot contain sources")
+        return self
+
+
+class EvidenceFinding(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    finding_id: str = Field(pattern=r"^EV-[0-9]{3}$")
+    research_question_ids: list[str] = Field(min_length=1, max_length=5)
+    claim: str = Field(min_length=15, max_length=500)
+    dimension: ResearchDimension
+    status: Literal["supported", "contested", "insufficient"]
+    supporting_source_ids: list[str] = Field(max_length=6)
+    contradicting_source_ids: list[str] = Field(max_length=6)
+    confidence: Literal["low", "medium", "high"]
+    implication: str = Field(min_length=12, max_length=500)
+    limitations: list[str] = Field(max_length=5)
+
+    @model_validator(mode="after")
+    def keep_status_and_confidence_consistent(self):
+        if self.status == "contested":
+            if not self.supporting_source_ids or not self.contradicting_source_ids:
+                raise ValueError("contested findings need supporting and contradicting sources")
+            if self.confidence == "high":
+                raise ValueError("contested findings cannot have high confidence")
+        if self.status == "supported" and not self.supporting_source_ids:
+            raise ValueError("supported findings need at least one supporting source")
+        if self.status == "insufficient" and self.confidence != "low":
+            raise ValueError("insufficient findings must have low confidence")
+        return self
+
+
+class ResearchGap(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    gap: str = Field(min_length=8, max_length=300)
+    decision_risk: str = Field(min_length=8, max_length=300)
+    next_step: str = Field(min_length=8, max_length=300)
+    priority: Priority
+
+
+class SourceCoverage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    retained_source_count: int = Field(ge=0, le=10)
+    question_count: int = Field(ge=3, le=5)
+    answered_question_count: int = Field(ge=0, le=5)
+    source_diversity_note: str = Field(min_length=8, max_length=400)
+
+
+class EvidenceBrief(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    summary: str = Field(min_length=30, max_length=800)
+    findings: list[EvidenceFinding] = Field(min_length=3, max_length=10)
+    research_gaps: list[ResearchGap] = Field(min_length=1, max_length=8)
+    source_coverage: SourceCoverage
+
+    @model_validator(mode="after")
+    def require_unique_finding_ids(self):
+        ids = [finding.finding_id for finding in self.findings]
+        if len(ids) != len(set(ids)):
+            raise ValueError("evidence finding IDs must be unique")
+        return self
+
+
+class ClaimCitation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    claim_path: str = Field(
+        pattern=r"^(user_insight|market_hypothesis|value_proposition)\."
+    )
+    finding_ids: list[str] = Field(max_length=5)
+    claim_status: Literal["evidence_backed", "contested", "inference", "unknown"]
+    explanation: str = Field(min_length=8, max_length=400)
+
+    @model_validator(mode="after")
+    def require_findings_for_evidence_claims(self):
+        if self.claim_status in {"evidence_backed", "contested"} and not self.finding_ids:
+            raise ValueError("evidence-backed and contested claims require finding IDs")
+        return self
+
+
+class ClaimCitationMap(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    citations: list[ClaimCitation] = Field(min_length=1, max_length=30)
+
+    @model_validator(mode="after")
+    def require_unique_claim_paths(self):
+        paths = [citation.claim_path for citation in self.citations]
+        if len(paths) != len(set(paths)):
+            raise ValueError("claim citation paths must be unique")
+        return self
+
+
+class ResearchDecisionSummary(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    evidence_coverage: str
+    largest_research_gap: str
+
+
+class ResearchQualityReview(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["passed", "passed_with_notes", "review_required"]
+    issue_count: int = Field(ge=0)
+    blocking_issue_count: int = Field(ge=0)
+    auto_revision_count: int = Field(ge=0)
+    checks: list[QualityCheck] = Field(min_length=8, max_length=8)
+    issues: list[StrategyQualityIssue]
+
+
+class ResearchStrategyResponse(StrategyResponse):
+    model_config = ConfigDict(extra="forbid")
+
+    research_status: Literal["complete", "partial", "unavailable", "offline_fixture"]
+    researched_at: datetime
+    research_plan: ResearchPlan
+    source_manifest: SourceManifest
+    evidence_brief: EvidenceBrief
+    claim_citations: ClaimCitationMap
+    research_summary: ResearchDecisionSummary
+    research_quality_review: ResearchQualityReview

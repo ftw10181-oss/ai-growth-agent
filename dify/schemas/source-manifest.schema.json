@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SourceManifestV05",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["research_status", "researched_at", "sources", "failed_query_ids"],
+  "properties": {
+    "research_status": {
+      "type": "string",
+      "enum": ["complete", "partial", "unavailable", "offline_fixture"]
+    },
+    "researched_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sources": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "title",
+          "url",
+          "domain",
+          "publisher",
+          "published_at",
+          "retrieved_at",
+          "query_ids",
+          "source_class",
+          "relevance_score",
+          "freshness",
+          "snippet",
+          "limitations"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^SRC-[0-9]{3}$"
+          },
+          "title": {"type": "string", "minLength": 3, "maxLength": 300},
+          "url": {"type": "string", "format": "uri", "pattern": "^https://"},
+          "domain": {"type": "string", "minLength": 3, "maxLength": 253},
+          "publisher": {"type": ["string", "null"], "maxLength": 160},
+          "published_at": {"type": ["string", "null"], "format": "date"},
+          "retrieved_at": {"type": "string", "format": "date-time"},
+          "query_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^RQ-[0-9]{3}$"}
+          },
+          "source_class": {
+            "type": "string",
+            "enum": ["primary", "independent_secondary", "vendor", "community", "unknown"]
+          },
+          "relevance_score": {"type": "number", "minimum": 0, "maximum": 1},
+          "freshness": {"type": "string", "enum": ["current", "dated", "unknown"]},
+          "snippet": {"type": "string", "minLength": 10, "maxLength": 1200},
+          "limitations": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {"type": "string", "minLength": 3, "maxLength": 240}
+          }
+        }
+      }
+    },
+    "failed_query_ids": {
+      "type": "array",
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^RQ-[0-9]{3}$"}
+    }
+  }
+}
+

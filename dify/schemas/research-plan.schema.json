@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResearchPlanV05",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision_context", "questions", "search_limits"],
+  "properties": {
+    "decision_context": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 500
+    },
+    "questions": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "question_id",
+          "question",
+          "dimension",
+          "decision_impact",
+          "evidence_needed",
+          "query",
+          "recency_preference",
+          "priority"
+        ],
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "pattern": "^RQ-[0-9]{3}$"
+          },
+          "question": {
+            "type": "string",
+            "minLength": 15,
+            "maxLength": 240
+          },
+          "dimension": {
+            "type": "string",
+            "enum": [
+              "user_behavior",
+              "market_context",
+              "competitor",
+              "channel",
+              "risk",
+              "product_expectation"
+            ]
+          },
+          "decision_impact": {
+            "type": "string",
+            "minLength": 15,
+            "maxLength": 300
+          },
+          "evidence_needed": {
+            "type": "string",
+            "minLength": 15,
+            "maxLength": 300
+          },
+          "query": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 220
+          },
+          "recency_preference": {
+            "type": "string",
+            "enum": ["last_12_months", "last_24_months", "any"]
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["critical", "important", "exploratory"]
+          }
+        }
+      }
+    },
+    "search_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_queries", "max_results_per_query", "max_retained_sources"],
+      "properties": {
+        "max_queries": {"const": 5},
+        "max_results_per_query": {"type": "integer", "minimum": 3, "maximum": 5},
+        "max_retained_sources": {"const": 10}
+      }
+    }
+  }
+}
+

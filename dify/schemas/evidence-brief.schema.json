@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvidenceBriefV05",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "findings", "research_gaps", "source_coverage"],
+  "properties": {
+    "summary": {"type": "string", "minLength": 30, "maxLength": 800},
+    "findings": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "finding_id",
+          "research_question_ids",
+          "claim",
+          "dimension",
+          "status",
+          "supporting_source_ids",
+          "contradicting_source_ids",
+          "confidence",
+          "implication",
+          "limitations"
+        ],
+        "properties": {
+          "finding_id": {"type": "string", "pattern": "^EV-[0-9]{3}$"},
+          "research_question_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^RQ-[0-9]{3}$"}
+          },
+          "claim": {"type": "string", "minLength": 15, "maxLength": 500},
+          "dimension": {
+            "type": "string",
+            "enum": [
+              "user_behavior",
+              "market_context",
+              "competitor",
+              "channel",
+              "risk",
+              "product_expectation"
+            ]
+          },
+          "status": {"type": "string", "enum": ["supported", "contested", "insufficient"]},
+          "supporting_source_ids": {
+            "type": "array",
+            "maxItems": 6,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^SRC-[0-9]{3}$"}
+          },
+          "contradicting_source_ids": {
+            "type": "array",
+            "maxItems": 6,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^SRC-[0-9]{3}$"}
+          },
+          "confidence": {"type": "string", "enum": ["low", "medium", "high"]},
+          "implication": {"type": "string", "minLength": 12, "maxLength": 500},
+          "limitations": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {"type": "string", "minLength": 3, "maxLength": 240}
+          }
+        }
+      }
+    },
+    "research_gaps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["gap", "decision_risk", "next_step", "priority"],
+        "properties": {
+          "gap": {"type": "string", "minLength": 8, "maxLength": 300},
+          "decision_risk": {"type": "string", "minLength": 8, "maxLength": 300},
+          "next_step": {"type": "string", "minLength": 8, "maxLength": 300},
+          "priority": {"type": "string", "enum": ["critical", "important", "exploratory"]}
+        }
+      }
+    },
+    "source_coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retained_source_count", "question_count", "answered_question_count", "source_diversity_note"],
+      "properties": {
+        "retained_source_count": {"type": "integer", "minimum": 0, "maximum": 10},
+        "question_count": {"type": "integer", "minimum": 3, "maximum": 5},
+        "answered_question_count": {"type": "integer", "minimum": 0, "maximum": 5},
+        "source_diversity_note": {"type": "string", "minLength": 8, "maxLength": 400}
+      }
+    }
+  }
+}
+

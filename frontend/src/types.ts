@@ -123,3 +123,101 @@ export interface InsightResponse {
   user_insight: StrategyResponse["user_insight"];
   quality_review?: StrategyQualityReview;
 }
+
+export type ResearchStatus = "complete" | "partial" | "unavailable" | "offline_fixture";
+export type ResearchDimension =
+  | "user_behavior"
+  | "market_context"
+  | "competitor"
+  | "channel"
+  | "risk"
+  | "product_expectation";
+
+export interface ResearchQuestion {
+  question_id: string;
+  question: string;
+  dimension: ResearchDimension;
+  decision_impact: string;
+  evidence_needed: string;
+  query: string;
+  recency_preference: "last_12_months" | "last_24_months" | "any";
+  priority: "critical" | "important" | "exploratory";
+}
+
+export interface ResearchSource {
+  source_id: string;
+  title: string;
+  url: string;
+  domain: string;
+  publisher: string | null;
+  published_at: string | null;
+  retrieved_at: string;
+  query_ids: string[];
+  source_class: "primary" | "independent_secondary" | "vendor" | "community" | "unknown";
+  relevance_score: number;
+  freshness: "current" | "dated" | "unknown";
+  snippet: string;
+  limitations: string[];
+}
+
+export interface EvidenceFinding {
+  finding_id: string;
+  research_question_ids: string[];
+  claim: string;
+  dimension: ResearchDimension;
+  status: "supported" | "contested" | "insufficient";
+  supporting_source_ids: string[];
+  contradicting_source_ids: string[];
+  confidence: "low" | "medium" | "high";
+  implication: string;
+  limitations: string[];
+}
+
+export interface ResearchStrategyResponse extends StrategyResponse {
+  research_status: ResearchStatus;
+  researched_at: string;
+  research_plan: {
+    decision_context: string;
+    questions: ResearchQuestion[];
+    search_limits: {
+      max_queries: 5;
+      max_results_per_query: number;
+      max_retained_sources: 10;
+    };
+  };
+  source_manifest: {
+    research_status: ResearchStatus;
+    researched_at: string;
+    sources: ResearchSource[];
+    failed_query_ids: string[];
+  };
+  evidence_brief: {
+    summary: string;
+    findings: EvidenceFinding[];
+    research_gaps: Array<{
+      gap: string;
+      decision_risk: string;
+      next_step: string;
+      priority: "critical" | "important" | "exploratory";
+    }>;
+    source_coverage: {
+      retained_source_count: number;
+      question_count: number;
+      answered_question_count: number;
+      source_diversity_note: string;
+    };
+  };
+  claim_citations: {
+    citations: Array<{
+      claim_path: string;
+      finding_ids: string[];
+      claim_status: "evidence_backed" | "contested" | "inference" | "unknown";
+      explanation: string;
+    }>;
+  };
+  research_summary: {
+    evidence_coverage: string;
+    largest_research_gap: string;
+  };
+  research_quality_review: StrategyQualityReview;
+}
