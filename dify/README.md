@@ -1,6 +1,6 @@
 # Dify workspace
 
-## Recommended path: import the DSL
+## Stable path: import the V0.2 DSL
 
 1. Open Dify Studio.
 2. Choose **Create from DSL file**.
@@ -18,11 +18,28 @@ If your Dify workspace cannot resolve the imported model provider, follow `workf
 
 The reviewed `workflow-v0.1.yml` and its guide remain in the repository as the reproducible baseline used for the first 12-case evaluation.
 
+## V0.3 development path
+
+V0.3 is a separate candidate so the published V0.2 workflow remains stable during regression testing. Import `workflow-v0.3.yml` first; use the manual guide when the workspace cannot resolve its model provider.
+
+1. Choose **Create from DSL file** and upload `workflow-v0.3.yml`.
+2. Select a structured-output-capable model for all four LLM nodes.
+3. If import fails, create a new workflow and follow `workflow-v0.3.md`.
+4. Reuse the V0.2 Context Interpreter and User Insight contracts.
+5. Confirm `context`, `user_insight`, `market_hypothesis`, and `value_proposition` are exposed at End.
+6. Do not replace the production V0.2 application or key until the V0.3 regression gates pass.
+
 ## Source files
 
 - `prompts/01-context-interpreter.md`
 - `prompts/02-user-insight.md`
+- `prompts/03-market-hypothesis.md`
+- `prompts/04-value-proposition.md`
 - `schemas/context-interpreter.schema.json`
 - `schemas/user-insight.schema.json`
+- `schemas/market-hypothesis.schema.json`
+- `schemas/value-proposition.schema.json`
 
 When changing a V0.2 prompt or schema, run `python dify/build_workflow_v02.py` to rebuild the importable DSL, then run the repository verification commands before committing.
+
+When changing a V0.3 prompt or schema, run `python dify/build_workflow_v03.py` to rebuild `workflow-v0.3.yml` before verification.

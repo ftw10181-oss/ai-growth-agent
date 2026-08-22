@@ -61,6 +61,16 @@ def valid_outputs() -> tuple[dict, dict]:
     )
 
 
+def valid_strategy_outputs() -> dict:
+    result = asyncio.run(MockInsightService().generate_strategy(BRIEF))
+    return {
+        "context": result.context.model_dump(mode="json"),
+        "user_insight": result.user_insight.model_dump(mode="json"),
+        "market_hypothesis": result.market_hypothesis.model_dump(mode="json"),
+        "value_proposition": result.value_proposition.model_dump(mode="json"),
+    }
+
+
 def test_dify_service_accepts_object_outputs(monkeypatch) -> None:
     context, user_insight = valid_outputs()
     install_stub(
@@ -160,4 +170,50 @@ def test_dify_service_rejects_missing_job_dimension(monkeypatch) -> None:
             DifyInsightService(
                 Settings(app_mode="dify", dify_api_key="app-test-key")
             ).generate(BRIEF)
+        )
+
+
+def test_dify_service_accepts_v03_strategy_outputs(monkeypatch) -> None:
+    install_stub(
+        monkeypatch,
+        make_response(
+            {
+                "workflow_run_id": "run-v03-strategy",
+                "data": {
+                    "status": "succeeded",
+                    "outputs": valid_strategy_outputs(),
+                },
+            }
+        ),
+    )
+
+    result = asyncio.run(
+        DifyInsightService(
+            Settings(app_mode="dify", dify_api_key="app-test-key")
+        ).generate_strategy(BRIEF)
+    )
+
+    assert result.request_id == "run-v03-strategy"
+    assert result.market_hypothesis.confidence == "medium"
+    assert result.quality_review.status == "passed"
+
+
+def test_dify_service_rejects_missing_v03_module(monkeypatch) -> None:
+    outputs = valid_strategy_outputs()
+    outputs.pop("value_proposition")
+    install_stub(
+        monkeypatch,
+        make_response(
+            {
+                "workflow_run_id": "run-v03-incomplete",
+                "data": {"status": "succeeded", "outputs": outputs},
+            }
+        ),
+    )
+
+    with pytest.raises(InsightServiceError, match="unexpected response shape"):
+        asyncio.run(
+            DifyInsightService(
+                Settings(app_mode="dify", dify_api_key="app-test-key")
+            ).generate_strategy(BRIEF)
         )

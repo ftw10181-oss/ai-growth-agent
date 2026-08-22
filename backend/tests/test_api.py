@@ -20,7 +20,7 @@ def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
-    assert response.json()["version"] == "0.2.1"
+    assert response.json()["version"] == "0.3.0"
 
 
 def test_mock_insight_matches_contract() -> None:
@@ -53,3 +53,16 @@ def test_invalid_goal_is_rejected() -> None:
         "/api/analyze", json={**VALID_BRIEF, "business_goal": "Go Viral"}
     )
     assert response.status_code == 422
+
+
+def test_v03_strategy_returns_four_traceable_modules() -> None:
+    response = client.post("/api/v3/strategy", json=VALID_BRIEF)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "mock"
+    assert body["quality_review"]["status"] == "passed"
+    assert body["quality_review"]["blocking_issue_count"] == 0
+    assert len(body["quality_review"]["checks"]) == 6
+    assert body["strategy_summary"]["primary_value"] == body["value_proposition"]["primary_value"]["statement"]
+    assert body["market_hypothesis"]["validation_priorities"][0]["priority"] == "critical"

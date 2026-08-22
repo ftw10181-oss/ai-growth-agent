@@ -4,10 +4,13 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from time import monotonic
 from threading import Lock
-from typing import Optional
+from typing import Optional, Union
 
 from .config import Settings
-from .models import GrowthBrief, UserInsightResponse
+from .models import GrowthBrief, StrategyResponse, UserInsightResponse
+
+
+ProtectedResponse = Union[UserInsightResponse, StrategyResponse]
 
 
 @dataclass(frozen=True)
@@ -26,7 +29,7 @@ class VisitorUsage:
 @dataclass
 class CachedInsight:
     expires_at: float
-    response: UserInsightResponse
+    response: ProtectedResponse
 
 
 class LiveUsageGuard:
@@ -52,7 +55,7 @@ class LiveUsageGuard:
             self._visitors.clear()
             self._cache.clear()
 
-    def cached(self, key: str) -> Optional[UserInsightResponse]:
+    def cached(self, key: str) -> Optional[ProtectedResponse]:
         now = monotonic()
         with self._lock:
             item = self._cache.get(key)
@@ -63,7 +66,7 @@ class LiveUsageGuard:
                 return None
             return item.response.model_copy(deep=True)
 
-    def remember(self, key: str, response: UserInsightResponse) -> None:
+    def remember(self, key: str, response: ProtectedResponse) -> None:
         if self.settings.live_cache_ttl_seconds <= 0:
             return
         with self._lock:

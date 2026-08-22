@@ -1,9 +1,8 @@
-import { fileURLToPath } from "node:url";
 import { sites } from "@openai/sites-vite-plugin";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-const resolve = (path: string) => fileURLToPath(new URL(path, import.meta.url));
+const resolve = (path: string) => decodeURIComponent(new URL(path, import.meta.url).pathname);
 
 export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");

@@ -7,8 +7,18 @@ import httpx
 from pydantic import ValidationError
 
 from .config import Settings
-from .models import GrowthBrief, UserInsight, UserInsightResponse
+from .models import (
+    GrowthBrief,
+    MarketHypothesis,
+    NormalizedContext,
+    StrategyResponse,
+    StrategySummary,
+    UserInsight,
+    UserInsightResponse,
+    ValueProposition,
+)
 from .quality import evaluate_quality, normalize_claim_language
+from .strategy_quality import evaluate_strategy_quality, normalize_strategy_claim_language
 
 
 class InsightServiceError(RuntimeError):
@@ -18,6 +28,10 @@ class InsightServiceError(RuntimeError):
 class InsightService(ABC):
     @abstractmethod
     async def generate(self, brief: GrowthBrief) -> UserInsightResponse:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def generate_strategy(self, brief: GrowthBrief) -> StrategyResponse:
         raise NotImplementedError
 
 
@@ -133,6 +147,291 @@ class MockInsightService(InsightService):
             quality_review=evaluate_quality(parsed_insight, revision_count),
         )
 
+    async def generate_strategy(self, brief: GrowthBrief) -> StrategyResponse:
+        insight_response = await self.generate(brief)
+        contextual = {
+            "basis": "contextual_inference",
+            "confidence": "medium",
+            "validation_status": "needs_validation",
+        }
+        behavioral = {
+            "basis": "behavioral_hypothesis",
+            "confidence": "low",
+            "validation_status": "needs_validation",
+        }
+        market = MarketHypothesis.model_validate({
+            "opportunity_statement": {
+                "hypothesis": "Frequent business travelers may value a hands-free option during unscripted multilingual conversations.",
+                "why_now": "An upcoming international trip may create a concrete moment to evaluate a dedicated translation device.",
+                "source_refs": [
+                    "context.target_audience",
+                    "user_insight.jobs_to_be_done.0.job",
+                ],
+                "evidence": contextual,
+            },
+            "current_alternatives": [
+                {
+                    "alternative": "Phone-based translation workflow",
+                    "limitation_hypothesis": "Handling a phone may interrupt eye contact and conversational flow.",
+                    "source_refs": ["user_insight.pain_points.0.insight"],
+                    "evidence": contextual,
+                },
+                {
+                    "alternative": "Interpreter-assisted meetings",
+                    "limitation_hypothesis": "An interpreter may not be present for spontaneous networking moments.",
+                    "source_refs": ["user_insight.typical_scenarios.0.insight"],
+                    "evidence": contextual,
+                },
+            ],
+            "behavior_hypotheses": [
+                {
+                    "hypothesis": "A traveler may seek translation help when a conversation unexpectedly shifts languages.",
+                    "trigger": "An unscripted multilingual conversation begins.",
+                    "expected_observation": "At least 6 of 10 interviewees describe using an immediate workaround.",
+                    "priority": "critical",
+                    "source_refs": ["user_insight.jobs_to_be_done.0.job"],
+                    "evidence": contextual,
+                },
+                {
+                    "hypothesis": "A near-term trip may increase willingness to test a dedicated device.",
+                    "trigger": "A traveler schedules multiple overseas meetings.",
+                    "expected_observation": "At least 5 of 10 interviewees request a trial before departure.",
+                    "priority": "important",
+                    "source_refs": ["user_insight.purchase_motivations.0.insight"],
+                    "evidence": contextual,
+                },
+                {
+                    "hypothesis": "Privacy concerns could prevent use in confidential discussions.",
+                    "trigger": "The conversation includes confidential business information.",
+                    "expected_observation": "At least 4 of 10 interviewees ask how audio is stored or processed.",
+                    "priority": "important",
+                    "source_refs": ["user_insight.adoption_barriers.1.insight"],
+                    "evidence": contextual,
+                },
+            ],
+            "growth_wedge": {
+                "segment": insight_response.user_insight.target_user.primary_segment,
+                "entry_scenario": "Unscripted multilingual conversations surrounding scheduled overseas business meetings.",
+                "rationale": "The scenario combines repeated need, visible communication friction, and a near-term trial moment.",
+                "source_refs": [
+                    "user_insight.target_user.primary_segment",
+                    "user_insight.typical_scenarios.0.insight",
+                ],
+                "evidence": contextual,
+            },
+            "competitive_frame": {
+                "compared_with": ["phone translation workflows", "interpreter-assisted meetings"],
+                "differentiation_hypothesis": "A dedicated wearable may reduce phone handoffs during a live conversation.",
+                "less_suitable_for": "Travelers with only occasional, low-stakes translation needs.",
+                "source_refs": [
+                    "user_insight.pain_points.0.insight",
+                    "user_insight.typical_scenarios.0.insight",
+                ],
+                "evidence": contextual,
+            },
+            "main_risks": [
+                {
+                    "risk": "Accuracy may be insufficient for specialized business language.",
+                    "consequence": "A failed high-stakes interaction could undermine product trust.",
+                    "priority": "critical",
+                    "source_refs": ["user_insight.adoption_barriers.2.insight"],
+                    "evidence": contextual,
+                },
+                {
+                    "risk": "The device may feel awkward or impolite during a meeting.",
+                    "consequence": "Users could avoid the product in its intended scenario.",
+                    "priority": "important",
+                    "source_refs": ["user_insight.adoption_barriers.0.insight"],
+                    "evidence": behavioral,
+                },
+                {
+                    "risk": "Privacy concerns may block confidential business use.",
+                    "consequence": "Enterprise and executive travelers could reject the product.",
+                    "priority": "important",
+                    "source_refs": ["user_insight.adoption_barriers.1.insight"],
+                    "evidence": contextual,
+                },
+            ],
+            "validation_priorities": [
+                {
+                    "hypothesis_to_test": "Travelers experience urgent translation friction in unscripted conversations.",
+                    "method": "Interview 10 frequent international business travelers about their most recent trip.",
+                    "pass_signal": "At least 6 of 10 report an urgent workaround in the last 90 days.",
+                    "fail_signal": "Fewer than 3 of 10 report an urgent workaround in the last 90 days.",
+                    "priority": "critical",
+                    "source_refs": ["user_insight.jobs_to_be_done.0.job"],
+                },
+                {
+                    "hypothesis_to_test": "A hands-free workflow is preferable to a phone handoff in live meetings.",
+                    "method": "Run a task-based prototype comparison with 8 target users.",
+                    "pass_signal": "At least 5 of 8 prefer the wearable flow after completing both tasks.",
+                    "fail_signal": "Fewer than 3 of 8 prefer the wearable flow after completing both tasks.",
+                    "priority": "important",
+                    "source_refs": ["user_insight.pain_points.0.insight"],
+                },
+                {
+                    "hypothesis_to_test": "Users can understand and accept the proposed privacy model.",
+                    "method": "Show a privacy concept to 8 target users and test comprehension.",
+                    "pass_signal": "At least 6 of 8 correctly explain where conversation data is processed.",
+                    "fail_signal": "Fewer than 4 of 8 correctly explain where conversation data is processed.",
+                    "priority": "important",
+                    "source_refs": ["user_insight.adoption_barriers.1.insight"],
+                },
+            ],
+            "confidence": "medium",
+        })
+        value = ValueProposition.model_validate({
+            "primary_value": {
+                "statement": "Maintain conversational flow when a business discussion unexpectedly shifts languages.",
+                "value_type": "functional",
+                "rationale": "The proposed value connects the primary communication job to the initial live-conversation wedge.",
+                "source_refs": [
+                    "user_insight.jobs_to_be_done.0.job",
+                    "market_hypothesis.opportunity_statement.hypothesis",
+                ],
+                "evidence": contextual,
+            },
+            "functional_values": [
+                {
+                    "statement": "Reduce phone handoffs during a live multilingual conversation.",
+                    "why_it_matters": "The user may preserve eye contact and conversational rhythm.",
+                    "source_refs": ["market_hypothesis.competitive_frame.differentiation_hypothesis"],
+                    "evidence": contextual,
+                }
+            ],
+            "emotional_values": [
+                {
+                    "statement": "Feel more prepared when a conversation changes languages.",
+                    "why_it_matters": "Preparation may reduce anxiety in an unfamiliar interaction.",
+                    "source_refs": ["user_insight.jobs_to_be_done.1.job"],
+                    "evidence": behavioral,
+                }
+            ],
+            "social_values": [
+                {
+                    "statement": "Signal respect for a contact's preferred language.",
+                    "why_it_matters": "The behavior may support trust during a new professional relationship.",
+                    "source_refs": ["user_insight.jobs_to_be_done.2.job"],
+                    "evidence": behavioral,
+                }
+            ],
+            "positioning_statement": "For frequent international business travelers facing unscripted language shifts, AI Translation Earbuds are a wearable communication aid designed to keep a live conversation moving without repeated phone handoffs.",
+            "reasons_to_believe": [
+                {
+                    "capability": "Real-time AI translation is stated in the submitted product description.",
+                    "support_status": "brief_supported",
+                    "source_refs": ["context.brief_summary"],
+                },
+                {
+                    "capability": "Performance across accents, jargon, and noisy rooms requires confirmation.",
+                    "support_status": "needs_confirmation",
+                    "source_refs": ["user_insight.adoption_barriers.2.insight"],
+                },
+            ],
+            "message_pillars": [
+                {
+                    "name": "Stay in the conversation",
+                    "message": "Keep a multilingual discussion moving without repeated phone handoffs.",
+                    "user_problem": "Phone handling may interrupt eye contact and conversational rhythm.",
+                    "priority": "primary",
+                    "source_refs": [
+                        "user_insight.pain_points.0.insight",
+                        "market_hypothesis.competitive_frame.differentiation_hypothesis",
+                    ],
+                    "evidence": contextual,
+                },
+                {
+                    "name": "Prepare for the unexpected",
+                    "message": "Carry a translation option for unscripted moments around scheduled meetings.",
+                    "user_problem": "An interpreter may not be present during spontaneous networking.",
+                    "priority": "secondary",
+                    "source_refs": ["market_hypothesis.growth_wedge.entry_scenario"],
+                    "evidence": contextual,
+                },
+                {
+                    "name": "Test trust in context",
+                    "message": "Evaluate translation behavior using your own accent, vocabulary, and meeting scenario.",
+                    "user_problem": "Accuracy for specialized language and noisy rooms is not established.",
+                    "priority": "secondary",
+                    "source_refs": ["user_insight.adoption_barriers.2.insight"],
+                    "evidence": contextual,
+                },
+            ],
+            "objections": [
+                {
+                    "objection": "The translation may not preserve specialized business language.",
+                    "response_hypothesis": "A scenario-based trial may provide more useful proof than a generic accuracy claim.",
+                    "source_refs": ["market_hypothesis.main_risks.0.risk"],
+                    "evidence": contextual,
+                },
+                {
+                    "objection": "Wearing the device may feel impolite in a meeting.",
+                    "response_hypothesis": "A clear consent ritual could make device use feel more acceptable.",
+                    "source_refs": ["market_hypothesis.main_risks.1.risk"],
+                    "evidence": behavioral,
+                },
+                {
+                    "objection": "Conversation processing may create privacy concerns.",
+                    "response_hypothesis": "A concise data-flow explanation could reduce uncertainty before use.",
+                    "source_refs": ["market_hypothesis.main_risks.2.risk"],
+                    "evidence": contextual,
+                },
+            ],
+            "message_tests": [
+                {
+                    "angle": "scenario_led",
+                    "variant_a": "Lead with an unscripted post-conference conversation.",
+                    "variant_b": "Lead with a scheduled multilingual supplier meeting.",
+                    "primary_metric": "qualified trial intent",
+                    "expected_learning": "Which entry scenario creates stronger intent among the target audience.",
+                    "source_refs": ["market_hypothesis.growth_wedge.entry_scenario"],
+                },
+                {
+                    "angle": "pain_led",
+                    "variant_a": "Lead with broken eye contact during phone translation.",
+                    "variant_b": "Lead with a conversation moving on before a response is ready.",
+                    "primary_metric": "message relevance score",
+                    "expected_learning": "Which communication friction is recognized more consistently.",
+                    "source_refs": ["user_insight.pain_points.0.insight"],
+                },
+                {
+                    "angle": "confidence_led",
+                    "variant_a": "Offer a trial using the buyer's own vocabulary.",
+                    "variant_b": "Explain the product capability before offering a trial.",
+                    "primary_metric": "trial request rate",
+                    "expected_learning": "Whether experiential proof produces more trust than a capability explanation.",
+                    "source_refs": ["user_insight.purchase_motivations.2.insight"],
+                },
+            ],
+            "confidence": "medium",
+        })
+        market, value, strategy_revision_count = normalize_strategy_claim_language(market, value)
+        quality_review = evaluate_strategy_quality(
+            brief,
+            insight_response.context,
+            insight_response.user_insight,
+            market,
+            value,
+            strategy_revision_count,
+        )
+        return StrategyResponse(
+            request_id=str(uuid4()),
+            mode="mock",
+            strategy_summary=StrategySummary(
+                primary_user=insight_response.user_insight.target_user.primary_segment,
+                growth_wedge=market.growth_wedge.entry_scenario,
+                primary_value=value.primary_value.statement,
+                biggest_risk=next(
+                    risk.risk for risk in market.main_risks if risk.priority == "critical"
+                ),
+            ),
+            context=insight_response.context,
+            user_insight=insight_response.user_insight,
+            market_hypothesis=market,
+            value_proposition=value,
+            quality_review=quality_review,
+        )
+
 
 def _parse_object(value: Any, name: str) -> Any:
     if isinstance(value, str):
@@ -147,7 +446,7 @@ class DifyInsightService(InsightService):
     def __init__(self, settings: Settings):
         self.settings = settings
 
-    async def generate(self, brief: GrowthBrief) -> UserInsightResponse:
+    async def _run_workflow(self, brief: GrowthBrief) -> tuple[dict[str, Any], dict[str, Any]]:
         url = f"{self.settings.dify_base_url.rstrip('/')}/workflows/run"
         payload = {
             "inputs": brief.model_dump(mode="json"),
@@ -183,6 +482,10 @@ class DifyInsightService(InsightService):
         outputs = data.get("outputs")
         if not isinstance(outputs, dict):
             raise InsightServiceError("The AI workflow returned an unexpected response shape.")
+        return body, outputs
+
+    async def generate(self, brief: GrowthBrief) -> UserInsightResponse:
+        body, outputs = await self._run_workflow(brief)
         try:
             parsed_insight, revision_count = normalize_claim_language(
                 UserInsight.model_validate(
@@ -197,6 +500,54 @@ class DifyInsightService(InsightService):
                 quality_review=evaluate_quality(parsed_insight, revision_count),
             )
         except ValidationError as exc:
+            raise InsightServiceError("The AI workflow returned an unexpected response shape.") from exc
+
+    async def generate_strategy(self, brief: GrowthBrief) -> StrategyResponse:
+        body, outputs = await self._run_workflow(brief)
+        try:
+            context = _parse_object(outputs.get("context"), "context")
+            parsed_insight, _ = normalize_claim_language(
+                UserInsight.model_validate(
+                    _parse_object(outputs.get("user_insight"), "user_insight")
+                )
+            )
+            market = MarketHypothesis.model_validate(
+                _parse_object(outputs.get("market_hypothesis"), "market_hypothesis")
+            )
+            value = ValueProposition.model_validate(
+                _parse_object(outputs.get("value_proposition"), "value_proposition")
+            )
+            context_model = NormalizedContext.model_validate(context)
+            market, value, strategy_revision_count = normalize_strategy_claim_language(
+                market, value
+            )
+            quality_review = evaluate_strategy_quality(
+                brief,
+                context_model,
+                parsed_insight,
+                market,
+                value,
+                strategy_revision_count,
+            )
+            return StrategyResponse(
+                request_id=body.get("workflow_run_id") or body.get("task_id") or str(uuid4()),
+                mode="dify",
+                strategy_summary=StrategySummary(
+                    primary_user=parsed_insight.target_user.primary_segment,
+                    growth_wedge=market.growth_wedge.entry_scenario,
+                    primary_value=value.primary_value.statement,
+                    biggest_risk=next(
+                        (risk.risk for risk in market.main_risks if risk.priority == "critical"),
+                        market.main_risks[0].risk,
+                    ),
+                ),
+                context=context_model,
+                user_insight=parsed_insight,
+                market_hypothesis=market,
+                value_proposition=value,
+                quality_review=quality_review,
+            )
+        except (ValidationError, AttributeError, StopIteration) as exc:
             raise InsightServiceError("The AI workflow returned an unexpected response shape.") from exc
 
 

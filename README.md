@@ -2,19 +2,38 @@
 
 # AI Growth Agent
 
-**Evidence-aware user insight, generated from a fuzzy growth brief.**
+**Traceable growth strategy, generated from a fuzzy product brief.**
 
 [![CI](https://img.shields.io/github/actions/workflow/status/ftw10181-oss/ai-growth-agent/ci.yml?branch=main&label=CI)](https://github.com/ftw10181-oss/ai-growth-agent/actions/workflows/ci.yml)
-[![Backend Tests](https://img.shields.io/badge/backend-29%20passed-2ea44f)](./backend/tests/)
+[![Backend Tests](https://img.shields.io/badge/backend-pytest%20passing-2ea44f)](./backend/tests/)
 [![Evals](https://img.shields.io/badge/evals-contract%20gate-12%2F12-2ea44f)](./evals/)
 [![Frontend](https://img.shields.io/badge/frontend-React%2019%20%2B%20TS%207-0a7ea4)](./frontend/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 </div>
 
-AI Growth Agent turns a half-formed product idea and target audience into a structured **Growth Insight Report** — jobs to be done, pain points, purchase motivations, adoption barriers, recommendations, and research questions — with every claim tagged by **evidence basis**, **confidence**, and **decision relevance**. Outputs are checked by an offline **LLM evaluation contract**, and regressions fail the build.
+AI Growth Agent turns a half-formed product idea and target audience into a structured, decision-ready growth strategy. V0.3 connects **Context**, **User Insight**, **Market Hypothesis**, and **Value Proposition** so the user can see how each recommendation was formed, what evidence it inherits, and what should be validated next.
 
 It is built as a portfolio piece for **AI Product Manager**, **AI Application Engineer**, and **Growth Engineer** roles: the focus is the **product surface, the reasoning contract, and the evaluation loop**, not the infra underneath.
+
+---
+
+## V0.3 — From Insight to Strategy
+
+```text
+Growth Brief → Context → User Insight → Market Hypothesis → Value Proposition → Quality Gate
+```
+
+- A four-decision executive summary: primary user, growth wedge, primary value, and biggest risk
+- Item-level `source_refs` that connect downstream strategy to upstream context and user evidence
+- Measurable pass/fail signals for every validation priority
+- Six deterministic checks for structure, reference integrity, evidence inheritance, market-claim grounding, decision continuity, and testability
+- Transparent automatic reframing of risky inferred claims as hypotheses—without upgrading evidence or hiding the original substance
+- A recruiter-facing interface that explains the product decisions, architecture, responsible-AI boundary, and evaluation loop
+
+**Live V0.3 portfolio:** [ai-growth-agent-portfolio.markus12138467907.chatgpt.site](https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site/)
+
+The original standalone `/demo` route remains as the V0.2.1 evidence-aware insight showcase.
 
 ---
 

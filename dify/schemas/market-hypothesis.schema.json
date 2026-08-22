@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MarketHypothesis",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["opportunity_statement", "current_alternatives", "behavior_hypotheses", "growth_wedge", "competitive_frame", "main_risks", "validation_priorities", "confidence"],
+  "$defs": {
+    "sourceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": {"type": "string", "pattern": "^(context|user_insight)\\."}
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basis", "confidence", "validation_status"],
+      "properties": {
+        "basis": {"type": "string", "enum": ["explicit_brief", "contextual_inference", "behavioral_hypothesis"]},
+        "confidence": {"type": "string", "enum": ["low", "medium", "high"]},
+        "validation_status": {"type": "string", "enum": ["brief_supported", "needs_validation"]}
+      }
+    }
+  },
+  "properties": {
+    "opportunity_statement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hypothesis", "why_now", "source_refs", "evidence"],
+      "properties": {
+        "hypothesis": {"type": "string", "minLength": 20},
+        "why_now": {"type": "string", "minLength": 15},
+        "source_refs": {"$ref": "#/$defs/sourceRefs"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "current_alternatives": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["alternative", "limitation_hypothesis", "source_refs", "evidence"],
+        "properties": {
+          "alternative": {"type": "string", "minLength": 4},
+          "limitation_hypothesis": {"type": "string", "minLength": 12},
+          "source_refs": {"$ref": "#/$defs/sourceRefs"},
+          "evidence": {"$ref": "#/$defs/evidence"}
+        }
+      }
+    },
+    "behavior_hypotheses": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["hypothesis", "trigger", "expected_observation", "priority", "source_refs", "evidence"],
+        "properties": {
+          "hypothesis": {"type": "string", "minLength": 15},
+          "trigger": {"type": "string", "minLength": 8},
+          "expected_observation": {"type": "string", "minLength": 12},
+          "priority": {"type": "string", "enum": ["critical", "important", "exploratory"]},
+          "source_refs": {"$ref": "#/$defs/sourceRefs"},
+          "evidence": {"$ref": "#/$defs/evidence"}
+        }
+      }
+    },
+    "growth_wedge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["segment", "entry_scenario", "rationale", "source_refs", "evidence"],
+      "properties": {
+        "segment": {"type": "string", "minLength": 8},
+        "entry_scenario": {"type": "string", "minLength": 12},
+        "rationale": {"type": "string", "minLength": 15},
+        "source_refs": {"$ref": "#/$defs/sourceRefs"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "competitive_frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compared_with", "differentiation_hypothesis", "less_suitable_for", "source_refs", "evidence"],
+      "properties": {
+        "compared_with": {"type": "array", "minItems": 1, "maxItems": 5, "items": {"type": "string", "minLength": 3}},
+        "differentiation_hypothesis": {"type": "string", "minLength": 15},
+        "less_suitable_for": {"type": "string", "minLength": 10},
+        "source_refs": {"$ref": "#/$defs/sourceRefs"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "main_risks": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["risk", "consequence", "priority", "source_refs", "evidence"],
+        "properties": {
+          "risk": {"type": "string", "minLength": 10},
+          "consequence": {"type": "string", "minLength": 10},
+          "priority": {"type": "string", "enum": ["critical", "important", "exploratory"]},
+          "source_refs": {"$ref": "#/$defs/sourceRefs"},
+          "evidence": {"$ref": "#/$defs/evidence"}
+        }
+      }
+    },
+    "validation_priorities": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["hypothesis_to_test", "method", "pass_signal", "fail_signal", "priority", "source_refs"],
+        "properties": {
+          "hypothesis_to_test": {"type": "string", "minLength": 15},
+          "method": {"type": "string", "minLength": 8},
+          "pass_signal": {"type": "string", "minLength": 10},
+          "fail_signal": {"type": "string", "minLength": 10},
+          "priority": {"type": "string", "enum": ["critical", "important", "exploratory"]},
+          "source_refs": {"$ref": "#/$defs/sourceRefs"}
+        }
+      }
+    },
+    "confidence": {"type": "string", "enum": ["low", "medium", "high"]}
+  }
+}

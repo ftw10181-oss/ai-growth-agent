@@ -2,11 +2,18 @@ from pathlib import Path
 
 import yaml
 
-from app.models import NormalizedContext, UserInsight, UserInsightV01
+from app.models import (
+    MarketHypothesis,
+    NormalizedContext,
+    UserInsight,
+    UserInsightV01,
+    ValueProposition,
+)
 
 
 DSL_PATH = Path(__file__).parents[2] / "dify" / "workflow-v0.1.yml"
 DSL_V02_PATH = Path(__file__).parents[2] / "dify" / "workflow-v0.2.yml"
+DSL_V03_PATH = Path(__file__).parents[2] / "dify" / "workflow-v0.3.yml"
 
 
 def test_dify_dsl_matches_public_contract() -> None:
@@ -76,3 +83,56 @@ def test_v02_dify_dsl_enforces_evidence_contract() -> None:
     assert "Each of `jobs_to_be_done`" in source_prompt
     assert "Think about the most recent time" in source_prompt
     assert "final mechanical check" in source_prompt
+
+
+def test_v03_dify_dsl_adds_traceable_strategy_modules() -> None:
+    dsl = yaml.safe_load(DSL_V03_PATH.read_text())
+    graph = dsl["workflow"]["graph"]
+    nodes = {node["id"]: node["data"] for node in graph["nodes"]}
+
+    assert dsl["app"]["name"] == "AI Growth Agent — V0.3"
+    assert set(nodes) == {
+        "start",
+        "context_interpreter",
+        "user_insight",
+        "market_hypothesis",
+        "value_proposition",
+        "end",
+    }
+
+    market_schema = nodes["market_hypothesis"]["structured_output"]["schema"]
+    value_schema = nodes["value_proposition"]["structured_output"]["schema"]
+    assert "growth_wedge" in market_schema["required"]
+    assert set(market_schema["required"]) == set(MarketHypothesis.model_json_schema()["required"])
+    assert market_schema["properties"]["validation_priorities"]["minItems"] == 3
+    assert "primary_value" in value_schema["required"]
+    assert set(value_schema["required"]) == set(ValueProposition.model_json_schema()["required"])
+    assert value_schema["properties"]["message_pillars"]["minItems"] == 3
+
+    end_outputs = {
+        item["variable"]: item["value_selector"] for item in nodes["end"]["outputs"]
+    }
+    assert end_outputs == {
+        "context": ["context_interpreter", "structured_output"],
+        "user_insight": ["user_insight", "structured_output"],
+        "market_hypothesis": ["market_hypothesis", "structured_output"],
+        "value_proposition": ["value_proposition", "structured_output"],
+    }
+
+    edge_pairs = {(edge["source"], edge["target"]) for edge in graph["edges"]}
+    assert edge_pairs == {
+        ("start", "context_interpreter"),
+        ("context_interpreter", "user_insight"),
+        ("user_insight", "market_hypothesis"),
+        ("market_hypothesis", "value_proposition"),
+        ("value_proposition", "end"),
+    }
+
+    market_prompt = (
+        Path(__file__).parents[2] / "dify" / "prompts" / "03-market-hypothesis.md"
+    ).read_text()
+    value_prompt = (
+        Path(__file__).parents[2] / "dify" / "prompts" / "04-value-proposition.md"
+    ).read_text()
+    assert nodes["market_hypothesis"]["prompt_template"][0]["text"] == market_prompt
+    assert nodes["value_proposition"]["prompt_template"][0]["text"] == value_prompt

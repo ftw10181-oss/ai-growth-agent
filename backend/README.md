@@ -2,7 +2,9 @@
 
 FastAPI product boundary for the AI Growth Agent. Run in `mock` mode for the credential-free portfolio demo or `dify` mode to proxy the published workflow.
 
-The frontend-facing endpoint is `POST /api/analyze`. The original versioned path, `POST /api/v1/insights`, remains available as a compatibility alias.
+The V0.3 strategy endpoint is `POST /api/v3/strategy`. The existing `POST /api/analyze`, `POST /api/v2/insights`, and `POST /api/v1/insights` paths remain available for the V0.2 User Insight experience.
+
+`/api/v3/strategy` returns Context, User Insight, Market Hypothesis, Value Proposition, a four-decision summary, and a deterministic cross-module quality review. The review validates source paths, evidence inheritance, market-claim grounding, decision continuity, product support, and validation testability.
 
 ```bash
 pip install -r requirements-dev.txt

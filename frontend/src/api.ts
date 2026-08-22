@@ -1,6 +1,22 @@
-import type { GrowthBrief, InsightResponse } from "./types";
+import type { GrowthBrief, InsightResponse, StrategyResponse } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+
+export async function generateStrategy(brief: GrowthBrief): Promise<StrategyResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/v3/strategy`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(brief)
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    const detail = typeof body?.detail === "string" ? body.detail : "Unable to generate the strategy.";
+    throw new Error(detail);
+  }
+
+  return response.json();
+}
 
 export async function generateInsight(brief: GrowthBrief): Promise<InsightResponse> {
   const response = await fetch(`${API_BASE_URL}/api/analyze`, {
