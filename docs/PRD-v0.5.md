@@ -100,11 +100,12 @@ The product should answer five connected questions:
 5. Source Normalizer removes duplicate URLs and creates immutable source IDs.
 6. Source Evaluator records relevance, source class, freshness, and limitations.
 7. Evidence Synthesizer groups findings as supported, contested, or insufficient.
-8. User Insight, Market Hypothesis, and Value Proposition consume the evidence
-   brief and retain V0.3 upstream traceability.
-9. A deterministic gate validates citations, coverage, conflicts, and claim
-   language.
-10. The UI shows the strategy, evidence board, sources, gaps, and review state.
+8. A deterministic evidence gate removes invalid or weak source links, enforces
+   confidence ceilings, and recalculates question coverage.
+9. User Insight, Market Hypothesis, and Value Proposition consume the validated
+   evidence brief and retain V0.3 upstream traceability.
+10. The product API performs final citation, continuity, and claim-language checks.
+11. The UI shows the strategy, evidence board, sources, gaps, and review state.
 
 ## 8. Functional requirements
 
@@ -113,7 +114,7 @@ The product should answer five connected questions:
 | FR-01 | Preserve the V0.3 brief | Existing six fields and business goals remain valid |
 | FR-02 | Plan research before search | Three to five questions each define a query, evidence need, and decision impact |
 | FR-03 | Bound external search | Maximum five queries and ten retained sources per run |
-| FR-04 | Preserve raw provenance | Every retained source has an immutable ID, canonical URL, query ID, and retrieval timestamp |
+| FR-04 | Preserve raw provenance | Every retained source has an immutable ID, canonical URL, query ID, and retrieval timestamp; the global source cap is allocated across research questions rather than consumed by the first query |
 | FR-05 | Evaluate source usefulness | Every source exposes relevance, source class, freshness, and limitations |
 | FR-06 | Synthesize evidence | Findings expose supported, contested, or insufficient status and source IDs |
 | FR-07 | Prevent citation invention | Every citation resolves to a retained source and every source URL came from tool output |
@@ -122,6 +123,7 @@ The product should answer five connected questions:
 | FR-10 | Fail transparently | Search failure returns V0.3 strategy plus `research_status=unavailable` |
 | FR-11 | Protect secrets and quota | Search credentials remain server-side and requests are rate/cost limited |
 | FR-12 | Expose decision summary | Response adds evidence coverage and largest research gap to the V0.3 summary |
+| FR-13 | Enforce evidence before strategy | A deterministic workflow gate rejects mismatched or low-relevance source links and caps unsupported confidence before strategy generation |
 
 ## 9. Evidence contract
 
@@ -230,6 +232,7 @@ decision. V0.5 must not claim business impact until measured with real users.
 | Search snippets are mistaken for facts | Label retrieval separately; require finding synthesis and citation checks |
 | The model fabricates or edits URLs | Build source IDs from tool output and reject unknown URLs |
 | Results overrepresent vendor content | Expose source class and require diversity notes |
+| Early queries consume the source budget | Retain results in rank-by-query order and test question-level coverage |
 | Freshness is unknown | Preserve missing dates and lower confidence rather than invent them |
 | Search adds latency and cost | Limit queries/results, cache briefs, and show partial progress |
 | Evidence conflicts | Preserve both sides and trigger review for critical claims |
@@ -242,4 +245,3 @@ V0.5 is complete when the Dify workflow performs bounded live search, the
 server proves URL and citation integrity, the public UI exposes evidence and
 uncertainty, the fixed evaluation set passes every release gate, and the V0.3
 experience remains available as a safe fallback.
-

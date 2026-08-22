@@ -29,6 +29,14 @@ limitations.
 - `community` means user-generated discussion or social/community content.
 - A search snippet may support relevance screening but may be incomplete.
 - A recent publication date does not establish authority.
+- If `published_at` is null, `freshness` must be `unknown`; never infer
+  freshness from a year in the title, URL, snippet, or query.
+- A product maker, retailer, consultancy, or commercial site discussing or
+  promoting its own offering is `vendor`, not `independent_secondary`.
+- Replace the normalizer's placeholder limitation with concrete limitations.
+  A source with no publication date must state that the date is unavailable,
+  and every search-only source must state that evaluation used a snippet rather
+  than the full page.
 - State limitations such as missing methodology, vendor interest, geographic
   mismatch, unknown date, snippet-only access, or small/self-selected sample.
 
@@ -36,4 +44,3 @@ limitations.
 
 Return the Source Manifest with only evaluator-owned fields completed. Preserve
 all deterministic identity and provenance fields exactly.
-

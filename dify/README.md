@@ -39,9 +39,12 @@ claim-citation map while retaining the V0.3 strategy modules.
 2. Create a separate workflow named `AI Growth Agent — V0.5`.
 3. Install the official Tavily plugin from Dify Marketplace and configure its
    credential in Dify; never place the key in this repository.
-4. Follow `workflow-v0.5.md` to build and test the canvas.
-5. Use the V0.5 prompts, schemas, and deterministic source-normalizer Code node.
-6. Connect a separate development API key only after provenance and citation
+4. Choose **Create from DSL file** and upload `workflow-v0.5.yml`.
+5. Open the Tavily Search node once and select the authorized Tavily credential
+   if Dify does not bind it automatically.
+6. Confirm every LLM node uses a structured-output-capable model available in
+   the workspace, then follow `workflow-v0.5.md` for the test sequence.
+7. Connect a separate development API key only after provenance and citation
    tests pass.
 
 ## Source files
@@ -64,12 +67,14 @@ claim-citation map while retaining the V0.3 strategy modules.
 - `schemas/evidence-brief.schema.json`
 - `schemas/claim-citations.schema.json`
 - `code/normalize_search_results.py`
+- `code/validate_evidence_brief.py`
+- `build_workflow_v05.py`
+- `workflow-v0.5.yml`
 
 When changing a V0.2 prompt or schema, run `python dify/build_workflow_v02.py` to rebuild the importable DSL, then run the repository verification commands before committing.
 
 When changing a V0.3 prompt or schema, run `python dify/build_workflow_v03.py` to rebuild `workflow-v0.3.yml` before verification.
 
-V0.5 intentionally begins with the manual workflow guide. Generate an
-importable DSL only after the Tavily node has been configured and exported from
-the user's Dify workspace, because plugin identifiers and credential bindings
-are workspace-specific.
+When changing a V0.5 prompt, schema, or normalizer, run
+`python dify/build_workflow_v05.py` to rebuild `workflow-v0.5.yml`. Tavily
+credentials remain workspace secrets and are never written into the DSL.

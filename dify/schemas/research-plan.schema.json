@@ -79,11 +79,10 @@
       "additionalProperties": false,
       "required": ["max_queries", "max_results_per_query", "max_retained_sources"],
       "properties": {
-        "max_queries": {"const": 5},
+        "max_queries": {"type": "integer", "const": 5},
         "max_results_per_query": {"type": "integer", "minimum": 3, "maximum": 5},
-        "max_retained_sources": {"const": 10}
+        "max_retained_sources": {"type": "integer", "const": 10}
       }
     }
   }
 }
-

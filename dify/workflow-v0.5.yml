@@ -1,0 +1,2219 @@
+app:
+  description: Turn an overseas growth brief into a bounded, evidence-backed strategy with live web sources.
+  icon: 🧭
+  icon_background: '#E8F5EE'
+  icon_type: emoji
+  mode: workflow
+  name: AI Growth Agent — V0.5
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.7.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      enabled: false
+    opening_statement: ''
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: start-source-context_interpreter-target
+      source: start
+      sourceHandle: source
+      target: context_interpreter
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: context_interpreter-source-research_planner-target
+      source: context_interpreter
+      sourceHandle: source
+      target: research_planner
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: iteration
+      id: research_planner-source-research_iteration-target
+      source: research_planner
+      sourceHandle: source
+      target: research_iteration
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: true
+        isInLoop: false
+        sourceType: iteration-start
+        targetType: tool
+        iteration_id: research_iteration
+      id: research_iteration_start-source-tavily_search-target
+      source: research_iteration_start
+      sourceHandle: source
+      target: tavily_search
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: true
+        isInLoop: false
+        sourceType: tool
+        targetType: code
+        iteration_id: research_iteration
+      id: tavily_search-source-package_search_result-target
+      source: tavily_search
+      sourceHandle: source
+      target: package_search_result
+      targetHandle: target
+      type: custom
+      zIndex: 1002
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: iteration
+        targetType: code
+      id: research_iteration-source-source_normalizer-target
+      source: research_iteration
+      sourceHandle: source
+      target: source_normalizer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: source_normalizer-source-source_evaluator-target
+      source: source_normalizer
+      sourceHandle: source
+      target: source_evaluator
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: source_evaluator-source-evidence_synthesizer-target
+      source: source_evaluator
+      sourceHandle: source
+      target: evidence_synthesizer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: evidence_synthesizer-source-evidence_gate-target
+      source: evidence_synthesizer
+      sourceHandle: source
+      target: evidence_gate
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: evidence_gate-source-user_insight-target
+      source: evidence_gate
+      sourceHandle: source
+      target: user_insight
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: user_insight-source-market_hypothesis-target
+      source: user_insight
+      sourceHandle: source
+      target: market_hypothesis
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: market_hypothesis-source-value_proposition-target
+      source: market_hypothesis
+      sourceHandle: source
+      target: value_proposition
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: value_proposition-source-claim_citation_mapper-target
+      source: value_proposition
+      sourceHandle: source
+      target: claim_citation_mapper
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: end
+      id: claim_citation_mapper-source-end-target
+      source: claim_citation_mapper
+      sourceHandle: source
+      target: end
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: Six-field overseas growth brief
+        selected: false
+        title: Start
+        type: start
+        variables:
+        - default: ''
+          hint: Product or working name
+          label: Product
+          max_length: 120
+          options: []
+          placeholder: AI Translation Earbuds
+          required: true
+          type: text-input
+          variable: product
+        - default: ''
+          hint: What the product does and for whom
+          label: Product Description
+          max_length: 2000
+          options: []
+          placeholder: Real-time AI translation earbuds for cross-language communication.
+          required: true
+          type: paragraph
+          variable: product_description
+        - default: ''
+          hint: Country or region
+          label: Target Market
+          max_length: 120
+          options: []
+          placeholder: United States
+          required: true
+          type: text-input
+          variable: target_market
+        - default: ''
+          hint: Initial audience hypothesis
+          label: Target Audience
+          max_length: 500
+          options: []
+          placeholder: Frequent international business travelers
+          required: true
+          type: paragraph
+          variable: target_audience
+        - default: User Acquisition
+          hint: Primary outcome for this analysis
+          label: Business Goal
+          options:
+          - Brand Awareness
+          - User Acquisition
+          - Conversion
+          - Community Growth
+          - Product Launch
+          - Retention
+          placeholder: ''
+          required: true
+          type: select
+          variable: business_goal
+        - default: ''
+          hint: Constraints, channels, competitors, or stage
+          label: Additional Context
+          max_length: 2000
+          options: []
+          placeholder: Optional
+          required: false
+          type: paragraph
+          variable: additional_context
+      height: 270
+      id: start
+      position:
+        x: 40
+        y: 220
+      positionAbsolute:
+        x: 40
+        y: 220
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Normalize the brief and expose assumptions before analysis.
+        model:
+          completion_params:
+            temperature: 0.2
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: context-system
+          role: system
+          text: '# Role
+
+
+            You are the Context Interpreter for an overseas growth strategy product. Your job is to transform a raw growth brief into a precise, neutral analysis context for downstream agents.
+
+
+            # Objectives
+
+
+            1. Preserve the user''s explicit facts.
+
+            2. Normalize vague or uneven wording without changing intent.
+
+            3. Separate supplied information from reasonable assumptions.
+
+            4. Identify ambiguity that could materially affect growth analysis.
+
+
+            # Rules
+
+
+            - Do not perform market research.
+
+            - Do not invent statistics, user quotes, competitor facts, prices, product capabilities, or citations.
+
+            - Treat the target audience as an initial hypothesis, not a verified segment.
+
+            - If information is missing, record a concise assumption rather than silently filling the gap.
+
+            - Keep the summary specific to the supplied product, market, audience, and goal.
+
+            - Use English for all values.
+
+            - Return only the configured structured output. No markdown or commentary.
+
+
+            # Field guidance
+
+
+            - `brief_summary`: 2–3 sentences connecting product, user, market, and goal.
+
+            - `product_category`: a concise category inferred from the description.
+
+            - `growth_stage`: one of `new_market_entry`, `launch`, `early_growth`, `scaling`, `retention`, `unknown`.
+
+            - `primary_goal`: copy the supported business goal exactly.
+
+            - `known_constraints`: only constraints explicitly supplied by the user.
+
+            - `channel_signals`: channels mentioned by the user; do not add recommendations.
+
+            - `assumptions`: missing or inferred conditions that downstream reasoning relies on.
+
+            - `ambiguities`: questions whose answers could change the analysis.
+
+
+            # Mandatory consistency check
+
+
+            Before returning the configured output:
+
+
+            1. `primary_goal` MUST exactly match the user''s `business_goal`.
+
+            2. `brief_summary` MUST describe that same primary goal.
+
+            3. Do not describe brand awareness, acquisition, conversion, retention, or community growth as the product''s objective unless it matches `business_goal`.
+
+            4. Other objectives inferred from `additional_context` may only be presented as constraints or secondary considerations.
+
+            5. If any output field conflicts with `business_goal`, revise it before returning the final object.
+
+            '
+        - id: context-user
+          role: user
+          text: 'Product: {{#start.product#}}
+
+            Product description: {{#start.product_description#}}
+
+            Target market: {{#start.target_market#}}
+
+            Target audience: {{#start.target_audience#}}
+
+            Business goal: {{#start.business_goal#}}
+
+            Additional context: {{#start.additional_context#}}'
+        retry_config:
+          max_retries: 2
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              brief_summary:
+                minLength: 20
+                type: string
+              product_category:
+                minLength: 2
+                type: string
+              target_market:
+                minLength: 2
+                type: string
+              target_audience:
+                minLength: 2
+                type: string
+              growth_stage:
+                enum:
+                - new_market_entry
+                - launch
+                - early_growth
+                - scaling
+                - retention
+                - unknown
+                type: string
+              primary_goal:
+                enum:
+                - Brand Awareness
+                - User Acquisition
+                - Conversion
+                - Community Growth
+                - Product Launch
+                - Retention
+                type: string
+              known_constraints:
+                items:
+                  type: string
+                maxItems: 8
+                type: array
+              channel_signals:
+                items:
+                  type: string
+                maxItems: 8
+                type: array
+              assumptions:
+                items:
+                  type: string
+                maxItems: 8
+                minItems: 1
+                type: array
+              ambiguities:
+                items:
+                  type: string
+                maxItems: 8
+                type: array
+            required:
+            - brief_summary
+            - product_category
+            - target_market
+            - target_audience
+            - growth_stage
+            - primary_goal
+            - known_constraints
+            - channel_signals
+            - assumptions
+            - ambiguities
+            type: object
+        structured_output_enabled: true
+        title: Context Interpreter
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 120
+      id: context_interpreter
+      position:
+        x: 380
+        y: 280
+      positionAbsolute:
+        x: 380
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Create three to five decision-focused web research questions.
+        model:
+          completion_params:
+            temperature: 0.1
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: research_planner-system
+          role: system
+          text: "# Role\n\nYou are the Research Planner for AI Growth Agent V0.5. Convert a normalized\ngrowth brief into a small set of web-research questions that could materially\nchange a growth decision.\n\n# Input\n\nYou receive the normalized Context Interpreter object. Treat explicit brief\nfields as supplied facts and assumptions as unverified.\n\n# Task\n\nReturn three to five research questions. Cover only dimensions that affect the\nprimary user, entry scenario, market opportunity, alternatives, channel choice,\nadoption risk, or credible value proposition.\n\nFor every question:\n\n- assign sequential IDs beginning with `RQ-001` (`RQ-001`, `RQ-002`, and so\n  on, with no gaps or alternate numbering);\n- state the decision it could change;\n- describe the evidence needed;\n- write one focused web-search query;\n- choose a recency preference;\n- assign a priority.\n\n# Rules\n\n- Plan research; do not answer the questions.\n- Do not assume named competitors unless the brief names\
+            \ them.\n- Do not ask for broad market-size statistics unless the decision requires it.\n- Every query must literally include the target market value from the normalized\n  context, plus the relevant product category and user or behavior concept.\n- Do not repeat or paraphrase the same query across multiple questions.\n- Prefer observable behavior, current alternatives, policy, distribution, and\n  adoption signals over generic trend queries.\n- Return no more than five queries.\n- `search_limits.max_queries` must equal 5.\n- `search_limits.max_retained_sources` must equal 10.\n\n# Output\n\nReturn only structured output matching `research-plan.schema.json`.\n"
+        - id: research_planner-user
+          role: user
+          text: 'Normalized growth context:
+
+            {{#context_interpreter.structured_output#}}'
+        retry_config:
+          max_retries: 2
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: ResearchPlanV05
+            type: object
+            additionalProperties: false
+            required:
+            - decision_context
+            - questions
+            - search_limits
+            properties:
+              decision_context:
+                type: string
+                minLength: 20
+                maxLength: 500
+              questions:
+                type: array
+                minItems: 3
+                maxItems: 5
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - question_id
+                  - question
+                  - dimension
+                  - decision_impact
+                  - evidence_needed
+                  - query
+                  - recency_preference
+                  - priority
+                  properties:
+                    question_id:
+                      type: string
+                      pattern: ^RQ-[0-9]{3}$
+                    question:
+                      type: string
+                      minLength: 15
+                      maxLength: 240
+                    dimension:
+                      type: string
+                      enum:
+                      - user_behavior
+                      - market_context
+                      - competitor
+                      - channel
+                      - risk
+                      - product_expectation
+                    decision_impact:
+                      type: string
+                      minLength: 15
+                      maxLength: 300
+                    evidence_needed:
+                      type: string
+                      minLength: 15
+                      maxLength: 300
+                    query:
+                      type: string
+                      minLength: 8
+                      maxLength: 220
+                    recency_preference:
+                      type: string
+                      enum:
+                      - last_12_months
+                      - last_24_months
+                      - any
+                    priority:
+                      type: string
+                      enum:
+                      - critical
+                      - important
+                      - exploratory
+              search_limits:
+                type: object
+                additionalProperties: false
+                required:
+                - max_queries
+                - max_results_per_query
+                - max_retained_sources
+                properties:
+                  max_queries:
+                    type: integer
+                    const: 5
+                  max_results_per_query:
+                    type: integer
+                    minimum: 3
+                    maximum: 5
+                  max_retained_sources:
+                    type: integer
+                    const: 10
+        structured_output_enabled: true
+        title: Research Planner
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 120
+      id: research_planner
+      position:
+        x: 720
+        y: 280
+      positionAbsolute:
+        x: 720
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        desc: Run at most five bounded Tavily searches in serial order.
+        error_handle_mode: continue-on-error
+        flatten_output: true
+        height: 310
+        is_parallel: false
+        iterator_input_type: array[object]
+        iterator_selector:
+        - research_planner
+        - structured_output
+        - questions
+        output_selector:
+        - package_search_result
+        - result
+        output_type: array[object]
+        parallel_nums: 1
+        selected: false
+        startNodeType: tool
+        start_node_id: research_iteration_start
+        title: Bounded Web Research
+        type: iteration
+        width: 720
+      height: 310
+      id: research_iteration
+      position:
+        x: 1060
+        y: 190
+      positionAbsolute:
+        x: 1060
+        y: 190
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 720
+      zIndex: 1
+    - data:
+        desc: ''
+        isInIteration: true
+        selected: false
+        title: ''
+        type: iteration-start
+      height: 48
+      id: research_iteration_start
+      position:
+        x: 24
+        y: 78
+      positionAbsolute:
+        x: 1084
+        y: 268
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-iteration-start
+      width: 44
+      draggable: false
+      parentId: research_iteration
+      selectable: false
+      zIndex: 1002
+    - data:
+        desc: Return structured JSON search results; generated answers are disabled.
+        isInIteration: true
+        iteration_id: research_iteration
+        is_team_authorization: true
+        provider_id: langgenius/tavily/tavily
+        provider_name: langgenius/tavily/tavily
+        provider_type: builtin
+        selected: false
+        title: Tavily Search
+        tool_configurations:
+          auto_parameters:
+            type: constant
+            value: false
+          include_answer:
+            type: constant
+            value: 'false'
+          include_favicon:
+            type: constant
+            value: false
+          include_image_descriptions:
+            type: constant
+            value: false
+          include_images:
+            type: constant
+            value: false
+          include_raw_content:
+            type: constant
+            value: 'false'
+          include_usage:
+            type: constant
+            value: true
+          max_results:
+            type: constant
+            value: 5
+        tool_label: Tavily Search
+        tool_name: tavily_search
+        tool_node_version: '2'
+        tool_parameters:
+          query:
+            type: mixed
+            value: '{{#research_iteration.item.query#}}'
+          search_depth:
+            type: constant
+            value: basic
+          time_range:
+            type: constant
+            value: not_specified
+          topic:
+            type: constant
+            value: general
+        type: tool
+      height: 120
+      id: tavily_search
+      position:
+        x: 100
+        y: 95
+      positionAbsolute:
+        x: 1160
+        y: 285
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+      extent: parent
+      parentId: research_iteration
+      zIndex: 1002
+    - data:
+        code: "def main(question: dict, raw_result=None) -> dict:\n    question = question if isinstance(question, dict) else {}\n    return {\n        'result': {\n            'query_id': question.get('question_id'),\n            'search_result': raw_result,\n        }\n    }\n"
+        code_language: python3
+        desc: Bind each immutable question ID to its raw Tool JSON output.
+        isInIteration: true
+        iteration_id: research_iteration
+        outputs:
+          result:
+            children: null
+            type: object
+        selected: false
+        title: Package Search Result
+        type: code
+        variables:
+        - value_selector:
+          - research_iteration
+          - item
+          variable: question
+        - value_selector:
+          - tavily_search
+          - json
+          variable: raw_result
+      height: 120
+      id: package_search_result
+      position:
+        x: 405
+        y: 95
+      positionAbsolute:
+        x: 1465
+        y: 285
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+      extent: parent
+      parentId: research_iteration
+      zIndex: 1002
+    - data:
+        code: "\"\"\"Deterministic Dify Code-node logic for V0.5 search provenance.\n\nThe Code node receives one Tavily JSON result per research question. It creates\ncanonical URLs and source IDs before any LLM sees the source manifest, so later\nnodes cannot silently invent a source identity.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nfrom datetime import datetime, timezone\nfrom typing import Any\nfrom urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit\n\n\nTRACKING_KEYS = {\n    \"fbclid\",\n    \"gclid\",\n    \"mc_cid\",\n    \"mc_eid\",\n    \"ref\",\n    \"referrer\",\n}\n\n\ndef _as_object(value: Any) -> dict[str, Any]:\n    if isinstance(value, dict):\n        return value\n    if isinstance(value, list):\n        # Dify can aggregate a tool's JSON messages into a one-item array inside\n        # an Iteration node. Some plugin/runtime combinations expose Tavily's\n        # result list directly instead. Accept both representations.\n        for item\
+          \ in value:\n            candidate = _as_object(item)\n            if isinstance(candidate.get(\"results\"), list):\n                return candidate\n        if value and all(isinstance(item, dict) for item in value):\n            if any(isinstance(item.get(\"url\"), str) for item in value):\n                return {\"results\": value}\n        return {}\n    if isinstance(value, str):\n        try:\n            parsed = json.loads(value)\n        except json.JSONDecodeError:\n            return {}\n        return _as_object(parsed)\n    return {}\n\n\ndef _canonical_url(value: Any) -> str | None:\n    if not isinstance(value, str):\n        return None\n    try:\n        parts = urlsplit(value.strip())\n    except ValueError:\n        return None\n    if parts.scheme.lower() != \"https\" or not parts.hostname:\n        return None\n\n    query = [\n        (key, item)\n        for key, item in parse_qsl(parts.query, keep_blank_values=True)\n        if not key.lower().startswith(\"\
+          utm_\") and key.lower() not in TRACKING_KEYS\n    ]\n    path = parts.path or \"/\"\n    if path != \"/\":\n        path = path.rstrip(\"/\")\n    return urlunsplit((\"https\", parts.netloc.lower(), path, urlencode(query), \"\"))\n\n\ndef _score(value: Any) -> float:\n    try:\n        return max(0.0, min(1.0, float(value)))\n    except (TypeError, ValueError):\n        return 0.0\n\n\ndef _researched_at(value: Any) -> str:\n    \"\"\"Convert Dify's ``sys.timestamp`` or an ISO value to UTC ISO 8601.\"\"\"\n\n    if isinstance(value, (int, float)):\n        return datetime.fromtimestamp(value, tz=timezone.utc).isoformat().replace(\n            \"+00:00\", \"Z\"\n        )\n    if isinstance(value, str):\n        stripped = value.strip()\n        try:\n            return datetime.fromtimestamp(float(stripped), tz=timezone.utc).isoformat().replace(\n                \"+00:00\", \"Z\"\n            )\n        except ValueError:\n            if stripped:\n                return stripped\n\
+          \    return datetime.now(tz=timezone.utc).isoformat().replace(\"+00:00\", \"Z\")\n\n\ndef _query_id(value: Any) -> str | None:\n    if isinstance(value, str):\n        return value\n    if isinstance(value, dict) and isinstance(value.get(\"question_id\"), str):\n        return value[\"question_id\"]\n    return None\n\n\ndef main(\n    raw_results: list[Any],\n    researched_at: Any,\n    query_ids: list[Any] | None = None,\n    failed_query_ids: list[str] | None = None,\n) -> dict[str, Any]:\n    \"\"\"Return a Dify-compatible Source Manifest output.\"\"\"\n\n    failures = list(dict.fromkeys(failed_query_ids or []))\n    candidate_groups: list[tuple[str | None, list[dict[str, Any]]]] = []\n    query_ids = query_ids or []\n    retrieval_time = _researched_at(researched_at)\n\n    for query_index, raw in enumerate(raw_results[:5]):\n        fallback_query_id = (\n            _query_id(query_ids[query_index]) if query_index < len(query_ids) else None\n        )\n        wrapped\
+          \ = _as_object(raw)\n        query_id = _query_id(wrapped.get(\"query_id\")) or fallback_query_id\n        payload = (\n            _as_object(wrapped.get(\"search_result\"))\n            if \"search_result\" in wrapped\n            else wrapped\n        )\n        results = payload.get(\"results\")\n        if not isinstance(results, list):\n            if query_id and query_id not in failures:\n                failures.append(query_id)\n            continue\n\n        candidates_for_query: dict[str, dict[str, Any]] = {}\n        for item in results[:5]:\n            if not isinstance(item, dict):\n                continue\n            canonical = _canonical_url(item.get(\"url\"))\n            if canonical is None:\n                continue\n            if canonical in candidates_for_query:\n                candidates_for_query[canonical][\"relevance_score\"] = max(\n                    candidates_for_query[canonical][\"relevance_score\"],\n                    _score(item.get(\"\
+          score\")),\n                )\n                continue\n\n            domain = urlsplit(canonical).hostname or \"\"\n            candidates_for_query[canonical] = {\n                \"canonical_url\": canonical,\n                \"source_id\": \"\",\n                \"title\": str(item.get(\"title\") or domain)[:300],\n                \"url\": canonical,\n                \"domain\": domain,\n                \"publisher\": None,\n                \"published_at\": item.get(\"published_date\") or None,\n                \"retrieved_at\": retrieval_time,\n                \"query_ids\": [query_id] if query_id else [],\n                \"source_class\": \"unknown\",\n                \"relevance_score\": _score(item.get(\"score\")),\n                \"freshness\": \"unknown\",\n                \"snippet\": str(item.get(\"content\") or \"No search snippet was returned.\")[:1200],\n                \"limitations\": [\"Source classification and publication date require evaluation.\"],\n \
+          \           }\n        if query_id and not candidates_for_query and query_id not in failures:\n            failures.append(query_id)\n        candidate_groups.append((query_id, list(candidates_for_query.values())))\n\n    # Retain sources in rank-by-query order instead of letting the first query\n    # consume the global cap. With five questions and a ten-source budget this\n    # normally preserves the top two results for every question. Later ranks\n    # fill gaps when URLs are duplicated or a query returns fewer results.\n    retained: dict[str, dict[str, Any]] = {}\n    max_rank = max((len(group) for _, group in candidate_groups), default=0)\n    for rank in range(max_rank):\n        for query_id, group in candidate_groups:\n            if rank >= len(group):\n                continue\n            candidate = group[rank]\n            canonical = candidate[\"canonical_url\"]\n            if canonical in retained:\n                if query_id and query_id not in retained[canonical][\"\
+          query_ids\"]:\n                    retained[canonical][\"query_ids\"].append(query_id)\n                retained[canonical][\"relevance_score\"] = max(\n                    retained[canonical][\"relevance_score\"],\n                    candidate[\"relevance_score\"],\n                )\n                continue\n            if len(retained) >= 10:\n                continue\n            retained[canonical] = candidate\n\n    sources = list(retained.values())\n    for index, source in enumerate(sources, 1):\n        source.pop(\"canonical_url\", None)\n        source[\"source_id\"] = f\"SRC-{index:03d}\"\n\n    if not sources:\n        status = \"unavailable\"\n    elif failures:\n        status = \"partial\"\n    else:\n        status = \"complete\"\n\n    return {\n        \"source_manifest\": {\n            \"research_status\": status,\n            \"researched_at\": retrieval_time,\n            \"sources\": sources,\n            \"failed_query_ids\": failures,\n        }\n  \
+          \  }\n"
+        code_language: python3
+        desc: Canonicalize URLs, deduplicate sources, and assign provenance IDs.
+        outputs:
+          source_manifest:
+            children: null
+            type: object
+        selected: false
+        title: Source Normalizer
+        type: code
+        variables:
+        - value_selector:
+          - research_iteration
+          - output
+          variable: raw_results
+        - value_selector:
+          - research_planner
+          - structured_output
+          - questions
+          variable: query_ids
+        - value_selector:
+          - sys
+          - timestamp
+          variable: researched_at
+      height: 120
+      id: source_normalizer
+      position:
+        x: 1900
+        y: 280
+      positionAbsolute:
+        x: 1900
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Classify source quality while preserving immutable provenance fields.
+        model:
+          completion_params:
+            temperature: 0
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: source_evaluator-system
+          role: system
+          text: "# Role\n\nYou are the Source Evaluator for AI Growth Agent V0.5. Evaluate the usefulness\nof normalized search results without treating retrieval as verification.\n\n# Input\n\nYou receive:\n\n- the Research Plan;\n- a deterministic Source Manifest whose IDs, URLs, query IDs, titles, snippets,\n  and retrieval timestamps came from the search-tool output.\n\n# Task\n\nFor every retained source, classify source type, estimate relevance to its\nresearch question, assess freshness from the supplied date, and record concrete\nlimitations.\n\n# Rules\n\n- Never create, edit, or replace a URL or source ID.\n- Never invent a publisher or publication date. Preserve null when unknown.\n- `primary` means the organization or authority directly responsible for the\n  underlying product, policy, dataset, or event.\n- `independent_secondary` means an editorial, research, or analytical source\n  independent of the subject.\n- `vendor` means commercial content promoting the publisher's own\
+            \ offering.\n- `community` means user-generated discussion or social/community content.\n- A search snippet may support relevance screening but may be incomplete.\n- A recent publication date does not establish authority.\n- If `published_at` is null, `freshness` must be `unknown`; never infer\n  freshness from a year in the title, URL, snippet, or query.\n- A product maker, retailer, consultancy, or commercial site discussing or\n  promoting its own offering is `vendor`, not `independent_secondary`.\n- Replace the normalizer's placeholder limitation with concrete limitations.\n  A source with no publication date must state that the date is unavailable,\n  and every search-only source must state that evaluation used a snippet rather\n  than the full page.\n- State limitations such as missing methodology, vendor interest, geographic\n  mismatch, unknown date, snippet-only access, or small/self-selected sample.\n\n# Output\n\nReturn the Source Manifest with only evaluator-owned\
+            \ fields completed. Preserve\nall deterministic identity and provenance fields exactly.\n"
+        - id: source_evaluator-user
+          role: user
+          text: 'Research plan:
+
+            {{#research_planner.structured_output#}}
+
+
+            Deterministic source manifest:
+
+            {{#source_normalizer.source_manifest#}}'
+        retry_config:
+          max_retries: 2
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: SourceManifestV05
+            type: object
+            additionalProperties: false
+            required:
+            - research_status
+            - researched_at
+            - sources
+            - failed_query_ids
+            properties:
+              research_status:
+                type: string
+                enum:
+                - complete
+                - partial
+                - unavailable
+                - offline_fixture
+              researched_at:
+                type: string
+                format: date-time
+              sources:
+                type: array
+                maxItems: 10
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - source_id
+                  - title
+                  - url
+                  - domain
+                  - publisher
+                  - published_at
+                  - retrieved_at
+                  - query_ids
+                  - source_class
+                  - relevance_score
+                  - freshness
+                  - snippet
+                  - limitations
+                  properties:
+                    source_id:
+                      type: string
+                      pattern: ^SRC-[0-9]{3}$
+                    title:
+                      type: string
+                      minLength: 3
+                      maxLength: 300
+                    url:
+                      type: string
+                      pattern: ^https://
+                    domain:
+                      type: string
+                      minLength: 3
+                      maxLength: 253
+                    publisher:
+                      type:
+                      - string
+                      - 'null'
+                      maxLength: 160
+                    published_at:
+                      type:
+                      - string
+                      - 'null'
+                      format: date
+                    retrieved_at:
+                      type: string
+                      format: date-time
+                    query_ids:
+                      type: array
+                      minItems: 1
+                      maxItems: 5
+                      items:
+                        type: string
+                        pattern: ^RQ-[0-9]{3}$
+                    source_class:
+                      type: string
+                      enum:
+                      - primary
+                      - independent_secondary
+                      - vendor
+                      - community
+                      - unknown
+                    relevance_score:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    freshness:
+                      type: string
+                      enum:
+                      - current
+                      - dated
+                      - unknown
+                    snippet:
+                      type: string
+                      minLength: 10
+                      maxLength: 1200
+                    limitations:
+                      type: array
+                      maxItems: 4
+                      items:
+                        type: string
+                        minLength: 3
+                        maxLength: 240
+              failed_query_ids:
+                type: array
+                maxItems: 5
+                items:
+                  type: string
+                  pattern: ^RQ-[0-9]{3}$
+        structured_output_enabled: true
+        title: Source Evaluator
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 120
+      id: source_evaluator
+      position:
+        x: 2240
+        y: 280
+      positionAbsolute:
+        x: 2240
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Create bounded findings, contradictions, gaps, and implications.
+        model:
+          completion_params:
+            temperature: 0.1
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: evidence_synthesizer-system
+          role: system
+          text: "# Role\n\nYou are the Evidence Synthesizer for AI Growth Agent V0.5. Convert evaluated\nsources into a bounded evidence brief for growth decision-making.\n\n# Input\n\nYou receive the Research Plan and evaluated Source Manifest.\n\n# Task\n\nCreate three to ten findings. Each finding must answer one or more research\nquestions, cite only source IDs in the manifest, explain the strategic\nimplication, and preserve important limitations.\n\n# Status rules\n\n- `supported`: the retained sources materially support the claim and no\n  equally relevant source contradicts it.\n- `contested`: relevant retained sources support different conclusions.\n- `insufficient`: the retrieved material is too weak, indirect, sparse, dated,\n  or commercially interested to answer the question.\n\n# Confidence rules\n\n- `high` requires at least two relevant sources and at least one `primary` or\n  `independent_secondary` source.\n- Vendor or community sources cannot independently justify `high`\
+            \ confidence.\n- If every supporting source has an unknown publication date, confidence must\n  not exceed `medium`.\n- If every supporting source was evaluated only from a search snippet,\n  confidence must not exceed `medium`.\n- A contested finding cannot be `high` confidence.\n- An insufficient finding must be `low` confidence.\n\n# Safety rules\n\n- Do not create source IDs.\n- Every cited source must list at least one of the finding's\n  `research_question_ids` in its own `query_ids`; otherwise it is not eligible\n  evidence for that finding.\n- Do not make a claim stronger than the cited snippets establish.\n- Do not collapse contradictory sources into a single neutral statement.\n- Do not infer causality, frequency, market share, or willingness to pay unless\n  directly supported by suitable sources.\n- For every unanswered critical question, create a research gap and next step.\n- `answered_question_count` may count a research question only when at least one\n  `supported`\
+            \ or `contested` finding cites an eligible source for that question.\n\n# Output\n\nReturn only structured output matching `evidence-brief.schema.json`.\n"
+        - id: evidence_synthesizer-user
+          role: user
+          text: 'Research plan:
+
+            {{#research_planner.structured_output#}}
+
+
+            Evaluated source manifest:
+
+            {{#source_evaluator.structured_output#}}'
+        retry_config:
+          max_retries: 2
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: EvidenceBriefV05
+            type: object
+            additionalProperties: false
+            required:
+            - summary
+            - findings
+            - research_gaps
+            - source_coverage
+            properties:
+              summary:
+                type: string
+                minLength: 30
+                maxLength: 800
+              findings:
+                type: array
+                minItems: 3
+                maxItems: 10
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - finding_id
+                  - research_question_ids
+                  - claim
+                  - dimension
+                  - status
+                  - supporting_source_ids
+                  - contradicting_source_ids
+                  - confidence
+                  - implication
+                  - limitations
+                  properties:
+                    finding_id:
+                      type: string
+                      pattern: ^EV-[0-9]{3}$
+                    research_question_ids:
+                      type: array
+                      minItems: 1
+                      maxItems: 5
+                      items:
+                        type: string
+                        pattern: ^RQ-[0-9]{3}$
+                    claim:
+                      type: string
+                      minLength: 15
+                      maxLength: 500
+                    dimension:
+                      type: string
+                      enum:
+                      - user_behavior
+                      - market_context
+                      - competitor
+                      - channel
+                      - risk
+                      - product_expectation
+                    status:
+                      type: string
+                      enum:
+                      - supported
+                      - contested
+                      - insufficient
+                    supporting_source_ids:
+                      type: array
+                      maxItems: 6
+                      items:
+                        type: string
+                        pattern: ^SRC-[0-9]{3}$
+                    contradicting_source_ids:
+                      type: array
+                      maxItems: 6
+                      items:
+                        type: string
+                        pattern: ^SRC-[0-9]{3}$
+                    confidence:
+                      type: string
+                      enum:
+                      - low
+                      - medium
+                      - high
+                    implication:
+                      type: string
+                      minLength: 12
+                      maxLength: 500
+                    limitations:
+                      type: array
+                      maxItems: 5
+                      items:
+                        type: string
+                        minLength: 3
+                        maxLength: 240
+              research_gaps:
+                type: array
+                minItems: 1
+                maxItems: 8
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - gap
+                  - decision_risk
+                  - next_step
+                  - priority
+                  properties:
+                    gap:
+                      type: string
+                      minLength: 8
+                      maxLength: 300
+                    decision_risk:
+                      type: string
+                      minLength: 8
+                      maxLength: 300
+                    next_step:
+                      type: string
+                      minLength: 8
+                      maxLength: 300
+                    priority:
+                      type: string
+                      enum:
+                      - critical
+                      - important
+                      - exploratory
+              source_coverage:
+                type: object
+                additionalProperties: false
+                required:
+                - retained_source_count
+                - question_count
+                - answered_question_count
+                - source_diversity_note
+                properties:
+                  retained_source_count:
+                    type: integer
+                    minimum: 0
+                    maximum: 10
+                  question_count:
+                    type: integer
+                    minimum: 3
+                    maximum: 5
+                  answered_question_count:
+                    type: integer
+                    minimum: 0
+                    maximum: 5
+                  source_diversity_note:
+                    type: string
+                    minLength: 8
+                    maxLength: 400
+        structured_output_enabled: true
+        title: Evidence Synthesizer
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 120
+      id: evidence_synthesizer
+      position:
+        x: 2580
+        y: 280
+      positionAbsolute:
+        x: 2580
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        code: "\"\"\"Deterministic evidence gate for AI Growth Agent V0.5.\n\nThe model may synthesize evidence, but it may not grade its own compliance.\nThis Code-node layer resolves source IDs, checks question provenance, rejects\nweak retrieval matches, and enforces confidence ceilings before strategy nodes\nconsume the evidence brief.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport copy\nfrom typing import Any\n\n\nMIN_RELEVANCE = 0.5\n\n\ndef _question_id(value: Any) -> str | None:\n    if isinstance(value, str):\n        return value\n    if isinstance(value, dict) and isinstance(value.get(\"question_id\"), str):\n        return value[\"question_id\"]\n    return None\n\n\ndef _has_snippet_only_limitation(source: dict[str, Any]) -> bool:\n    return any(\n        \"snippet\" in str(limitation).lower()\n        for limitation in source.get(\"limitations\", [])\n    )\n\n\ndef _eligible_source_ids(\n    source_ids: list[Any],\n    finding_question_ids: set[str],\n    sources:\
+          \ dict[str, dict[str, Any]],\n    finding_path: str,\n    issues: list[dict[str, str]],\n) -> list[str]:\n    eligible: list[str] = []\n    for raw_source_id in source_ids:\n        if not isinstance(raw_source_id, str) or raw_source_id not in sources:\n            issues.append(\n                {\n                    \"code\": \"unknown_source_id\",\n                    \"path\": finding_path,\n                    \"message\": f\"Removed unresolved source reference {raw_source_id!r}.\",\n                }\n            )\n            continue\n        source = sources[raw_source_id]\n        source_questions = {\n            item for item in source.get(\"query_ids\", []) if isinstance(item, str)\n        }\n        if not finding_question_ids.intersection(source_questions):\n            issues.append(\n                {\n                    \"code\": \"question_source_mismatch\",\n                    \"path\": finding_path,\n                    \"message\": (\n               \
+          \         f\"Removed {raw_source_id}; its query provenance does not \"\n                        \"match the finding question.\"\n                    ),\n                }\n            )\n            continue\n        try:\n            relevance = float(source.get(\"relevance_score\", 0))\n        except (TypeError, ValueError):\n            relevance = 0.0\n        if relevance < MIN_RELEVANCE:\n            issues.append(\n                {\n                    \"code\": \"low_relevance_source\",\n                    \"path\": finding_path,\n                    \"message\": (\n                        f\"Removed {raw_source_id}; relevance {relevance:.2f} is below \"\n                        f\"the {MIN_RELEVANCE:.2f} evidence threshold.\"\n                    ),\n                }\n            )\n            continue\n        if raw_source_id not in eligible:\n            eligible.append(raw_source_id)\n    return eligible\n\n\ndef _high_confidence_allowed(\n    source_ids: list[str],\
+          \ sources: dict[str, dict[str, Any]]\n) -> bool:\n    supporting = [sources[source_id] for source_id in source_ids]\n    if len(supporting) < 2:\n        return False\n    if not any(\n        source.get(\"source_class\") in {\"primary\", \"independent_secondary\"}\n        for source in supporting\n    ):\n        return False\n    if all(not source.get(\"published_at\") for source in supporting):\n        return False\n    if all(_has_snippet_only_limitation(source) for source in supporting):\n        return False\n    return True\n\n\ndef main(\n    evidence_brief: dict[str, Any],\n    source_manifest: dict[str, Any],\n    research_plan: dict[str, Any],\n) -> dict[str, Any]:\n    brief = copy.deepcopy(evidence_brief if isinstance(evidence_brief, dict) else {})\n    manifest = source_manifest if isinstance(source_manifest, dict) else {}\n    plan = research_plan if isinstance(research_plan, dict) else {}\n    source_list = [\n        source for source in manifest.get(\"sources\"\
+          , []) if isinstance(source, dict)\n    ]\n    sources = {\n        source[\"source_id\"]: source\n        for source in source_list\n        if isinstance(source.get(\"source_id\"), str)\n    }\n    plan_question_ids = [\n        question_id\n        for question_id in (\n            _question_id(question) for question in plan.get(\"questions\", [])\n        )\n        if question_id\n    ]\n    issues: list[dict[str, str]] = []\n    answered_question_ids: set[str] = set()\n\n    for index, finding in enumerate(brief.get(\"findings\", [])):\n        if not isinstance(finding, dict):\n            continue\n        path = f\"findings.{index}\"\n        finding_question_ids = {\n            item\n            for item in finding.get(\"research_question_ids\", [])\n            if isinstance(item, str)\n        }\n        supporting = _eligible_source_ids(\n            finding.get(\"supporting_source_ids\", []),\n            finding_question_ids,\n            sources,\n            f\"\
+          {path}.supporting_source_ids\",\n            issues,\n        )\n        contradicting = _eligible_source_ids(\n            finding.get(\"contradicting_source_ids\", []),\n            finding_question_ids,\n            sources,\n            f\"{path}.contradicting_source_ids\",\n            issues,\n        )\n        finding[\"supporting_source_ids\"] = supporting\n        finding[\"contradicting_source_ids\"] = contradicting\n\n        if not supporting:\n            if finding.get(\"status\") != \"insufficient\":\n                issues.append(\n                    {\n                        \"code\": \"finding_downgraded\",\n                        \"path\": f\"{path}.status\",\n                        \"message\": \"Downgraded to insufficient after evidence checks.\",\n                    }\n                )\n            finding[\"status\"] = \"insufficient\"\n            finding[\"confidence\"] = \"low\"\n            finding[\"contradicting_source_ids\"] = []\n         \
+          \   limitations = finding.setdefault(\"limitations\", [])\n            note = \"No eligible source passed provenance and relevance checks.\"\n            if note not in limitations:\n                if len(limitations) < 5:\n                    limitations.append(note)\n                else:\n                    limitations[-1] = note\n            continue\n\n        if finding.get(\"status\") == \"contested\" and not contradicting:\n            finding[\"status\"] = \"supported\"\n            issues.append(\n                {\n                    \"code\": \"conflict_downgraded\",\n                    \"path\": f\"{path}.status\",\n                    \"message\": \"Removed contested status because no eligible contradiction remained.\",\n                }\n            )\n\n        if finding.get(\"confidence\") == \"high\" and not _high_confidence_allowed(\n            supporting, sources\n        ):\n            finding[\"confidence\"] = \"medium\"\n            issues.append(\n\
+          \                {\n                    \"code\": \"confidence_capped\",\n                    \"path\": f\"{path}.confidence\",\n                    \"message\": (\n                        \"Capped confidence at medium because high-confidence \"\n                        \"source requirements were not met.\"\n                    ),\n                }\n            )\n\n        if finding.get(\"status\") in {\"supported\", \"contested\"}:\n            answered_question_ids.update(finding_question_ids)\n\n    coverage = brief.setdefault(\"source_coverage\", {})\n    coverage[\"retained_source_count\"] = len(source_list)\n    coverage[\"question_count\"] = len(plan_question_ids)\n    coverage[\"answered_question_count\"] = len(\n        answered_question_ids.intersection(plan_question_ids)\n    )\n\n    issues = issues[:50]\n    return {\n        \"validated_evidence_brief\": brief,\n        \"evidence_audit\": {\n            \"status\": \"passed_with_notes\" if issues else \"passed\"\
+          ,\n            \"issue_count\": len(issues),\n            \"issues\": issues,\n            \"minimum_relevance\": MIN_RELEVANCE,\n        },\n    }\n"
+        code_language: python3
+        desc: Enforce source provenance, relevance, coverage, and confidence rules before strategy generation.
+        outputs:
+          validated_evidence_brief:
+            children: null
+            type: object
+          evidence_audit:
+            children: null
+            type: object
+        selected: false
+        title: Deterministic Evidence Gate
+        type: code
+        variables:
+        - value_selector:
+          - evidence_synthesizer
+          - structured_output
+          variable: evidence_brief
+        - value_selector:
+          - source_evaluator
+          - structured_output
+          variable: source_manifest
+        - value_selector:
+          - research_planner
+          - structured_output
+          variable: research_plan
+      height: 120
+      id: evidence_gate
+      position:
+        x: 2920
+        y: 280
+      positionAbsolute:
+        x: 2920
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Generate evidence-aware, testable user hypotheses.
+        model:
+          completion_params:
+            temperature: 0.2
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: insight-system
+          role: system
+          text: "# Role\n\nYou are a senior growth researcher turning a normalized brief into testable user hypotheses for an overseas technology product.\n\n# Objective\n\nProduce a structured and evidence-aware user-insight hypothesis that helps a growth operator plan discovery interviews, messaging tests, and acquisition experiments.\n\n# Reasoning policy\n\n- Reason only from the normalized context and broadly applicable behavioral logic.\n- Frame every unverified claim as a hypothesis using cautious language such as “may,” “could,” or “hypothesis.”\n- Prefer situational specificity over demographic stereotypes.\n- Distinguish the functional, emotional, and social dimensions of the user's job.\n- Connect every pain, motivation, barrier, and scenario to the product and business goal.\n- Separate what the brief states from what you infer. The target audience field is an initial hypothesis, not proof of observed user behavior.\n- Do not invent statistics, market sizes, adoption rates, user\
+            \ quotes, competitor claims, research findings, or citations.\n- Do not repeat the same idea across fields.\n- Use English for all values.\n- Return only the configured structured output. No markdown or commentary.\n\n# Output quality bar\n\n- `target_user`: one crisp primary segment and a one-sentence rationale.\n- `jobs_to_be_done`: 3–5 items. Write as “When…, I want to…, so I can…”. Include a `dimension`, `why_it_matters`, `decision_relevance`, and `evidence`.\n- `pain_points`: 2–5 specific frictions with a plausible trigger or workaround. Return fewer items when the context cannot support specificity.\n- `purchase_motivations`: 2–5 outcomes that could cause evaluation or purchase. Return fewer items when evidence is sparse.\n- `adoption_barriers`: 2–5 product, trust, habit, or operational obstacles. Do not add generic security, price, integration, or switching barriers without a contextual reason.\n- `typical_scenarios`: 2–5 observable situations, not generic activities.\
+            \ Return fewer, stronger scenarios instead of filling five slots.\n- `research_questions`: 3–5 neutral questions that can validate or falsify the hypotheses.\n- `confidence`: `low`, `medium`, or `high`; use `low` when context is sparse and never use `high` for claims requiring external evidence.\n- `assumptions_to_validate`: carry forward important assumptions and add only those created by your reasoning.\n\n# Evidence contract for every JTBD and insight item\n\n- `decision_relevance`: use `primary` only when the item directly affects the submitted business goal; otherwise use `secondary`.\n- `evidence.basis` must be exactly one of:\n  - `explicit_brief`: directly stated in the normalized context. This preserves the user's input; it does not claim external verification.\n  - `contextual_inference`: a product- or workflow-specific inference supported by multiple signals in the brief.\n  - `behavioral_hypothesis`: a plausible but weakly supported behavior that requires discovery\
+            \ research.\n- `evidence.confidence`: `low`, `medium`, or `high`. Use `high` only for `explicit_brief`; use `low` for behavioral hypotheses or sparse context.\n- `evidence.validation_status`: use `brief_supported` only with `explicit_brief`; otherwise use `needs_validation`.\n\n# Mandatory quality validation\n\nBefore returning the configured output:\n\n1. `jobs_to_be_done` MUST contain all three dimensions: `functional`, `emotional`, and `social`. For five items, use three functional, one emotional, and one social JTBD.\n2. Treat unsupported user behavior as a hypothesis. Do not use “often,” “many,” “frequently,” “significantly,” or similar frequency and magnitude claims unless evidence is provided.\n3. Scan every generated string for unsupported comparative or causal wording. The phrases “leads to,” “results in,” “directly impacts,” “improves,” “increases,” “decreases,” “enhances,” “faster,” and “better” are forbidden unless the same sentence explicitly starts with or contains\
+            \ “hypothesis to test,” “may,” or “could.” Prefer neutral wording such as “is relevant to the conversion decision.”\n4. Keep `purchase_motivations` focused on outcomes experienced by the user, such as reducing administrative work, preventing lost decisions, improving accountability, or lowering evaluation risk.\n5. The first three `research_questions` MUST follow these three distinct patterns, in this order: (1) “Think about the most recent time…” to investigate a specific past experience; (2) “What do you use today…” to investigate the current workaround; (3) “What evidence or result would you need…” to investigate a trust threshold, switching trigger, or purchase threshold.\n6. Rank by decision relevance. Each of `jobs_to_be_done`, `pain_points`, `purchase_motivations`, `adoption_barriers`, and `typical_scenarios` MUST contain at least one `primary` item, and all `primary` items MUST appear before `secondary` items. A `primary` adoption barrier must describe an obstacle to\
+            \ the submitted business goal, not a generic product concern.\n7. Check that evidence basis, confidence, and validation status are internally consistent for every item.\n8. Reduce repetition across `pain_points`, `adoption_barriers`, and `typical_scenarios`.\n9. Run a final mechanical check before returning: all five major sections contain `primary`; the first three research questions match the required patterns; and no forbidden causal or comparative phrase appears without explicit hypothesis language. If any check fails, revise the output internally before returning it.\n\n\n# V0.5 evidence grounding addendum\n\nYou also receive the V0.5 Evidence Brief. Preserve the existing module schema\nand internal `source_refs` contract.\n\nRules:\n\n- External evidence can inform prioritization but does not replace upstream\n  Context → User → Market continuity.\n- Do not copy a search snippet as a recommendation.\n- Do not create a URL, source ID, finding ID, statistic, publication date,\
+            \ or\n  competitor fact.\n- A market or behavior statement supported by a finding should use wording no\n  stronger than that finding's status and confidence.\n- A contested finding must remain visibly contested in the strategy wording or\n  validation priorities.\n- An insufficient finding must remain a hypothesis, assumption, or unknown.\n- Vendor and community sources are signals, not independent proof.\n- If the Evidence Brief does not address a material claim, frame that claim as\n  something to validate.\n- The separate Claim Citation Mapper will connect final paths to evidence\n  findings. Do not place external URLs inside the module output.\n\n"
+        - id: insight-user
+          role: user
+          text: 'Normalized growth context:
+
+            {{#context_interpreter.structured_output#}}
+
+
+            Validated V0.5 evidence brief:
+
+            {{#evidence_gate.validated_evidence_brief#}}'
+        retry_config:
+          max_retries: 2
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: UserInsight
+            type: object
+            additionalProperties: false
+            required:
+            - target_user
+            - jobs_to_be_done
+            - pain_points
+            - purchase_motivations
+            - adoption_barriers
+            - typical_scenarios
+            - research_questions
+            - assumptions_to_validate
+            - confidence
+            $defs:
+              evidence:
+                type: object
+                additionalProperties: false
+                required:
+                - basis
+                - confidence
+                - validation_status
+                properties:
+                  basis:
+                    type: string
+                    enum:
+                    - explicit_brief
+                    - contextual_inference
+                    - behavioral_hypothesis
+                  confidence:
+                    type: string
+                    enum:
+                    - low
+                    - medium
+                    - high
+                  validation_status:
+                    type: string
+                    enum:
+                    - brief_supported
+                    - needs_validation
+              insightItem:
+                type: object
+                additionalProperties: false
+                required:
+                - insight
+                - why_it_matters
+                - decision_relevance
+                - evidence
+                properties:
+                  insight:
+                    type: string
+                    minLength: 8
+                  why_it_matters:
+                    type: string
+                    minLength: 8
+                  decision_relevance:
+                    type: string
+                    enum:
+                    - primary
+                    - secondary
+                  evidence:
+                    $ref: '#/$defs/evidence'
+            properties:
+              target_user:
+                type: object
+                additionalProperties: false
+                required:
+                - primary_segment
+                - rationale
+                properties:
+                  primary_segment:
+                    type: string
+                    minLength: 8
+                  rationale:
+                    type: string
+                    minLength: 12
+              jobs_to_be_done:
+                type: array
+                minItems: 3
+                maxItems: 5
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - job
+                  - dimension
+                  - why_it_matters
+                  - decision_relevance
+                  - evidence
+                  properties:
+                    job:
+                      type: string
+                      minLength: 20
+                    dimension:
+                      type: string
+                      enum:
+                      - functional
+                      - emotional
+                      - social
+                    why_it_matters:
+                      type: string
+                      minLength: 8
+                    decision_relevance:
+                      type: string
+                      enum:
+                      - primary
+                      - secondary
+                    evidence:
+                      $ref: '#/$defs/evidence'
+              pain_points:
+                type: array
+                minItems: 2
+                maxItems: 5
+                items:
+                  $ref: '#/$defs/insightItem'
+              purchase_motivations:
+                type: array
+                minItems: 2
+                maxItems: 5
+                items:
+                  $ref: '#/$defs/insightItem'
+              adoption_barriers:
+                type: array
+                minItems: 2
+                maxItems: 5
+                items:
+                  $ref: '#/$defs/insightItem'
+              typical_scenarios:
+                type: array
+                minItems: 2
+                maxItems: 5
+                items:
+                  $ref: '#/$defs/insightItem'
+              research_questions:
+                type: array
+                minItems: 3
+                maxItems: 5
+                items:
+                  type: string
+                  minLength: 10
+              assumptions_to_validate:
+                type: array
+                minItems: 1
+                maxItems: 8
+                items:
+                  type: string
+                  minLength: 8
+              confidence:
+                type: string
+                enum:
+                - low
+                - medium
+                - high
+        structured_output_enabled: true
+        title: User Insight
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 120
+      id: user_insight
+      position:
+        x: 3260
+        y: 280
+      positionAbsolute:
+        x: 3260
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Identify a narrow growth wedge, market risks, and validation priorities.
+        model:
+          completion_params:
+            temperature: 0.2
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: market_hypothesis-system
+          role: system
+          text: "# Role\n\nYou are the Market Hypothesis module for an evidence-aware overseas growth product. You turn normalized context and structured user insight into a narrow, testable market-entry hypothesis.\n\n# Objective\n\nHelp a growth operator decide which opportunity, behavior change, current alternative, and validation priority may deserve attention. Your output is a hypothesis set for discovery, not a market-research report.\n\n# Input policy\n\n- Use only the supplied `context` and `user_insight` objects.\n- Do not use outside knowledge as evidence.\n- Do not invent market size, market growth, demand level, willingness to pay, adoption rate, user frequency, competitor performance, research findings, statistics, quotes, or citations.\n- Treat the target audience and all inferred behavior as unverified until validated.\n- Prefer a narrow entry scenario over a broad market statement.\n- Use English for every value.\n- Return only the configured structured output. No markdown\
+            \ or commentary.\n\n# Source-reference contract\n\nEvery material item must include one or more exact `source_refs` copied from the supplied objects. Do not repeat a reference within the same `source_refs` array.\n\nValid examples:\n\n- `context.product_category`\n- `context.known_constraints.0`\n- `context.assumptions.1`\n- `user_insight.target_user.primary_segment`\n- `user_insight.jobs_to_be_done.0.job`\n- `user_insight.pain_points.1.insight`\n- `user_insight.purchase_motivations.0.insight`\n- `user_insight.adoption_barriers.0.insight`\n- `user_insight.typical_scenarios.2.insight`\n\nRules:\n\n1. Never invent an index or path.\n2. Reference the smallest field that supports the statement.\n3. A source reference provides traceability, not external verification.\n4. If no upstream field supports a claim, omit the claim instead of creating a false reference.\n\n# Evidence contract\n\n- `explicit_brief`: directly present in normalized context; may use `high` confidence and `brief_supported`.\n\
+            - `contextual_inference`: supported by multiple product- or scenario-specific signals; must use `needs_validation` and at most `medium` confidence.\n- `behavioral_hypothesis`: plausible behavior with weak support; must use `needs_validation` and `low` confidence.\n- Downstream evidence must never be stronger than the weakest referenced upstream evidence.\n- A product capability in the brief does not prove that current alternatives lack that capability. For example, “the product supports real-time translation” does not support “translation apps are not real-time.”\n- A field named `brief_summary` may contain a concise synthesis. Use `explicit_brief` only for details that are plainly stated by the user, not for a new comparative conclusion built from the summary.\n\n# Field guidance\n\n- `opportunity_statement.hypothesis`: one narrow statement about a user, problem, and entry scenario. Use “may” or “hypothesis to test.”\n- `opportunity_statement.why_now`: explain the trigger visible\
+            \ in the supplied brief or scenario. Do not claim macro trends.\n- `current_alternatives`: 2–5 current workarounds or non-consumption options. If not explicit, mark each as a behavioral hypothesis.\n- `behavior_hypotheses`: 3–5 testable behaviors with a trigger and an observable signal.\n- `growth_wedge`: choose one initial segment and entry scenario; do not restate the full target market.\n- `competitive_frame`: compare with current alternatives or explicitly supplied competitors. Do not invent named competitors.\n- `main_risks`: prioritize falsifiable risks that could invalidate the opportunity.\n- `validation_priorities`: define a method plus measurable pass and fail signals. Every pass and fail signal must include a sample count, percentage, numeric threshold, or time bound. Avoid vague labels such as “high interest,” “positive feedback,” or “conduct more research.”\n- `confidence`: summarize confidence in the complete market hypothesis; never use `high` when external evidence\
+            \ is absent.\n\n# Claim-language policy\n\nUnsupported market language such as “large market,” “growing demand,” “most users,” “strong willingness to pay,” “competitive advantage,” “better,” “faster,” “improves,” or “increases” is forbidden unless the same sentence explicitly frames it as a hypothesis to test. Prefer neutral, falsifiable language.\n\n# Mandatory final validation\n\nBefore returning:\n\n1. Confirm that every `source_ref` exists exactly in the supplied input.\n2. Confirm that every inferred item is `needs_validation`.\n3. Confirm that the growth wedge matches the upstream target user and at least one typical scenario.\n4. Confirm that no product capability appears unless it is present in context.\n5. Confirm that no named competitor appears unless supplied by the user.\n6. Confirm that validation priorities contain observable pass and fail signals.\n7. Confirm that no market claim is phrased as verified research.\n8. Confirm that every validation priority includes\
+            \ a numeric threshold, sample count, percentage, or time bound in both `pass_signal` and `fail_signal`.\n\n\n# V0.5 evidence grounding addendum\n\nYou also receive the V0.5 Evidence Brief. Preserve the existing module schema\nand internal `source_refs` contract.\n\nRules:\n\n- External evidence can inform prioritization but does not replace upstream\n  Context → User → Market continuity.\n- Do not copy a search snippet as a recommendation.\n- Do not create a URL, source ID, finding ID, statistic, publication date, or\n  competitor fact.\n- A market or behavior statement supported by a finding should use wording no\n  stronger than that finding's status and confidence.\n- A contested finding must remain visibly contested in the strategy wording or\n  validation priorities.\n- An insufficient finding must remain a hypothesis, assumption, or unknown.\n- Vendor and community sources are signals, not independent proof.\n- If the Evidence Brief does not address a material claim, frame\
+            \ that claim as\n  something to validate.\n- The separate Claim Citation Mapper will connect final paths to evidence\n  findings. Do not place external URLs inside the module output.\n\n"
+        - id: market_hypothesis-user
+          role: user
+          text: 'Normalized context:
+
+            {{#context_interpreter.structured_output#}}
+
+
+            Evidence-aware user insight:
+
+            {{#user_insight.structured_output#}}
+
+
+            Validated V0.5 evidence brief:
+
+            {{#evidence_gate.validated_evidence_brief#}}'
+        retry_config:
+          max_retries: 2
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: MarketHypothesis
+            type: object
+            additionalProperties: false
+            required:
+            - opportunity_statement
+            - current_alternatives
+            - behavior_hypotheses
+            - growth_wedge
+            - competitive_frame
+            - main_risks
+            - validation_priorities
+            - confidence
+            $defs:
+              sourceRefs:
+                type: array
+                minItems: 1
+                maxItems: 5
+                items:
+                  type: string
+                  pattern: ^(context|user_insight)\.
+              evidence:
+                type: object
+                additionalProperties: false
+                required:
+                - basis
+                - confidence
+                - validation_status
+                properties:
+                  basis:
+                    type: string
+                    enum:
+                    - explicit_brief
+                    - contextual_inference
+                    - behavioral_hypothesis
+                  confidence:
+                    type: string
+                    enum:
+                    - low
+                    - medium
+                    - high
+                  validation_status:
+                    type: string
+                    enum:
+                    - brief_supported
+                    - needs_validation
+            properties:
+              opportunity_statement:
+                type: object
+                additionalProperties: false
+                required:
+                - hypothesis
+                - why_now
+                - source_refs
+                - evidence
+                properties:
+                  hypothesis:
+                    type: string
+                    minLength: 20
+                  why_now:
+                    type: string
+                    minLength: 15
+                  source_refs:
+                    $ref: '#/$defs/sourceRefs'
+                  evidence:
+                    $ref: '#/$defs/evidence'
+              current_alternatives:
+                type: array
+                minItems: 2
+                maxItems: 5
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - alternative
+                  - limitation_hypothesis
+                  - source_refs
+                  - evidence
+                  properties:
+                    alternative:
+                      type: string
+                      minLength: 4
+                    limitation_hypothesis:
+                      type: string
+                      minLength: 12
+                    source_refs:
+                      $ref: '#/$defs/sourceRefs'
+                    evidence:
+                      $ref: '#/$defs/evidence'
+              behavior_hypotheses:
+                type: array
+                minItems: 3
+                maxItems: 5
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - hypothesis
+                  - trigger
+                  - expected_observation
+                  - priority
+                  - source_refs
+                  - evidence
+                  properties:
+                    hypothesis:
+                      type: string
+                      minLength: 15
+                    trigger:
+                      type: string
+                      minLength: 8
+                    expected_observation:
+                      type: string
+                      minLength: 12
+                    priority:
+                      type: string
+                      enum:
+                      - critical
+                      - important
+                      - exploratory
+                    source_refs:
+                      $ref: '#/$defs/sourceRefs'
+                    evidence:
+                      $ref: '#/$defs/evidence'
+              growth_wedge:
+                type: object
+                additionalProperties: false
+                required:
+                - segment
+                - entry_scenario
+                - rationale
+                - source_refs
+                - evidence
+                properties:
+                  segment:
+                    type: string
+                    minLength: 8
+                  entry_scenario:
+                    type: string
+                    minLength: 12
+                  rationale:
+                    type: string
+                    minLength: 15
+                  source_refs:
+                    $ref: '#/$defs/sourceRefs'
+                  evidence:
+                    $ref: '#/$defs/evidence'
+              competitive_frame:
+                type: object
+                additionalProperties: false
+                required:
+                - compared_with
+                - differentiation_hypothesis
+                - less_suitable_for
+                - source_refs
+                - evidence
+                properties:
+                  compared_with:
+                    type: array
+                    minItems: 1
+                    maxItems: 5
+                    items:
+                      type: string
+                      minLength: 3
+                  differentiation_hypothesis:
+                    type: string
+                    minLength: 15
+                  less_suitable_for:
+                    type: string
+                    minLength: 10
+                  source_refs:
+                    $ref: '#/$defs/sourceRefs'
+                  evidence:
+                    $ref: '#/$defs/evidence'
+              main_risks:
+                type: array
+                minItems: 3
+                maxItems: 5
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - risk
+                  - consequence
+                  - priority
+                  - source_refs
+                  - evidence
+                  properties:
+                    risk:
+                      type: string
+                      minLength: 10
+                    consequence:
+                      type: string
+                      minLength: 10
+                    priority:
+                      type: string
+                      enum:
+                      - critical
+                      - important
+                      - exploratory
+                    source_refs:
+                      $ref: '#/$defs/sourceRefs'
+                    evidence:
+                      $ref: '#/$defs/evidence'
+              validation_priorities:
+                type: array
+                minItems: 3
+                maxItems: 5
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - hypothesis_to_test
+                  - method
+                  - pass_signal
+                  - fail_signal
+                  - priority
+                  - source_refs
+                  properties:
+                    hypothesis_to_test:
+                      type: string
+                      minLength: 15
+                    method:
+                      type: string
+                      minLength: 8
+                    pass_signal:
+                      type: string
+                      minLength: 10
+                    fail_signal:
+                      type: string
+                      minLength: 10
+                    priority:
+                      type: string
+                      enum:
+                      - critical
+                      - important
+                      - exploratory
+                    source_refs:
+                      $ref: '#/$defs/sourceRefs'
+              confidence:
+                type: string
+                enum:
+                - low
+                - medium
+                - high
+        structured_output_enabled: true
+        title: Market Hypothesis
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 120
+      id: market_hypothesis
+      position:
+        x: 3600
+        y: 280
+      positionAbsolute:
+        x: 3600
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Create grounded value, positioning, objections, and message tests.
+        model:
+          completion_params:
+            temperature: 0.2
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: value_proposition-system
+          role: system
+          text: "# Role\n\nYou are the Value Proposition module for an evidence-aware overseas growth product. You convert a structured user insight and market hypothesis into testable value and message directions.\n\n# Objective\n\nHelp a growth operator decide which functional, emotional, or social value should be tested first and why. Produce positioning hypotheses, not finished advertising copy or verified product claims.\n\n# Input policy\n\n- Use only the supplied `context`, `user_insight`, and `market_hypothesis` objects.\n- Do not invent product features, technical performance, prices, integrations, privacy practices, customer proof, competitor facts, statistics, quotes, or citations.\n- A value is not a proven benefit simply because it is plausible.\n- Keep the submitted business goal and the selected growth wedge consistent across all fields.\n- Use English for every value.\n- Return only the configured structured output. No markdown or commentary.\n\n# Source-reference contract\n\
+            \nEvery material value, pillar, objection, and test must include one or more exact upstream paths.\n\nValid examples:\n\n- `context.brief_summary`\n- `context.known_constraints.0`\n- `user_insight.jobs_to_be_done.0.job`\n- `user_insight.pain_points.0.insight`\n- `user_insight.purchase_motivations.1.insight`\n- `user_insight.adoption_barriers.0.insight`\n- `market_hypothesis.growth_wedge.entry_scenario`\n- `market_hypothesis.opportunity_statement.hypothesis`\n- `market_hypothesis.main_risks.0.risk`\n\nNever invent an index or field. Reference the smallest field that supports the statement. A reference provides traceability, not proof of truth. Do not repeat a reference within the same `source_refs` array.\n\n# Evidence contract\n\n- `explicit_brief`: directly supported by normalized context; may use `high` confidence and `brief_supported`.\n- `contextual_inference`: grounded in multiple supplied signals; must use `needs_validation` and at most `medium` confidence.\n- `behavioral_hypothesis`:\
+            \ weakly supported user response or motivation; must use `needs_validation` and `low` confidence.\n- Never strengthen evidence inherited from an upstream hypothesis. When several sources are cited, the weakest source sets the maximum evidence strength.\n\n# Field guidance\n\n- `primary_value`: choose one value that best connects the primary user, growth wedge, business goal, and a primary job or pain.\n- `functional_values`: outcomes related to completing a task or reducing workflow friction.\n- `emotional_values`: outcomes related to confidence, anxiety, control, or cognitive effort. Keep them as hypotheses.\n- `social_values`: outcomes related to identity, trust, respect, or perceived competence. Avoid stereotypes.\n- `positioning_statement`: follow “For [user] who [problem], [product] is a [category] that may help [value], compared with [current alternative], because [reason to believe].”\n- `reasons_to_believe`: include only product capabilities present in context. Use `needs_confirmation`\
+            \ when wording is ambiguous or incomplete.\n- `message_pillars`: return 3–4 distinct pillars, with at least one `primary` pillar appearing first.\n- `objections`: ground objections in adoption barriers, current alternatives, market risks, or ambiguities.\n- `message_tests`: create test directions, not complete campaign copy. Each pair should isolate one meaningful angle and name a metric plus expected learning.\n- `confidence`: summarize confidence in the complete value proposition; never use `high` when the primary value relies on unvalidated behavior.\n\n# Claim-language policy\n\nDo not claim that the product “improves,” “increases,” “reduces,” “saves,” “outperforms,” is “better,” or is “faster” unless that language is explicitly framed as a hypothesis and supported by a supplied capability. Prefer language such as “may help,” “could support,” or “value hypothesis.”\n\n# Mandatory final validation\n\nBefore returning:\n\n1. Confirm that every `source_ref` exists exactly in\
+            \ an upstream object.\n2. Confirm that the primary value references at least one JTBD or pain and the market growth wedge.\n3. Confirm that all three value dimensions are present and non-duplicative.\n4. Confirm that every reason to believe maps to a product capability in context.\n5. Confirm that at least one message pillar is `primary` and primary pillars appear first.\n6. Confirm that objections are not generic additions unsupported by upstream barriers, alternatives, risks, or ambiguities.\n7. Confirm that tests describe learning goals rather than promising performance.\n8. Confirm that no unverified benefit is phrased as a fact.\n\n\n# V0.5 evidence grounding addendum\n\nYou also receive the V0.5 Evidence Brief. Preserve the existing module schema\nand internal `source_refs` contract.\n\nRules:\n\n- External evidence can inform prioritization but does not replace upstream\n  Context → User → Market continuity.\n- Do not copy a search snippet as a recommendation.\n- Do not\
+            \ create a URL, source ID, finding ID, statistic, publication date, or\n  competitor fact.\n- A market or behavior statement supported by a finding should use wording no\n  stronger than that finding's status and confidence.\n- A contested finding must remain visibly contested in the strategy wording or\n  validation priorities.\n- An insufficient finding must remain a hypothesis, assumption, or unknown.\n- Vendor and community sources are signals, not independent proof.\n- If the Evidence Brief does not address a material claim, frame that claim as\n  something to validate.\n- The separate Claim Citation Mapper will connect final paths to evidence\n  findings. Do not place external URLs inside the module output.\n\n"
+        - id: value_proposition-user
+          role: user
+          text: 'Normalized context:
+
+            {{#context_interpreter.structured_output#}}
+
+
+            Evidence-aware user insight:
+
+            {{#user_insight.structured_output#}}
+
+
+            Market hypothesis:
+
+            {{#market_hypothesis.structured_output#}}
+
+
+            Validated V0.5 evidence brief:
+
+            {{#evidence_gate.validated_evidence_brief#}}'
+        retry_config:
+          max_retries: 2
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: ValueProposition
+            type: object
+            additionalProperties: false
+            required:
+            - primary_value
+            - functional_values
+            - emotional_values
+            - social_values
+            - positioning_statement
+            - reasons_to_believe
+            - message_pillars
+            - objections
+            - message_tests
+            - confidence
+            $defs:
+              sourceRefs:
+                type: array
+                minItems: 1
+                maxItems: 5
+                items:
+                  type: string
+                  pattern: ^(context|user_insight|market_hypothesis)\.
+              evidence:
+                type: object
+                additionalProperties: false
+                required:
+                - basis
+                - confidence
+                - validation_status
+                properties:
+                  basis:
+                    type: string
+                    enum:
+                    - explicit_brief
+                    - contextual_inference
+                    - behavioral_hypothesis
+                  confidence:
+                    type: string
+                    enum:
+                    - low
+                    - medium
+                    - high
+                  validation_status:
+                    type: string
+                    enum:
+                    - brief_supported
+                    - needs_validation
+              valueItem:
+                type: object
+                additionalProperties: false
+                required:
+                - statement
+                - why_it_matters
+                - source_refs
+                - evidence
+                properties:
+                  statement:
+                    type: string
+                    minLength: 10
+                  why_it_matters:
+                    type: string
+                    minLength: 10
+                  source_refs:
+                    $ref: '#/$defs/sourceRefs'
+                  evidence:
+                    $ref: '#/$defs/evidence'
+            properties:
+              primary_value:
+                type: object
+                additionalProperties: false
+                required:
+                - statement
+                - value_type
+                - rationale
+                - source_refs
+                - evidence
+                properties:
+                  statement:
+                    type: string
+                    minLength: 12
+                  value_type:
+                    type: string
+                    enum:
+                    - functional
+                    - emotional
+                    - social
+                  rationale:
+                    type: string
+                    minLength: 12
+                  source_refs:
+                    $ref: '#/$defs/sourceRefs'
+                  evidence:
+                    $ref: '#/$defs/evidence'
+              functional_values:
+                type: array
+                minItems: 1
+                maxItems: 3
+                items:
+                  $ref: '#/$defs/valueItem'
+              emotional_values:
+                type: array
+                minItems: 1
+                maxItems: 3
+                items:
+                  $ref: '#/$defs/valueItem'
+              social_values:
+                type: array
+                minItems: 1
+                maxItems: 3
+                items:
+                  $ref: '#/$defs/valueItem'
+              positioning_statement:
+                type: string
+                minLength: 40
+              reasons_to_believe:
+                type: array
+                minItems: 1
+                maxItems: 4
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - capability
+                  - support_status
+                  - source_refs
+                  properties:
+                    capability:
+                      type: string
+                      minLength: 6
+                    support_status:
+                      type: string
+                      enum:
+                      - brief_supported
+                      - needs_confirmation
+                    source_refs:
+                      $ref: '#/$defs/sourceRefs'
+              message_pillars:
+                type: array
+                minItems: 3
+                maxItems: 4
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - name
+                  - message
+                  - user_problem
+                  - priority
+                  - source_refs
+                  - evidence
+                  properties:
+                    name:
+                      type: string
+                      minLength: 3
+                    message:
+                      type: string
+                      minLength: 12
+                    user_problem:
+                      type: string
+                      minLength: 10
+                    priority:
+                      type: string
+                      enum:
+                      - primary
+                      - secondary
+                    source_refs:
+                      $ref: '#/$defs/sourceRefs'
+                    evidence:
+                      $ref: '#/$defs/evidence'
+              objections:
+                type: array
+                minItems: 3
+                maxItems: 5
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - objection
+                  - response_hypothesis
+                  - source_refs
+                  - evidence
+                  properties:
+                    objection:
+                      type: string
+                      minLength: 8
+                    response_hypothesis:
+                      type: string
+                      minLength: 12
+                    source_refs:
+                      $ref: '#/$defs/sourceRefs'
+                    evidence:
+                      $ref: '#/$defs/evidence'
+              message_tests:
+                type: array
+                minItems: 3
+                maxItems: 4
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - angle
+                  - variant_a
+                  - variant_b
+                  - primary_metric
+                  - expected_learning
+                  - source_refs
+                  properties:
+                    angle:
+                      type: string
+                      enum:
+                      - feature_led
+                      - pain_led
+                      - scenario_led
+                      - confidence_led
+                      - social_value_led
+                    variant_a:
+                      type: string
+                      minLength: 10
+                    variant_b:
+                      type: string
+                      minLength: 10
+                    primary_metric:
+                      type: string
+                      minLength: 3
+                    expected_learning:
+                      type: string
+                      minLength: 12
+                    source_refs:
+                      $ref: '#/$defs/sourceRefs'
+              confidence:
+                type: string
+                enum:
+                - low
+                - medium
+                - high
+        structured_output_enabled: true
+        title: Value Proposition
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 120
+      id: value_proposition
+      position:
+        x: 3940
+        y: 280
+      positionAbsolute:
+        x: 3940
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: Map material strategy paths to evidence findings.
+        model:
+          completion_params:
+            temperature: 0
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: claim_citation_mapper-system
+          role: system
+          text: "# Role\n\nYou are the Claim Citation Mapper for AI Growth Agent V0.5. Link material\nstrategy claims to existing evidence findings without changing either object.\n\n# Input\n\nYou receive the Evidence Brief, User Insight, Market Hypothesis, and Value\nProposition.\n\n# Task\n\nCreate citations for every material market, competitor, channel, behavior,\nadoption-risk, and product-expectation claim.\n\n# Rules\n\n- Use an exact path into one of the three strategy objects.\n- Cite only finding IDs present in the Evidence Brief.\n- Use `evidence_backed` only when the cited finding directly supports the claim.\n- Use `contested` when a cited finding is contested.\n- Use `inference` when the claim is a reasonable synthesis but lacks direct\n  external evidence.\n- Use `unknown` when the available evidence cannot evaluate the claim.\n- `inference` and `unknown` may use an empty `finding_ids` list.\n- Do not use citation quantity as a substitute for claim/evidence fit.\n\n# Output\n\
+            \nReturn only structured output matching `claim-citations.schema.json`.\n\n"
+        - id: claim_citation_mapper-user
+          role: user
+          text: 'Validated evidence brief:
+
+            {{#evidence_gate.validated_evidence_brief#}}
+
+
+            User insight:
+
+            {{#user_insight.structured_output#}}
+
+
+            Market hypothesis:
+
+            {{#market_hypothesis.structured_output#}}
+
+
+            Value proposition:
+
+            {{#value_proposition.structured_output#}}'
+        retry_config:
+          max_retries: 2
+          retry_enabled: true
+          retry_interval: 1000
+        selected: false
+        structured_output:
+          schema:
+            $schema: https://json-schema.org/draft/2020-12/schema
+            title: ClaimCitationMapV05
+            type: object
+            additionalProperties: false
+            required:
+            - citations
+            properties:
+              citations:
+                type: array
+                minItems: 1
+                maxItems: 30
+                items:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - claim_path
+                  - finding_ids
+                  - claim_status
+                  - explanation
+                  properties:
+                    claim_path:
+                      type: string
+                      pattern: ^(user_insight|market_hypothesis|value_proposition)\.
+                    finding_ids:
+                      type: array
+                      maxItems: 5
+                      items:
+                        type: string
+                        pattern: ^EV-[0-9]{3}$
+                    claim_status:
+                      type: string
+                      enum:
+                      - evidence_backed
+                      - contested
+                      - inference
+                      - unknown
+                    explanation:
+                      type: string
+                      minLength: 8
+                      maxLength: 400
+        structured_output_enabled: true
+        title: Claim Citation Mapper
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 120
+      id: claim_citation_mapper
+      position:
+        x: 4280
+        y: 280
+      positionAbsolute:
+        x: 4280
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    - data:
+        desc: Return research provenance, evidence, strategy, and claim citations.
+        outputs:
+        - value_selector:
+          - context_interpreter
+          - structured_output
+          value_type: object
+          variable: context
+        - value_selector:
+          - research_planner
+          - structured_output
+          value_type: object
+          variable: research_plan
+        - value_selector:
+          - source_evaluator
+          - structured_output
+          value_type: object
+          variable: source_manifest
+        - value_selector:
+          - evidence_gate
+          - validated_evidence_brief
+          value_type: object
+          variable: evidence_brief
+        - value_selector:
+          - evidence_gate
+          - evidence_audit
+          value_type: object
+          variable: evidence_audit
+        - value_selector:
+          - user_insight
+          - structured_output
+          value_type: object
+          variable: user_insight
+        - value_selector:
+          - market_hypothesis
+          - structured_output
+          value_type: object
+          variable: market_hypothesis
+        - value_selector:
+          - value_proposition
+          - structured_output
+          value_type: object
+          variable: value_proposition
+        - value_selector:
+          - claim_citation_mapper
+          - structured_output
+          value_type: object
+          variable: claim_citations
+        selected: false
+        title: End
+        type: end
+      height: 120
+      id: end
+      position:
+        x: 4620
+        y: 280
+      positionAbsolute:
+        x: 4620
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 260
+    viewport:
+      x: 10
+      y: 120
+      zoom: 0.35
+  rag_pipeline_variables: []

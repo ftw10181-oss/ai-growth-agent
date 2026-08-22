@@ -602,6 +602,31 @@ class EvidenceBrief(BaseModel):
         return self
 
 
+class EvidenceAuditIssue(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    code: str = Field(min_length=3, max_length=80)
+    path: str = Field(min_length=3, max_length=200)
+    message: str = Field(min_length=8, max_length=500)
+
+
+class EvidenceAudit(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["passed", "passed_with_notes"]
+    issue_count: int = Field(ge=0)
+    issues: list[EvidenceAuditIssue] = Field(max_length=50)
+    minimum_relevance: float = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def issue_count_matches_items(self):
+        if self.issue_count != len(self.issues):
+            raise ValueError("evidence audit issue_count must match issues")
+        if self.status == "passed" and self.issues:
+            raise ValueError("a passed evidence audit cannot contain issues")
+        return self
+
+
 class ClaimCitation(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -658,6 +683,7 @@ class ResearchStrategyResponse(StrategyResponse):
     research_plan: ResearchPlan
     source_manifest: SourceManifest
     evidence_brief: EvidenceBrief
+    evidence_audit: EvidenceAudit
     claim_citations: ClaimCitationMap
     research_summary: ResearchDecisionSummary
     research_quality_review: ResearchQualityReview

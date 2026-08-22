@@ -15,7 +15,8 @@ flowchart LR
     WS --> SN["Deterministic source normalizer"]
     SN --> SE["Source Evaluator"]
     SE --> ES["Evidence Synthesizer"]
-    ES --> I["Evidence-aware User Insight"]
+    ES --> EG["Deterministic Evidence Gate"]
+    EG --> I["Evidence-aware User Insight"]
     I --> M["Market Hypothesis"]
     M --> V["Value Proposition"]
     V --> OUT["Structured outputs"]
@@ -80,6 +81,8 @@ sequenceDiagram
 - Accepts only URLs returned by the Tool node
 - Canonicalizes URLs, removes tracking parameters, deduplicates, and assigns
   stable `SRC-###` identifiers
+- Allocates the ten-source budget in rank-by-query order so an early query
+  cannot consume all retained evidence
 - Preserves query IDs and retrieval time
 - Does not invent publishers or publication dates
 
@@ -96,6 +99,18 @@ sequenceDiagram
 - Keeps supporting and contradicting source IDs separate
 - Returns `insufficient` when the evidence threshold is not met
 - May cite only IDs from the normalized source manifest
+- May use a source for a finding only when their research-question IDs overlap
+
+### Deterministic Evidence Gate
+
+- Runs after model synthesis and before any strategy module
+- Removes unresolved sources and sources assigned to a different research question
+- Rejects retrieval matches below the documented `0.50` relevance floor
+- Recalculates answered-question coverage
+- Downgrades unsupported findings and caps `high` confidence when freshness,
+  source-type, or snippet-depth requirements are not met
+- Returns a machine-readable `evidence_audit`; the model cannot approve its own
+  compliance
 
 ### Strategy modules
 
@@ -124,6 +139,7 @@ sequenceDiagram
 - `researched_at`
 - `research_plan`
 - `evidence_brief`
+- `evidence_audit`
 - `strategy_summary`
 - `context`
 - `user_insight`
@@ -176,4 +192,3 @@ of the web.
   web search: https://docs.dify.ai/en/develop-plugin/dev-guides-and-walkthroughs/tool-plugin
 - Official Tavily Dify plugin and actions:
   https://github.com/langgenius/dify-official-plugins/tree/main/tools/tavily
-

@@ -3,6 +3,7 @@ from pydantic import ValidationError
 
 from app.models import (
     ClaimCitation,
+    EvidenceAudit,
     EvidenceFinding,
     ResearchPlan,
     SourceManifest,
@@ -75,6 +76,29 @@ def test_evidence_backed_citation_requires_a_finding():
         })
 
 
+def test_evidence_audit_count_and_status_are_consistent():
+    assert EvidenceAudit.model_validate({
+        "status": "passed",
+        "issue_count": 0,
+        "issues": [],
+        "minimum_relevance": 0.5,
+    }).status == "passed"
+
+    with pytest.raises(ValidationError):
+        EvidenceAudit.model_validate({
+            "status": "passed",
+            "issue_count": 1,
+            "issues": [
+                {
+                    "code": "confidence_capped",
+                    "path": "findings.0.confidence",
+                    "message": "Confidence was capped by deterministic evidence rules.",
+                }
+            ],
+            "minimum_relevance": 0.5,
+        })
+
+
 def test_source_manifest_rejects_duplicate_urls():
     source = {
         "source_id": "SRC-001",
@@ -99,4 +123,3 @@ def test_source_manifest_rejects_duplicate_urls():
             "sources": [source, {**source, "source_id": "SRC-002"}],
             "failed_query_ids": [],
         })
-

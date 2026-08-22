@@ -17,6 +17,8 @@ adoption risk, or credible value proposition.
 
 For every question:
 
+- assign sequential IDs beginning with `RQ-001` (`RQ-001`, `RQ-002`, and so
+  on, with no gaps or alternate numbering);
 - state the decision it could change;
 - describe the evidence needed;
 - write one focused web-search query;
@@ -28,8 +30,9 @@ For every question:
 - Plan research; do not answer the questions.
 - Do not assume named competitors unless the brief names them.
 - Do not ask for broad market-size statistics unless the decision requires it.
-- Queries must include the relevant product category, target market, and user or
-  behavior concept.
+- Every query must literally include the target market value from the normalized
+  context, plus the relevant product category and user or behavior concept.
+- Do not repeat or paraphrase the same query across multiple questions.
 - Prefer observable behavior, current alternatives, policy, distribution, and
   adoption signals over generic trend queries.
 - Return no more than five queries.
@@ -39,4 +42,3 @@ For every question:
 # Output
 
 Return only structured output matching `research-plan.schema.json`.
-
