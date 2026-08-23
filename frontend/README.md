@@ -25,6 +25,11 @@ quality review. It retains the V0.3 decision summary, Context Interpreter, User
 Insight, Market Hypothesis, Value Proposition, and validation priorities. The standalone
 `/demo` route remains available as the earlier evidence-aware insight showcase.
 
+The V0.5 Worker uses Dify's streaming workflow mode and emits lightweight
+keepalive bytes while research is running. This allows multi-step search and
+evidence validation to complete without the public request being cut off at the
+short synchronous-response boundary.
+
 Worker counters and cache entries are best-effort per isolate. For a strict
 cross-instance budget, back them with a Durable Object or another shared store
 and set a hard limit with the model provider.

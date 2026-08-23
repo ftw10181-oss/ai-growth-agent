@@ -48,14 +48,13 @@ export async function generateResearchStrategy(
     body: JSON.stringify(brief)
   });
 
-  if (!response.ok) {
-    const body = await response.json().catch(() => null);
-    const detail =
-      typeof body?.detail === "string"
-        ? body.detail
-        : "Unable to complete the evidence-backed strategy.";
+  const body = await response.json().catch(() => null);
+  if (!response.ok || typeof body?.detail === "string") {
+    const detail = typeof body?.detail === "string"
+      ? body.detail
+      : "Unable to complete the evidence-backed strategy.";
     throw new Error(detail);
   }
 
-  return response.json();
+  return body as ResearchStrategyResponse;
 }

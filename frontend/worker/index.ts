@@ -94,6 +94,57 @@ function readString(record: Record<string, unknown>, key: string): string {
   return typeof record[key] === "string" ? record[key] as string : "";
 }
 
+async function readDifyStream(response: Response): Promise<Record<string, unknown>> {
+  if (!response.body) throw new Error("Dify returned an empty streaming response.");
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let workflowRunId = "";
+
+  const consumeEvent = (block: string): Record<string, unknown> | null => {
+    const payload = block
+      .split("\n")
+      .filter((line) => line.startsWith("data:"))
+      .map((line) => line.slice(5).trimStart())
+      .join("\n");
+    if (!payload) return null;
+
+    const event = JSON.parse(payload) as Record<string, unknown>;
+    if (typeof event.workflow_run_id === "string") workflowRunId = event.workflow_run_id;
+    if (event.event === "error") {
+      throw new Error(typeof event.message === "string" ? event.message : "Dify streaming failed.");
+    }
+    if (event.event !== "workflow_finished" || !isRecord(event.data)) return null;
+    return {
+      workflow_run_id: workflowRunId || event.workflow_run_id,
+      task_id: event.task_id,
+      data: event.data,
+    };
+  };
+
+  while (true) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value, { stream: !done }).replaceAll("\r\n", "\n");
+    let boundary = buffer.indexOf("\n\n");
+    while (boundary >= 0) {
+      const block = buffer.slice(0, boundary);
+      buffer = buffer.slice(boundary + 2);
+      const finished = consumeEvent(block);
+      if (finished) {
+        await reader.cancel();
+        return finished;
+      }
+      boundary = buffer.indexOf("\n\n");
+    }
+    if (done) break;
+  }
+
+  const finalEvent = consumeEvent(buffer);
+  if (finalEvent) return finalEvent;
+  throw new Error("Dify stream ended before the workflow completed.");
+}
+
 function researchQualityReview(
   sourceManifest: Record<string, unknown>,
   evidenceBrief: Record<string, unknown>,
@@ -163,11 +214,13 @@ async function generateStrategy(request: Request, env: Env, legacyInsightOnly = 
     const response = await fetch(`${baseUrl}/workflows/run`, {
       method: "POST",
       headers: { Authorization: `Bearer ${env.DIFY_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ inputs: { ...brief, additional_context: brief.additional_context || "" }, response_mode: "blocking", user: `portfolio-demo-${crypto.randomUUID()}` }),
+      body: JSON.stringify({ inputs: { ...brief, additional_context: brief.additional_context || "" }, response_mode: researchMode ? "streaming" : "blocking", user: `portfolio-demo-${crypto.randomUUID()}` }),
       signal: AbortSignal.timeout(120_000),
     });
     if (!response.ok) return json("The AI workflow could not complete the request.", 502);
-    const body = await response.json() as Record<string, unknown>;
+    const body = researchMode
+      ? await readDifyStream(response)
+      : await response.json() as Record<string, unknown>;
     const data = isRecord(body.data) ? body.data : null;
     const outputs = data && isRecord(data.outputs) ? data.outputs : null;
     if (!data || data.status !== "succeeded" || !outputs) return json("The AI workflow returned an unexpected response.", 502);
@@ -250,6 +303,34 @@ async function generateStrategy(request: Request, env: Env, legacyInsightOnly = 
   }
 }
 
+function streamResearchStrategy(request: Request, env: Env): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      const heartbeat = setInterval(() => controller.enqueue(encoder.encode(" \n")), 8_000);
+      void (async () => {
+        try {
+          const response = await generateStrategy(request, env, false, true);
+          controller.enqueue(encoder.encode(await response.text()));
+        } catch {
+          controller.enqueue(encoder.encode(JSON.stringify({ detail: "The AI workflow is currently unavailable." })));
+        } finally {
+          clearInterval(heartbeat);
+          controller.close();
+        }
+      })();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "private, no-store, no-transform",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
+}
+
 const worker = {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -259,7 +340,7 @@ const worker = {
     }
     if (url.pathname === "/api/v5/research-strategy") {
       if (request.method !== "POST") return new Response(null, { status: 405, headers: { Allow: "POST" } });
-      return generateStrategy(request, env, false, true);
+      return streamResearchStrategy(request, env);
     }
     if (url.pathname === "/api/analyze") {
       if (request.method !== "POST") return new Response(null, { status: 405, headers: { Allow: "POST" } });
