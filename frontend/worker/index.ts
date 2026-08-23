@@ -305,9 +305,11 @@ async function generateStrategy(request: Request, env: Env, legacyInsightOnly = 
 
 function streamResearchStrategy(request: Request, env: Env): Response {
   const encoder = new TextEncoder();
+  const heartbeatChunk = encoder.encode(`${" ".repeat(2048)}\n`);
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
-      const heartbeat = setInterval(() => controller.enqueue(encoder.encode(" \n")), 8_000);
+      controller.enqueue(heartbeatChunk);
+      const heartbeat = setInterval(() => controller.enqueue(heartbeatChunk), 8_000);
       void (async () => {
         try {
           const response = await generateStrategy(request, env, false, true);
