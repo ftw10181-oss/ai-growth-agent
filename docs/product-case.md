@@ -1,126 +1,250 @@
-# Using AI Agent to Transform Overseas User Feedback into Growth Insights
+# AI Growth Agent V0.5 — Research Before Recommendation
 
-> A product case study for the [AI Growth Agent](https://github.com/ftw10181-oss/ai-growth-agent) project.
-> It explains the problem the product exists for, how the current architecture addresses it, and where it goes next.
-> See the [Live Demo](../README.md#live-demo) and the [README](../README.md) for the technical surface.
-
----
-
-## Background
-
-Growth teams working on overseas markets are not short of signals — they are short of time to make sense of them. Feedback arrives from many places at once:
-
-- User feedback from onboarding surveys and support tickets
-- Community discussions on Reddit, forums, Discord, and X
-- App store reviews and rating comments
-- Market signals: competitor launches, pricing changes, regional promotions
-
-A typical research pass means opening a dozen tabs, reading long threads, copying quotes into a spreadsheet, and discussing what it all means. By the time a summary is written, the team has already made most decisions without it — or the research starts over for the next market, audience, or product line.
-
-The core need is not more data. It is a way to turn scattered, unstructured signals into **structured, verifiable, decision-ready insight** — fast enough to keep up with how growth teams actually work.
+> An end-to-end AI product case about turning an incomplete growth brief into a current, auditable, decision-ready strategy.
+>
+> [Open the live product](https://ai-growth-agent.pages.dev/) · [Return to the README](../README.md)
 
 ---
 
-## Problem
+## Executive Summary
 
-Manual analysis of overseas user feedback fails on three axes.
+Growth teams routinely ask AI to recommend audiences, channels, positioning, and experiments from a short brief. The output often looks useful while hiding a fundamental problem: the model has not separated what the team supplied, what current evidence supports, and what it merely inferred.
 
-**Time consuming.** Collecting and synthesizing feedback from multiple channels takes days to weeks. The synthesis step — reading everything, grouping it, judging what matters — is the bottleneck, and it does not get cheaper with volume.
+AI Growth Agent V0.5 changes the order of operations:
 
-**Hard to validate.** A human-written summary carries no audit trail. When a report says "users struggle with setup," nobody can tell whether that came from ten reviews, one angry tweet, or the author's assumption. The same problem gets worse with AI: a raw LLM answer is fluent, confident, and unverifiable — it cannot tell the reader which part is grounded in input and which part is invented.
-
-**Difficult to scale.** Every new market, new audience, or new product line restarts the process from zero. Insights produced in one research pass do not automatically transfer or accumulate, so the organization never builds a reusable understanding of its users.
-
-These three problems share a root cause: the pipeline between raw feedback and growth insight treats **generation** as the goal, when the real goal is **trust**.
-
----
-
-## Solution
-
-AI Growth Agent restructures the pipeline around that goal. Instead of one prompt producing one block of text, the system inserts explicit reasoning, evidence, and evaluation layers:
-
-```
-Input (Growth Brief + Audience + Goal)
-   ↓
-Agent Reasoning          — typed schema: jobs, pain points, motivations,
-                           barriers, recommendations, assumptions
-   ↓
-Evidence Validation     — every item tagged: basis (explicit_brief /
-                           inferred_from_context / hypothesis), confidence
-                           (high / medium / low), validation_status
-   ↓
-Confidence Evaluation   — per-section confidence + overall confidence,
-                           computed from the evidence metadata
-   ↓
-Growth Insight Report   — typed report, recommendations, research questions,
-                           assumptions to check
+```text
+Define the decision → Plan the research → Retrieve current evidence
+→ Audit the evidence → Build the strategy → Resolve material claims
 ```
 
-Four mechanisms carry the design:
+The product delivers an Evidence Board before the recommendation layer. A reviewer can inspect coverage, sources, findings, limitations, conflicts, confidence corrections, and research gaps before acting on the strategy.
 
-1. **A typed output contract.** The LLM is asked to populate a Pydantic `InsightResponse` schema — not to write prose. Sections like Jobs to be Done, Pain Points, Purchase Motivations, Adoption Barriers, Recommendations, and Assumptions are first-class fields, so the report cannot drift into unstructured text.
-
-2. **Evidence metadata on every claim.** Each item carries `evidence.basis` — stated in the brief, inferred from context, or a hypothesis that still needs testing — plus `evidence.confidence` and `validation_status`. Recommendations are tagged with `decision_relevance` (`primary` / `supporting`). A reader can tell, at a glance, which block is grounded and which block needs a human.
-
-3. **An offline evaluation contract.** `evals/check_outputs.py` replays 12 frozen cases against the schema and asserts structural invariants: every `recommendation` traces to a `pain_point`, every `hypothesis` surfaces as a `research_question`, assumptions are self-contained. It runs in CI on every commit, with no live LLM calls — so a change to the prompt or parser cannot silently degrade output quality.
-
-4. **A pluggable backend.** The same `/api/analyze` contract runs in `APP_MODE=mock` (no external services) or `APP_MODE=dify` (real LLM via a Dify workflow), which keeps the product testable during development and configurable in production.
+This is a portfolio case, not a claim of commercial impact. It demonstrates product judgment, workflow design, responsible-AI boundaries, typed contracts, evaluation, frontend delivery, and production deployment.
 
 ---
 
-## Example Scenario
+## 1. The Product Problem
 
-> **Note on method.** The scenario below uses a fictional product to demonstrate how the system works. It shows the *method*, not a claimed business result — the numbers, quotes, and conclusions are illustrative and must not be read as real market data.
+A growth operator usually starts with fragments:
 
-**Setup.** A growth team for **AI Translation Earbuds** — real-time translation earbuds that let two people speak their own languages — is planning a US entry. The brief:
+- a product description;
+- a target market and audience;
+- a goal such as user acquisition or retention;
+- channel ideas, competitor names, and internal assumptions;
+- no clean research plan and no shared standard for sufficient evidence.
 
+A generic LLM can convert those fragments into persuasive recommendations within seconds. That speed creates three risks.
+
+### False authority
+
+Fluent language makes an inference look like a finding. The reviewer cannot see whether a recommendation came from the brief, a current source, or the model's prior.
+
+### Unbounded research
+
+“Research this market” is not a decision-focused instruction. Without a bounded plan, retrieval gathers whatever is easy to find rather than what the team needs to decide.
+
+### Broken provenance
+
+Even when sources are collected, the connection often disappears downstream. A final positioning statement may include links without showing which finding supports which claim.
+
+The product opportunity was therefore not “generate better growth copy.” It was:
+
+> Make the path from a fuzzy brief to a growth recommendation inspectable, bounded, and testable.
+
+---
+
+## 2. Target User and Job
+
+The primary user is an overseas growth or product operator working on an AI or technology product. They need to move quickly but cannot treat confident model output as market truth.
+
+Their core job is:
+
+> When I need to choose a growth direction with incomplete context, help me identify what is known, research the highest-value unknowns, and produce a strategy I can audit before spending budget.
+
+Secondary users include early-stage founders, international marketers, AI product managers, and growth engineers evaluating agent workflows.
+
+---
+
+## 3. Product Decisions
+
+### Decision 1: plan before search
+
+The workflow first interprets the decision context, then creates three to five questions. Each question has an ID, priority, rationale, and intended decision use.
+
+This bounds cost and latency while making research coverage measurable.
+
+### Decision 2: keep a source manifest
+
+Search results are normalized into a deterministic manifest. Canonical URLs are deduplicated, query provenance is retained, invalid URLs are removed, and the global source count is capped.
+
+The manifest is a product object, not hidden workflow plumbing.
+
+### Decision 3: audit evidence with code
+
+The Evidence Gate is deterministic. It checks question alignment, source availability, diversity, freshness signals, conflict preservation, and confidence rules. When evidence is weak, the gate changes the output instead of asking the LLM to self-police.
+
+### Decision 4: preserve conflicts
+
+A contested finding cannot become a high-confidence recommendation. Supporting and contradicting source IDs remain attached to the same finding so disagreement is visible.
+
+### Decision 5: cite material claims, not paragraphs
+
+The final citation map connects strategy claims to finding IDs. A claim without sufficient resolution remains labeled as inference or unknown.
+
+### Decision 6: keep the human boundary explicit
+
+The workflow can structure evidence and propose priorities. A person still owns commercial judgment, source interpretation, budget allocation, and experiment approval.
+
+---
+
+## 4. V0.5 Workflow
+
+```mermaid
+flowchart TD
+    A[Six-field growth brief] --> B[Context Interpreter]
+    B --> C[Research Planner]
+    C --> D[3–5 bounded searches]
+    D --> E[Source Normalizer]
+    E --> F[Evidence Synthesizer]
+    F --> G[Deterministic Evidence Gate]
+    G --> H[User Insight]
+    H --> I[Market Hypothesis]
+    I --> J[Value Proposition]
+    J --> K[Claim Citation Mapper]
+    K --> L[Evidence Board + Strategy Report]
 ```
-Product:              AI Translation Earbuds
-What does it do:      Real-time AI translation earbuds that let two people
-                      speak their own languages naturally
-Target market:        United States
-Target audience:      Frequent international business travelers
-Business goal:        User Acquisition
-Additional context:   Entering the US market; test Reddit and TikTok.
-                      Competing with Pocketalk-style devices.
+
+The production path streams Dify workflow events through a Cloudflare Pages Worker. The browser receives progress without receiving the Dify credential, then assembles the typed public report from the successful final event.
+
+---
+
+## 5. The Evidence Board
+
+The Evidence Board is the central V0.5 interface decision. It appears before the strategy modules and answers five review questions.
+
+| Review question | Product signal |
+| --- | --- |
+| Did the workflow research the intended decision? | Research questions and coverage counts |
+| What did it find? | Supported, contested, and insufficient findings |
+| Where did each finding come from? | Source IDs, domains, URLs, and query provenance |
+| How strong is the evidence? | Confidence, limitations, audit status, and corrections |
+| What remains unknown? | Research gaps and unanswered critical questions |
+
+The board intentionally shows limitations beside findings. A source link alone is not treated as proof.
+
+---
+
+## 6. Example Scenario
+
+The live interface is prefilled with a fictional US-entry brief for real-time AI translation earbuds.
+
+```text
+Product: AI Translation Earbuds
+Market: United States
+Audience: Frequent international business travelers
+Goal: User Acquisition
+Context: Test Reddit and TikTok; competitors have strong marketplace presence
 ```
 
-**What the report produces.** The team gets a structured report instead of a paragraph. A condensed excerpt:
+The workflow does not assume that business travelers need the product or that a specific channel will work. It might research:
 
-| Section | Example item | Evidence tag |
-| --- | --- | --- |
-| Jobs to be done | "Keep a business meeting flowing when both sides don't share a language" | `explicit_brief` — high |
-| Pain point | "Carrying a dedicated device is fine for trips, too heavy for daily carry" | `inferred_from_context` — medium |
-| Pain point | "Latency and accuracy in live conversation are the make-or-break moment" | `hypothesis` — low |
-| Recommendation | "Position around the meeting use case, not the traveler's whole trip" | `primary` — links to the meeting JTBD |
-| Recommendation | "Validate latency sensitivity with a 10-user usability pass before paid ads" | `Validate first` — links to the latency hypothesis |
-| Research question | "Does the target audience already own Pocketalk-style devices, and why do they stop using them?" | — |
-| Assumption | "Business travelers in the US routinely attend meetings with non-English speakers" | needs checking |
+1. Which cross-language moments create the highest perceived cost for the target user?
+2. What alternatives do business travelers currently use?
+3. Which trust barriers affect adoption of real-time translation hardware?
+4. What evidence supports a meeting-first entry scenario?
+5. What channel behavior would need validation before paid acquisition?
 
-**How a reviewer reads it.** The evidence tags do the work:
+The report can then distinguish:
 
-- The meeting-focused JTBD is marked `explicit_brief` — it came from the input, so it is safe to build on.
-- The daily-carry pain point is `inferred_from_context` — reasonable, but worth one round of validation.
-- The latency sensitivity is a `hypothesis` — the report *requires* it to surface as a research question, so the team does not mistake it for a finding.
+- a **supported finding** backed by retained sources;
+- a **contested finding** with evidence on both sides;
+- an **insufficient finding** that cannot support strong confidence;
+- an **inference** that remains useful as a hypothesis;
+- an **unknown** that becomes a next research or experiment priority.
 
-The report does not claim to know which of these is true. It tells the team **what is grounded, what is inferred, and what to validate next** — which is exactly what a growth team needs before spending budget on a campaign.
+No example result is presented as real market or business performance.
 
 ---
 
-## Product Value
+## 7. Output Contract
 
-**Better decision support.** By separating grounded claims from hypotheses, the report tells a team *where* it can act today and *where* it must validate first. The `primary` / `Validate first` split on recommendations is a direct map from insight to next action, which shortens the distance between research and decision.
+V0.5 returns nine typed objects: context, research plan, source manifest, evidence brief, evidence audit, user insight, market hypothesis, value proposition, and claim citations.
 
-**More reliable AI output.** Reliability here is structural, not rhetorical. Every claim carries a basis, every hypothesis is forced into a research question, and an offline evaluation contract fails CI when invariants break. The system is designed so that an untrustworthy output is *detectable* — the team can see exactly which items are speculation and which are supported.
+Typed outputs create three advantages:
 
-**Structured growth insights.** A typed `InsightResponse` means every report has the same shape: the same sections, the same evidence fields, the same traceability. That makes reports comparable across markets and products, which is the precondition for building a reusable understanding of users instead of restarting from zero every time.
+1. The interface cannot silently render a partial free-form answer as a complete report.
+2. Offline tests can assert cross-object invariants without a live model call.
+3. The same contract can support future model or prompt variants without changing the product surface.
 
 ---
 
-## Future Improvements
+## 8. Evaluation Strategy
 
-**Community feedback integration.** Today the input is a written brief. The natural next step is ingesting community sources directly — Reddit threads, forum posts, Discord logs — and summarizing them as evidence-bearing input, so the report can cite *where* a signal came from instead of relying on the user to paste it.
+The repository currently includes:
 
-**App review analysis.** App store reviews are the highest-volume, lowest-latency source of user feedback. Connecting review feeds to the same pipeline would let a team monitor pain point emergence over time and see whether a new release shifted sentiment — all within the existing evidence and confidence framework.
+- 56 backend regression tests;
+- 12 frozen evaluation cases covering every supported business goal;
+- schema checks for V0.2, V0.3, and V0.5 compatibility;
+- deterministic tests for URL normalization, evidence confidence, conflict preservation, citation resolution, quota controls, and public API behavior;
+- three parallel GitHub Actions jobs for backend quality, frontend quality, and the offline LLM contract gate.
 
-**Experiment recommendation.** The report currently ends at "validate this first." Closing the loop means turning validated hypotheses into concrete experiment proposals — audience, channel, message, success metric — so the pipeline runs from raw feedback all the way to a testable growth experiment.
+The eight research-quality checks exposed in the interface cover:
+
+1. research-plan contract;
+2. source-manifest integrity;
+3. citation resolution;
+4. evidence coverage;
+5. conflict preservation;
+6. source diversity and freshness;
+7. claim-language consistency;
+8. strategy continuity.
+
+These are product-quality signals. They do not replace human source review or prove commercial impact.
+
+---
+
+## 9. Production and Safety Boundary
+
+The live product is deployed to Cloudflare Pages Advanced Mode.
+
+- The browser calls a same-origin `/api/v5/research-strategy` endpoint.
+- The Worker stores the Dify API key server-side.
+- Upstream workflow events are proxied as an unbuffered event stream.
+- Per-visitor throttling and daily usage limits protect the public API budget.
+- The public client validates the final workflow status and required outputs.
+- No client-side bundle contains the API key.
+
+Production health is exposed at [`/health`](https://ai-growth-agent.pages.dev/health).
+
+---
+
+## 10. What V0.5 Demonstrates
+
+For an AI Product Manager role:
+
+- problem framing around trust rather than text generation;
+- an explicit human–AI decision boundary;
+- prioritization of bounded research, provenance, and inspectability;
+- a product narrative that links interface choices to workflow constraints.
+
+For an AI Application or Growth Engineer role:
+
+- typed frontend and backend contracts;
+- streaming edge delivery;
+- reproducible Dify workflow generation;
+- deterministic evidence controls outside the model;
+- regression tests, CI, public quota protection, and production deployment.
+
+---
+
+## 11. Next Product Bets
+
+1. Calibrate confidence against a human-rated source and finding set.
+2. Add scheduled live workflow evaluations with latency, cost, and contract-drift monitoring.
+3. Persist strict cross-instance quota accounting.
+4. Export Evidence Board snapshots for stakeholder review.
+5. Compare model and prompt variants behind the same V0.5 contract.
+
+---
+
+Built by Markus as an independent end-to-end AI product portfolio project.

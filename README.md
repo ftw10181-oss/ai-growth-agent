@@ -1,280 +1,270 @@
 <div align="center">
 
-# AI Growth Agent
+# AI Growth Agent · V0.5
 
-**Evidence-backed growth intelligence, generated from a fuzzy product brief.**
+**Research first. Recommend second.**
+
+Turn a fuzzy product brief into current findings, an auditable Evidence Board, and a citation-aware growth strategy.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/ftw10181-oss/ai-growth-agent/ci.yml?branch=main&label=CI)](https://github.com/ftw10181-oss/ai-growth-agent/actions/workflows/ci.yml)
-[![Backend Tests](https://img.shields.io/badge/backend-pytest%20passing-2ea44f)](./backend/tests/)
-[![Evals](https://img.shields.io/badge/evals-contract%20gate-12%2F12-2ea44f)](./evals/)
+[![Version](https://img.shields.io/badge/version-V0.5-d8ff55?labelColor=173d2b)](https://ai-growth-agent.pages.dev/)
+[![Backend Tests](https://img.shields.io/badge/backend-56%20tests-2ea44f)](./backend/tests/)
+[![Evals](https://img.shields.io/badge/evals-contract%20gate%2012%2F12-2ea44f)](./evals/)
 [![Frontend](https://img.shields.io/badge/frontend-React%2019%20%2B%20TS%207-0a7ea4)](./frontend/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
+[**Open the live V0.5 workflow →**](https://ai-growth-agent.pages.dev/) · [Standalone demo](https://ai-growth-agent.pages.dev/demo) · [Product case](./docs/product-case.md)
+
 </div>
 
-AI Growth Agent turns a half-formed product idea and target audience into a structured, source-aware growth strategy. V0.5 plans decision-focused research, retrieves current sources, applies a deterministic Evidence Gate, and then connects **User Insight**, **Market Hypothesis**, and **Value Proposition** to the retained findings.
-
-It is built as a portfolio piece for **AI Product Manager**, **AI Application Engineer**, and **Growth Engineer** roles: the focus is the **product surface, the reasoning contract, and the evaluation loop**, not the infra underneath.
-
 ---
 
-## V0.5 — Research Before Recommendation
+## What V0.5 Does
+
+AI Growth Agent is an evidence-backed research and strategy workflow for overseas growth teams. It does not jump from a short brief to a confident recommendation. V0.5 first decides what must be researched, retrieves current sources, applies deterministic evidence controls, and only then builds the strategy.
 
 ```text
-Growth Brief → Research Plan → Search → Evidence Gate → Strategy → Citation Map
+Growth Brief → Research Plan → Live Search → Evidence Gate
+             → Evidence Brief → Strategy Chain → Citation Map
 ```
 
-- Three to five bounded research questions and up to ten retained sources
-- A deterministic Evidence Gate that removes mismatched sources and caps unsupported confidence
-- An Evidence Board showing coverage, supported/contested/insufficient findings, source links, limitations, and remaining gaps
-- A claim citation map that marks material strategy claims as evidence-backed, contested, inference, or unknown
-- Eight research-quality checks while preserving every V0.3 route and strategy contract
-- Server-side credentials, daily usage limits, request throttling, and bounded caching
+The final interface makes four things visible:
 
-**Live portfolio:** [ai-growth-agent-portfolio.markus12138467907.chatgpt.site](https://ai-growth-agent-portfolio.markus12138467907.chatgpt.site/)
+- **What the workflow investigated** — three to five bounded, decision-focused research questions.
+- **What the sources actually support** — supported, contested, or insufficient findings with limitations.
+- **How evidence changes the strategy** — User Insight, Market Hypothesis, and Value Proposition retain upstream references.
+- **What still needs human judgment** — explicit gaps, unknowns, risks, and validation priorities.
 
-The original standalone `/demo` route remains as the V0.2.1 evidence-aware insight showcase.
+## What Changed in V0.5
+
+| Before | V0.5 |
+| --- | --- |
+| Strategy generated from the supplied brief | Research runs before strategy generation |
+| Brief-level evidence metadata | Current web sources with a normalized source manifest |
+| Cross-module traceability | Claim-level citation resolution to retained findings |
+| One deterministic strategy gate | Evidence Gate plus eight research-quality checks |
+| Separate legacy demo interface | `/` and `/demo` now share one complete V0.5 product surface |
+
+### 1. Bounded research planning
+
+The agent creates three to five research questions tied to the decision in the brief. The plan limits scope before search begins and identifies which question is most critical.
+
+### 2. Current source retrieval
+
+Search runs as a bounded iteration. Results are normalized, deduplicated by canonical URL, linked back to query IDs, and capped at ten retained sources.
+
+### 3. Deterministic Evidence Gate
+
+Before strategy generation, code-level checks reject question mismatches, preserve contested evidence, cap unsupported confidence, audit freshness and source diversity, and expose all corrections.
+
+### 4. Evidence Board
+
+The UI shows research coverage, retained sources, supported findings, confidence, source links, limitations, audit corrections, and the largest remaining research gap.
+
+### 5. Claim citation map
+
+Material strategy claims resolve to retained findings. Claims that cannot resolve remain visibly classified as inference, contested, or unknown instead of inheriting false authority.
 
 ---
 
-## Live Demo
+## Live Product Interface
 
-![AI Growth Agent — Live Demo showing Growth Insight Report with Confidence, Evidence, and Recommendations](docs/images/demo.png)
+The homepage and standalone demo now use the same V0.5 workflow and presentation layer.
 
-A standalone `/demo` route ships with the frontend. No signup. No API key. Mock mode runs out of the box.
+1. Enter the product, market, audience, business goal, and any constraints.
+2. Start **Research & build strategy**.
+3. Keep the tab open while the event stream completes; a full research run can take around two minutes.
+4. Review the Evidence Board before reading the recommendations.
+5. Open the source links, research questions, quality checks, validation priorities, and citation references.
 
-**Try it live:** [ai-growth-agent.pages.dev/demo](https://ai-growth-agent.pages.dev/demo)
+**Production:** [ai-growth-agent.pages.dev](https://ai-growth-agent.pages.dev/)
+**Demo route:** [ai-growth-agent.pages.dev/demo](https://ai-growth-agent.pages.dev/demo)
 
-**Try it locally:**
-
-```bash
-# 1. Backend (mock mode — no external services needed)
-cd backend
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-APP_MODE=mock .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
-
-# 2. Frontend (in another terminal)
-cd frontend
-npm install
-npm run dev
-# open http://localhost:5173/demo.html
-```
-
-**What you can do in the demo**
-
-- Fill in `Product`, `What does it do`, `Target market`, `Business goal`, `Target audience`, `Additional context`.
-- Hit **Generate report** — the form is prefilled with a worked example so you see a full report on first load.
-- Inspect each item: the `Primary` / `Hypothesis` tag, `Inference — medium` badge, and the side panel's **Confidence by section**, **Evidence legend**, **Validate next**, and **Assumptions to check** tell you where the report is solid and where it needs a human in the loop.
-
-In production the same `/api/analyze` endpoint is served from the Cloudflare Worker in `frontend/worker/index.ts`; swap `APP_MODE=mock` for `APP_MODE=dify` to route to a real LLM via Dify.
-
-### Deployment (Cloudflare Pages)
-
-> **Live:** [ai-growth-agent.pages.dev](https://ai-growth-agent.pages.dev) — deployed to Cloudflare Pages (Advanced mode), running in mock mode.
-
-The demo deploys to the edge as a Cloudflare Pages project in **Advanced mode** — no separate backend is required in production:
-
-- `npm run build` emits static assets to `dist/client/` and compiles the Worker in `frontend/worker/index.ts` into a single self-contained file.
-- `scripts/prepare-sites-build.mjs` copies that Worker to `dist/client/_worker.js`, which Cloudflare Pages runs for every route — serving `/api/analyze`, `/health`, and `/demo` from the edge.
-- With no `DIFY_API_KEY` configured, the Worker returns mock reports out of the box; set the key as a Pages secret to route `/api/analyze` to a real LLM via the Dify workflow in `dify/`.
-- Local preview of the exact Pages artifact: `cd frontend && npm run preview:pages`; production deploy: `npm run deploy:pages` (requires `wrangler login` and a Cloudflare account).
-
-**Deployment settings** (Cloudflare Pages project `ai-growth-agent`): production branch `main`, root directory `frontend`, build command `npm ci && npm run build`, output directory `dist/client`. To route `/api/analyze` to a real LLM, add `DIFY_API_KEY` as a Pages project secret; until then the demo stays in mock mode.
+No signup is required. Public usage is protected with per-visitor throttling, daily limits, and server-side credentials.
 
 ---
 
-## The Story
+## Workflow Architecture
 
-A growth team rarely starts a research pass with a clean spec. They start with a one-paragraph brief, a Slack thread, maybe a Reddit thread, and a vague goal like "explore US user acquisition". Asking an LLM to "do growth research" on that input produces fluent paragraphs that look like insight but carry no provenance — every sentence is either a restatement of the brief, an unsupported inference, or, in the worst case, a fabrication.
+```mermaid
+flowchart LR
+    A[Growth brief] --> B[Context interpreter]
+    B --> C[Research planner]
+    C --> D[Bounded live search]
+    D --> E[Source normalizer]
+    E --> F[Evidence synthesizer]
+    F --> G[Deterministic Evidence Gate]
+    G --> H[User Insight]
+    H --> I[Market Hypothesis]
+    I --> J[Value Proposition]
+    J --> K[Claim Citation Map]
+    K --> L[Evidence Board]
+```
 
-Three things have to be true before an AI-written report is usable inside a growth team:
+### Product boundary
 
-1. **Every claim has a basis.** Stated in the brief, derived from context, or marked as a hypothesis that still needs user testing.
-2. **Every section has a confidence number** the team can read at a glance, so they know which block to push into a meeting and which block to put behind a research question.
-3. **The system is testable.** A change in the prompt, the model, or the parser cannot silently lower the quality of the output — there is a regression suite that fails CI when it does.
+```mermaid
+flowchart TB
+    UI[React 19 + TypeScript 7 interface]
+    EDGE[Cloudflare Pages Worker]
+    DIFY[Dify V0.5 workflow]
+    SEARCH[Current web retrieval]
+    CONTRACT[Typed public response]
 
-AI Growth Agent is the small product that gets those three things right. It wraps an LLM (real or mock) in an agent workflow that emits a typed schema, attaches evidence metadata to each item, and is guarded by an offline evaluation contract that runs on every commit.
+    UI -->|POST /api/v5/research-strategy| EDGE
+    EDGE -->|server-side API key| DIFY
+    DIFY --> SEARCH
+    DIFY -->|SSE workflow events| EDGE
+    EDGE -->|streamed same-origin response| UI
+    UI --> CONTRACT
+```
+
+- The browser never receives the Dify credential.
+- The Worker opens the upstream event stream and proxies it without buffering.
+- The frontend assembles the public `ResearchStrategyResponse` from the successful final event.
+- Older API contracts remain available, while the public interface uses V0.5.
 
 ---
 
-## Why This Matters
+## Typed V0.5 Output Contract
 
-A traditional LLM call is a one-shot text generator.
+The final workflow event contains nine typed objects:
 
-```
-Input → AI → Text
-```
+| Output | Purpose |
+| --- | --- |
+| `context` | Facts, constraints, assumptions, and ambiguities from the brief |
+| `research_plan` | Bounded questions, priorities, and decision relevance |
+| `source_manifest` | Normalized sources, provenance, retrieval status, and failures |
+| `evidence_brief` | Findings, confidence, coverage, limitations, and gaps |
+| `evidence_audit` | Deterministic corrections applied by the Evidence Gate |
+| `user_insight` | Jobs, pain points, adoption barriers, and validation questions |
+| `market_hypothesis` | Opportunity, growth wedge, risks, and test priorities |
+| `value_proposition` | Positioning, message pillars, and message experiments |
+| `claim_citations` | Finding references for material downstream claims |
 
-AI Growth Agent inserts three layers between the prompt and the output:
-
-```
-Input (Growth Brief)
-   ↓
-AI Agent Reasoning       — job, pain, motivation, barrier, recommendation
-   ↓
-Evidence Check           — basis, validation status, source attribution
-   ↓
-Confidence Evaluation    — per-section score, overall confidence
-   ↓
-Actionable Growth Insight — typed report, recommendations, research questions
-```
-
-The bet is simple: AI output is not valuable because it generates text — it is valuable because a human can act on it. Action requires provenance. This product is built around that contract.
+The interface validates the final event before rendering. Missing or malformed workflow outputs fail visibly instead of degrading into partial prose.
 
 ---
 
-## Product Case
+## Quality and Evaluation
 
-This case study explains how AI Growth Agent transforms fragmented user feedback into structured and evidence-based growth insights — from the problem it exists for, to a worked scenario and the roadmap ahead.
+Quality is treated as product behavior, not a prompt-writing preference.
 
-- **Background** — why overseas growth teams struggle to turn scattered feedback into insight
-- **Problem** — manual analysis is slow, hard to validate, and does not scale
-- **Solution** — the agent reasoning → evidence → confidence pipeline
-- **Example scenario** — a worked, method-only walkthrough (no claimed business results)
-- **Product value & future** — what the report returns to the team, and where it goes next
+- **56 backend regression tests** cover API boundaries, V0.2/V0.3 compatibility, V0.5 contracts, Dify parsing, source normalization, evidence controls, public quota protection, and strategy quality.
+- **12 frozen evaluation cases** cover every supported business goal and boundary conditions.
+- **Eight research-quality checks** verify planning, manifest integrity, citation resolution, evidence coverage, conflict preservation, source quality, claim language, and strategy continuity.
+- **Three CI jobs** run backend pytest + ruff, frontend typecheck + ESLint + production build, and the offline LLM evaluation gate.
+- **No live model call is required by CI**, keeping the contract gate deterministic and repeatable.
 
-[Read the product case study →](docs/product-case.md)
-
----
-
-## How It Works
-
-1. **Input.** The user describes a product, a market, an audience, and a goal through the demo form or the `/api/analyze` endpoint.
-2. **Agent reasoning.** The LLM is asked to populate a typed `InsightResponse` schema — Jobs, Pain Points, Purchase Motivations, Adoption Barriers, Recommendations, and Assumptions — rather than to write free-form prose.
-3. **Evidence layer.** Each emitted item is decorated with `evidence.basis` (`explicit_brief`, `inferred_from_context`, or `hypothesis`), `evidence.confidence` (`high`, `medium`, `low`), and `evidence.validation_status`. Recommendations are tagged with `decision_relevance` (`primary` or `supporting`).
-4. **Evaluation system.** An offline suite (`evals/check_outputs.py`) replays a frozen set of 12 cases against the response schema and asserts structural invariants: every `recommendation` must trace to a `pain_point`, every `assumption` must be self-contained, every `hypothesis` must surface as a `research_question`. CI fails the build when invariants break.
-5. **Report.** The frontend renders the report in a layout designed for review: confidence scores per section, an evidence legend, a "validate next" panel of research questions, and an "assumptions to check" panel for the human reviewer.
+The published evaluation artifacts are in [`evals/results/baseline-v0.1`](./evals/results/baseline-v0.1/). They are an internal product-quality baseline, not a claim of customer or business impact.
 
 ---
 
-## Key Features
+## Repository Structure
 
-- **Structured insight generation.** Every output is a typed `InsightResponse` (Pydantic v2 on the backend, TypeScript on the frontend), so the report cannot drift into unstructured prose.
-- **Evidence-based reasoning.** Each item carries a `basis` (`explicit_brief` / `inferred_from_context` / `hypothesis`) and a `validation_status` so the team can tell what is grounded and what is conjecture.
-- **Per-section confidence scoring.** Overall confidence and per-section confidence (`Overall insight`, `Jobs to be done`, `Pain points`) are computed from the evidence metadata and surfaced in the UI.
-- **Recommendation→pain traceability.** Every recommendation links back to a pain point and a decision relevance, so a reviewer can audit why an action is on the list.
-- **LLM output evaluation as a contract.** `evals/check_outputs.py` runs 12 frozen cases offline and asserts schema invariants on every CI run — no live LLM calls, no flake.
-- **Quality guardrails in CI.** Three jobs run in parallel: backend pytest + ruff, frontend typecheck + eslint + build, and the offline evaluation gate. A regression in any layer fails the build.
-- **Pluggable LLM backend.** `APP_MODE=mock` runs without any external service; `APP_MODE=dify` routes through a Dify workflow, both served from the same `/api/analyze` contract.
-- **Edge-deployed demo surface.** The demo is a Cloudflare Worker that serves the React 19 + TypeScript 7 frontend from `/` and `/demo`, keeping the public surface at zero infrastructure cost.
-
----
-
-## Architecture
-
-```
-┌───────────────────────────── Frontend ─────────────────────────────┐
-│  React 19 + TypeScript 7 + Vite 8 (MPA)                            │
-│  /         — main app                                              │
-│  /demo     — standalone Growth Insight Report demo                 │
-│  Cloudflare Worker: routes /api/* → backend, serves /demo & assets │
-└────────────────────────────────────────────────────────────────────┘
-                              │ HTTP
-                              ▼
-┌─────────────────────────── Backend ─────────────────────────────────┐
-│  FastAPI + Pydantic v2                                             │
-│  POST /api/analyze  →  analyze() → mock engine | Dify workflow     │
-│  Strict response schema: InsightResponse, EvidenceMeta, etc.        │
-└────────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────── Evals ───────────────────────────────────┐
-│  evals/check_outputs.py — offline contract gate (12 cases)          │
-│  evals/run_live_baseline.py — optional live quality run             │
-│  evals/results/baseline-v0.1/run-summary.json — frozen baseline     │
-└────────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌───────────────────────────── CI ────────────────────────────────────┐
-│  backend  → pytest + ruff                                          │
-│  frontend → tsc --noEmit + eslint + vite build                      │
-│  evals    → python evals/check_outputs.py evals/results/baseline-v0.1│
-└────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Project Structure
-
-```
+```text
 ai-growth-agent/
-├── backend/                # FastAPI + Pydantic v2 API
-│   ├── app/                # Routes, schemas, engines (mock / dify)
-│   ├── tests/              # 29 pytest cases
-│   └── requirements.txt
-├── frontend/               # React 19 + TS 7 + Vite 8 + Cloudflare Worker
-│   ├── src/                # App + Demo surfaces, shared Insight types
-│   ├── worker/             # Cloudflare Worker entry (routes /api/*)
-│   ├── demo.html           # Standalone demo entry (MPA build)
+├── backend/
+│   ├── app/                    # FastAPI routes, models, services, protection
+│   └── tests/                  # 56 regression tests
+├── frontend/
+│   ├── src/App.tsx             # Unified V0.5 homepage and product interface
+│   ├── src/demo/               # /demo entry reusing the V0.5 interface
+│   ├── src/api.ts              # Streaming client and public response assembly
+│   ├── worker/index.ts         # Cloudflare Pages Worker and SSE proxy
 │   └── package.json
-├── evals/                  # Offline LLM evaluation contract
-│   ├── cases.json          # 12 frozen input/expected cases
-│   ├── check_outputs.py    # CI gate (structural invariants)
-│   ├── run_live_baseline.py# Optional live quality run
-│   └── results/baseline-v0.1/
-├── dify/                   # Dify workflow definition for live mode
-├── docs/
-│   ├── architecture-analysis.md
-│   └── images/demo.png     # README demo screenshot
-├── .github/workflows/ci.yml
-└── README.md
+├── dify/
+│   ├── workflow-v0.5.yml       # Importable V0.5 Dify workflow
+│   ├── build_workflow_v05.py   # Reproducible workflow builder
+│   └── code/                   # Source normalization and Evidence Gate code
+├── evals/                      # Frozen cases and offline contract checks
+├── docs/product-case.md        # Product case study
+└── .github/workflows/ci.yml    # Three-job CI pipeline
 ```
-
----
-
-## Quality & Evaluation
-
-The evaluation suite is the part of this project I am most opinionated about, so it gets its own section.
-
-- **Offline contract** — `evals/check_outputs.py` runs the 12 frozen cases in `evals/cases.json` against the `InsightResponse` schema and asserts structural invariants (recommendations trace to pain points, hypotheses surface as research questions, assumptions are self-contained, etc.). It is the CI gate. It runs without any live LLM, so it is fast and deterministic.
-- **Live quality run** — `evals/run_live_baseline.py` is the optional path that exercises the real LLM (mock or Dify) and writes a `run-summary.json` with `case_count`, `success`, `failure`, and per-check counters. The baseline at `evals/results/baseline-v0.1/` is the reference; CI compares against it.
-- **What gets asserted** — schema validity, evidence metadata presence, recommendation traceability, assumption self-containment, and per-section confidence coherence. Any violation fails CI on the `evals` job.
-
----
-
-## Tech Stack
-
-| Layer    | Choice                                                          | Why                                                                    |
-| -------- | --------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Backend  | Python 3.11+, FastAPI, Pydantic v2, pytest, ruff                 | Strict typed schema, fast iteration, low ceremony                       |
-| Frontend | React 19, TypeScript 7 (tsgo), Vite 8 (MPA), Cloudflare Worker   | Typed surface, fast build, edge deployment of the demo                  |
-| Evals    | Python (stdlib), JSON fixtures                                | Deterministic offline gate; no live LLM dependency in CI                |
-| CI       | GitHub Actions (3 parallel jobs)                                | Backend tests, frontend build/lint, evaluation gate                     |
 
 ---
 
 ## Local Development
 
+### Frontend and exact Pages artifact
+
 ```bash
-# Backend (mock mode)
-cd backend && python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-APP_MODE=mock .venv/bin/uvicorn app.main:app --port 8000
-
-# Frontend
-cd ../frontend && npm install
-npm run dev                # → http://localhost:5173/  (app)
-                           # → http://localhost:5173/demo.html  (demo)
+cd frontend
+npm install
+npm run dev
 npm run typecheck
-npm run build              # MPA build → dist/client/{index,demo}.html + _worker.js
-
-# Evaluations
-cd ../evals
-python3 check_outputs.py evals/results/baseline-v0.1   # offline gate
-python3 run_live_baseline.py                           # live run (writes run-summary.json)
+npm run build
+npm run preview:pages
 ```
 
-Copy `backend/.env.example` to `backend/.env` and set `DIFY_API_KEY` (and any other Dify settings) to point the backend at a real LLM via the workflow in `dify/`.
+### Backend in deterministic mock mode
+
+```bash
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+APP_MODE=mock .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+### Evaluation contract
+
+```bash
+python3 evals/check_outputs.py evals/results/baseline-v0.1
+```
+
+### Dify workflow
+
+Import [`dify/workflow-v0.5.yml`](./dify/workflow-v0.5.yml) into Dify, configure the model and search provider, publish the Workflow app, then store its `app-…` API key only in the server environment.
+
+---
+
+## Deployment
+
+The production site uses Cloudflare Pages Advanced Mode:
+
+- Project: `ai-growth-agent`
+- Production branch: `main`
+- Root directory: `frontend`
+- Build command: `npm ci && npm run build`
+- Output directory: `dist/client`
+- Worker entry in the artifact: `dist/client/_worker.js`
+- Required production secret: `DIFY_API_KEY`
+
+```bash
+cd frontend
+npm run deploy:pages
+```
+
+The health endpoint reports the deployed product boundary:
+
+```text
+GET /health → { "status": "ok", "mode": "dify", "version": "0.5.0" }
+```
+
+---
+
+## Product Principles
+
+1. **Research scope must be bounded before retrieval.**
+2. **Confidence cannot exceed the evidence that supports it.**
+3. **Contested evidence must remain contested.**
+4. **Material recommendations must preserve citation continuity.**
+5. **Unknowns and human decisions must stay visible.**
+6. **The public product contract must be testable without a live model.**
 
 ---
 
 ## Roadmap
 
-- **Confidence calibration.** The current confidence labels are derived from `evidence.basis`; the next step is to calibrate them against human-rated samples held in `evals/cases.json`.
-- **Live evaluation runs in CI.** Today the live run is opt-in; promoting it to a scheduled CI job, and diffing `run-summary.json` against the baseline, is the natural next guardrail.
-- **Per-prompt variant testing.** The schema, not the prompt, is the contract today. Adding prompt variants behind the same contract is the obvious A/B surface.
+- Calibrate confidence labels against human-rated research samples.
+- Add scheduled live workflow evaluations alongside the deterministic CI gate.
+- Persist strict cross-instance quota accounting with a Durable Object.
+- Compare prompt and model variants behind the same typed V0.5 contract.
+- Add exportable Evidence Board snapshots for portfolio and stakeholder review.
 
 ---
+
+Built by Markus as an end-to-end AI product portfolio project: product strategy, workflow design, prompts, contracts, evidence controls, evaluation, frontend, and deployment.
 
 ## License
 

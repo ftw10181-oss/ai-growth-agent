@@ -71,7 +71,7 @@ function QualityGate({ review }: { review: StrategyResponse["quality_review"] })
     ? `${review.blocking_issue_count} blocker${review.blocking_issue_count === 1 ? "" : "s"}`
     : review.issue_count
       ? `${review.issue_count} review note${review.issue_count === 1 ? "" : "s"}`
-      : "6 checks passed";
+      : "8 checks passed";
 
   return (
     <section className={`quality-gate quality-${review.status}`} aria-label="Deterministic quality gate">
@@ -144,7 +144,7 @@ function Results({ result }: { result: ResearchStrategyResponse }) {
     <section className="results strategy-results" aria-live="polite">
       <div className="results-header">
         <div>
-          <span className="eyebrow">Growth strategy · V0.3</span>
+          <span className="eyebrow">Evidence-backed strategy · V0.5</span>
           <h2>{summary.primary_user}</h2>
           <p>{result.context.brief_summary}</p>
         </div>
@@ -247,12 +247,88 @@ function Results({ result }: { result: ResearchStrategyResponse }) {
   );
 }
 
+function V05Overview() {
+  const releases = [
+    {
+      number: "01",
+      title: "Bounded research plan",
+      copy: "The agent turns the brief into three to five decision-focused questions before it searches.",
+      tag: "Plan before search",
+    },
+    {
+      number: "02",
+      title: "Current source retrieval",
+      copy: "Live search results are normalized, deduplicated, and capped at ten retained sources.",
+      tag: "Source manifest",
+    },
+    {
+      number: "03",
+      title: "Deterministic Evidence Gate",
+      copy: "Question mismatch, weak provenance, and unsupported confidence are corrected before strategy generation.",
+      tag: "Trust by contract",
+    },
+    {
+      number: "04",
+      title: "Claim-level citation map",
+      copy: "Material recommendations resolve to retained findings—or stay visibly labeled as inference or unknown.",
+      tag: "Audit every claim",
+    },
+  ];
+
+  return (
+    <section className="release-overview" id="whats-new" aria-labelledby="release-title">
+      <div className="release-intro">
+        <div>
+          <span className="release-kicker"><i /> Now live · V0.5</span>
+          <h2 id="release-title">The strategy now begins with evidence.</h2>
+        </div>
+        <p>V0.5 upgrades AI Growth Agent from a traceable strategy generator into a bounded research workflow. It plans what to investigate, retrieves current sources, audits evidence quality, and preserves citation continuity all the way to the final recommendation.</p>
+      </div>
+
+      <div className="release-grid">
+        {releases.map((item) => (
+          <article key={item.number} className="release-card">
+            <div className="release-card-top"><span>{item.number}</span><em>{item.tag}</em></div>
+            <h3>{item.title}</h3>
+            <p>{item.copy}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="release-flow" aria-label="V0.5 workflow">
+        {[
+          ["Brief", "Human context"],
+          ["Plan", "3–5 questions"],
+          ["Search", "Live sources"],
+          ["Gate", "Evidence audit"],
+          ["Synthesize", "Findings"],
+          ["Strategy", "Decision chain"],
+          ["Cite", "Claim map"],
+        ].map(([title, copy], index) => (
+          <div className="release-flow-item" key={title}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <strong>{title}</strong>
+            <small>{copy}</small>
+          </div>
+        ))}
+      </div>
+
+      <div className="release-proof">
+        <div><strong>22/22</strong><span>workflow nodes succeeded</span></div>
+        <div><strong>3/3</strong><span>GitHub CI jobs passed</span></div>
+        <div><strong>8</strong><span>research-quality checks</span></div>
+        <div><strong>9</strong><span>typed workflow outputs</span></div>
+      </div>
+    </section>
+  );
+}
+
 function CaseStudy() {
   return (
     <section className="case-study" id="case-study" aria-labelledby="case-study-title">
       <div className="case-study-intro">
         <div><span className="eyebrow">Product case study</span><h2 id="case-study-title">A growth brief becomes a decision-ready strategy chain.</h2></div>
-        <p>V0.3 demonstrates more than prompt output: product scope, typed contracts, cross-module traceability, responsible-AI controls, regression tests, and a deployable interface.</p>
+        <p>V0.5 demonstrates the full research-to-decision loop: bounded search, source provenance, deterministic evidence controls, typed strategy contracts, claim citations, regression tests, and a deployable interface.</p>
       </div>
 
       <div className="case-study-grid">
@@ -262,15 +338,15 @@ function CaseStudy() {
       </div>
 
       <div className="case-section workflow-section">
-        <div className="section-heading"><span className="card-index">04 · How it works</span><h3>Four AI modules plus a deterministic quality layer.</h3></div>
+        <div className="section-heading"><span className="card-index">04 · How it works</span><h3>Research, evidence, strategy, and citation in one controlled workflow.</h3></div>
         <div className="workflow-steps workflow-v3" aria-label="AI Growth Agent workflow">
           {[
             ["01", "Growth brief", "Six fields capture product, market, audience, goal, and constraints."],
-            ["02", "Context", "Separates facts, assumptions, and ambiguities."],
-            ["03", "User insight", "Generates testable jobs, pains, barriers, and research questions."],
-            ["04", "Market hypothesis", "Frames opportunity, wedge, risks, and validation priorities."],
-            ["05", "Value proposition", "Creates positioning, message pillars, and experiments."],
-            ["06", "Quality gate", "Checks evidence inheritance, traceability, claim safety, and testability."]
+            ["02", "Research plan", "Creates three to five bounded questions tied to a real decision."],
+            ["03", "Live retrieval", "Searches current sources and preserves query provenance."],
+            ["04", "Evidence Gate", "Rejects mismatches and caps unsupported confidence."],
+            ["05", "Strategy chain", "Builds user insight, market hypothesis, and value proposition."],
+            ["06", "Citation map", "Resolves material claims to retained findings and sources."]
           ].map(([number, title, copy], index) => (
             <div className="workflow-fragment" key={number}><div className="workflow-step"><strong>{number}</strong><div><h4>{title}</h4><p>{copy}</p></div></div>{index < 5 && <span className="workflow-arrow" aria-hidden="true">→</span>}</div>
           ))}
@@ -279,16 +355,16 @@ function CaseStudy() {
 
       <div className="case-split">
         <article className="responsible-card"><span className="card-index">05 · Responsible AI</span><h3>Hypotheses, not fabricated authority.</h3><ul><li>No invented statistics, quotes, citations, or competitor facts</li><li>Evidence strength cannot exceed its weakest source</li><li>Risky inferred claims are visibly reframed before review</li><li>Measurable pass and fail signals keep validation actionable</li><li>The human owns prioritization and commercial decisions</li></ul></article>
-        <article className="architecture-card"><span className="card-index">06 · Architecture</span><h3>A secure, modular product boundary.</h3><div className="architecture-flow architecture-v3"><span>React UI</span><i>→</i><span>Server API</span><i>→</i><span>Dify workflow</span><i>→</i><span>Quality gate</span></div><p>The browser calls a same-origin API. Credentials stay server-side; typed outputs and deterministic checks protect the product contract.</p></article>
+        <article className="architecture-card"><span className="card-index">06 · Architecture</span><h3>A secure, streaming product boundary.</h3><div className="architecture-flow architecture-v3"><span>React UI</span><i>→</i><span>Edge stream</span><i>→</i><span>Dify V0.5</span><i>→</i><span>Evidence Board</span></div><p>The browser consumes a same-origin event stream. Credentials stay server-side while the final typed output preserves sources, audits, findings, strategy, and citations.</p></article>
       </div>
 
       <div className="evaluation-section">
         <div className="section-heading"><span className="card-index">07 · Evaluation</span><h3>Quality is treated as product behavior.</h3></div>
-        <div className="evidence-grid"><div><strong>36</strong><span>automated regression tests</span></div><div><strong>6</strong><span>cross-module quality checks</span></div><div><strong>4</strong><span>typed strategy objects</span></div><div><strong>0</strong><span>client-side API secrets</span></div></div>
+        <div className="evidence-grid"><div><strong>56</strong><span>automated regression tests</span></div><div><strong>8</strong><span>research-quality checks</span></div><div><strong>9</strong><span>typed workflow outputs</span></div><div><strong>0</strong><span>client-side API secrets</span></div></div>
         <div className="evaluation-findings">
           <article><span className="finding-label">Baseline</span><h4>V0.1 exposed fluent but overconfident claims.</h4><p>A fixed 12-case evaluation showed relevance was stronger than unsupported-claim safety.</p></article>
           <article className="finding-risk"><span className="finding-label">Iteration</span><h4>V0.2 added item-level evidence and review status.</h4><p>Evidence basis, confidence, decision relevance, and behavior-first questions became part of the output contract.</p></article>
-          <article className="finding-decision"><span className="finding-label">V0.3 decision</span><h4>Extend traceability through strategy.</h4><p>Market hypotheses and value propositions now preserve upstream sources and produce measurable validation plans.</p></article>
+          <article className="finding-decision"><span className="finding-label">V0.5 decision</span><h4>Research before recommendation.</h4><p>Current sources now pass through an Evidence Gate before strategy claims receive citations, confidence, or action priority.</p></article>
         </div>
         <p className="evaluation-note">Internal product evaluation—not a claim of user or business impact. <a href="https://github.com/ftw10181-oss/ai-growth-agent/tree/main/evals" target="_blank" rel="noreferrer">Review the evaluation artifacts <span aria-hidden="true">↗</span></a></p>
       </div>
@@ -315,9 +391,11 @@ export default function App() {
   return (
     <main>
       <header className="hero">
-        <nav><span className="brand-mark">AG</span><strong>AI Growth Agent</strong><div className="nav-links"><a href="#demo">Try demo</a><a href="#case-study">Case study</a><a href="https://github.com/ftw10181-oss/ai-growth-agent" target="_blank" rel="noreferrer">GitHub ↗</a></div><span className="version">V0.5</span></nav>
-        <div className="hero-copy"><span className="eyebrow">Evidence-backed growth intelligence</span><h1>Research first. Recommend second.</h1><p>Turn a fuzzy product brief into source-aware findings, a traceable growth strategy, and an explicit list of what still needs human validation.</p><div className="hero-actions"><a className="primary-action" href="#demo">Run evidence workflow <span aria-hidden="true">↓</span></a><a className="secondary-action" href="#case-study">Read the case study</a></div></div>
+        <nav><span className="brand-mark">AG</span><strong>AI Growth Agent</strong><div className="nav-links"><a href="#whats-new">What’s new</a><a href="#demo">Live workflow</a><a href="#case-study">Case study</a><a href="https://github.com/ftw10181-oss/ai-growth-agent" target="_blank" rel="noreferrer">GitHub ↗</a></div><span className="version">V0.5 · Live</span></nav>
+        <div className="hero-copy"><span className="eyebrow">Evidence-backed growth intelligence · V0.5</span><h1>Research first.<br />Recommend second.</h1><p>Turn a fuzzy product brief into current findings, a source-aware Evidence Board, and a traceable growth strategy—with every uncertainty left visible for human judgment.</p><div className="hero-actions"><a className="primary-action" href="#demo">Run the V0.5 workflow <span aria-hidden="true">↓</span></a><a className="secondary-action" href="#whats-new">Explore the release</a></div><div className="hero-proof"><span><strong>Live research</strong>Current web sources</span><span><strong>Evidence Gate</strong>Deterministic controls</span><span><strong>Citation map</strong>Claim-level traceability</span><span><strong>Production verified</strong>22-node workflow</span></div></div>
       </header>
+
+      <V05Overview />
 
       <section className="workspace" id="demo">
         <form onSubmit={handleSubmit}>
@@ -329,7 +407,7 @@ export default function App() {
           <div className="submit-row"><p>V0.5 searches up to five questions, validates evidence, then builds the strategy.</p><button disabled={loading}>{loading ? "Researching evidence…" : "Research & build strategy"}<span aria-hidden="true">→</span></button></div>
           {error && <p className="error" role="alert">{error}</p>}
         </form>
-        {result ? <Results result={result} /> : <aside className="empty-state"><span className="step">02</span><h2>Your Evidence Board will appear here.</h2><p>The agent plans research, retrieves current sources, audits evidence strength, and only then creates a traceable strategy.</p><div className="pipeline"><span>Plan</span><i>→</i><span>Search</span><i>→</i><span>Gate</span><i>→</i><span>Strategy</span></div></aside>}
+        {result ? <Results result={result} /> : <aside className={`empty-state ${loading ? "loading-state" : ""}`}><span className="step">02</span><h2>{loading ? "Research workflow in progress." : "Your Evidence Board will appear here."}</h2><p>{loading ? "The live workflow is planning questions, retrieving sources, and auditing evidence. A full V0.5 run can take around two minutes." : "The agent plans research, retrieves current sources, audits evidence strength, and only then creates a traceable strategy."}</p><div className="pipeline"><span>Plan</span><i>→</i><span>Search</span><i>→</i><span>Gate</span><i>→</i><span>Strategy</span></div>{loading && <div className="loading-progress"><i /><span>Keep this tab open while the evidence stream completes.</span></div>}</aside>}
       </section>
       <CaseStudy />
       <footer><span>Built by Markus for overseas growth operators</span><span>Traceable · transparent · testable</span></footer>
