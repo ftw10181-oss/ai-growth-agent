@@ -303,34 +303,51 @@ async function generateStrategy(request: Request, env: Env, legacyInsightOnly = 
   }
 }
 
-function streamResearchStrategy(request: Request, env: Env): Response {
-  const encoder = new TextEncoder();
-  const heartbeatChunk = encoder.encode(`${" ".repeat(2048)}\n`);
-  const stream = new ReadableStream<Uint8Array>({
-    start(controller) {
-      controller.enqueue(heartbeatChunk);
-      const heartbeat = setInterval(() => controller.enqueue(heartbeatChunk), 8_000);
-      void (async () => {
-        try {
-          const response = await generateStrategy(request, env, false, true);
-          controller.enqueue(encoder.encode(await response.text()));
-        } catch {
-          controller.enqueue(encoder.encode(JSON.stringify({ detail: "The AI workflow is currently unavailable." })));
-        } finally {
-          clearInterval(heartbeat);
-          controller.close();
-        }
-      })();
-    },
-  });
+async function proxyResearchStrategy(request: Request, env: Env): Promise<Response> {
+  if (!env.DIFY_API_KEY) return json("Live AI service is not configured.", 503);
+  let brief: unknown;
+  try { brief = await request.json(); }
+  catch { return json("Request body must be valid JSON.", 400); }
+  if (!isValidBrief(brief)) return json("Invalid growth brief.", 422);
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "private, no-store, no-transform",
-      "X-Content-Type-Options": "nosniff",
-    },
-  });
+  const admission = admitLive(await visitorId(request), env);
+  if (!admission.allowed) {
+    if (admission.reason === "rate_limited") {
+      return Response.json(
+        { detail: "Too many requests. Please wait before trying again." },
+        { status: 429, headers: { "Retry-After": String(admission.retryAfter || 60) } },
+      );
+    }
+    return json("The live demo has reached its usage limit. Please try again later.", 429);
+  }
+
+  const baseUrl = (env.DIFY_BASE_URL || "https://api.dify.ai/v1").replace(/\/$/, "");
+  try {
+    const response = await fetch(`${baseUrl}/workflows/run`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.DIFY_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        inputs: { ...brief, additional_context: brief.additional_context || "" },
+        response_mode: "streaming",
+        user: `portfolio-demo-${crypto.randomUUID()}`,
+      }),
+      signal: AbortSignal.timeout(120_000),
+    });
+    if (!response.ok || !response.body) return json("The AI workflow could not start the research request.", 502);
+
+    return new Response(response.body, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "private, no-store, no-transform",
+        "X-Accel-Buffering": "no",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+    return json(timedOut ? "The AI workflow timed out. Please try again." : "The AI workflow is currently unavailable.", timedOut ? 504 : 502);
+  }
 }
 
 const worker = {
@@ -342,7 +359,7 @@ const worker = {
     }
     if (url.pathname === "/api/v5/research-strategy") {
       if (request.method !== "POST") return new Response(null, { status: 405, headers: { Allow: "POST" } });
-      return streamResearchStrategy(request, env);
+      return proxyResearchStrategy(request, env);
     }
     if (url.pathname === "/api/analyze") {
       if (request.method !== "POST") return new Response(null, { status: 405, headers: { Allow: "POST" } });
